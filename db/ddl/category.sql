@@ -3,4 +3,7 @@ CREATE TABLE category (
     category     TEXT NOT NULL,
     sub_category TEXT,
     rules        TEXT NOT NULL
-)
+);
+
+ALTER TABLE category
+    ADD CONSTRAINT category_unique UNIQUE (rules);

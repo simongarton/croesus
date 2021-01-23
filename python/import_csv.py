@@ -165,5 +165,5 @@ def import_file(filename, account_id):
 
     con.commit()
 
-import_file('../data/Joint-account-1JAN2021-to-22JAN2021.csv', 1)
+# import_file('../data/Joint-account-22JAN2019-to-22JAN2021.csv', 1)
 setup_categories()
