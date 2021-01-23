@@ -50,6 +50,9 @@ def record_matches_category(record, category):
     if operation == 'equals':
         if record[column] == value:
             return True
+    if operation == 'contains':
+        if value in record[column]:
+            return True
     return False
 
 
