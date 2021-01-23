@@ -4,7 +4,7 @@ def data_exists(data, con, account_id):
     cur.execute('SELECT id FROM transaction '
                 'WHERE account_id = %s '
                 'AND date = %s '
-                'AND amount = %s '
+                'AND amount::numeric = %s '
                 'AND payee = %s',
                 [account_id, data['date'], data['amount'], data['payee']])
     rows = cur.fetchall()

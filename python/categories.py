@@ -73,15 +73,17 @@ def setup_categories():
     cur = con.cursor()
     sql = 'SELECT id, account_id, date, amount, payee, particulars, code, reference, ' \
           'transaction_type, this_account, other_account, serial, transaction_code, batch_number, ' \
-          'originating_bank, date_processed, category, sub_category FROM transaction'
+          'originating_bank, date_processed, category, sub_category FROM transaction WHERE category IS NULL'
     cur.execute(sql)
     rows = cur.fetchall()
+    updates = 0
     for row in rows:
         record = convert_database_row_to_json(row)
         category = guess_category(record, categories)
         print('{} : {} = {}'.format(record['id'], record['category'], category))
         if category:
             update_row_category(record, category, con)
-
+            updates = updates + 1
+    print('checked {} rows and updated {}'.format(len(rows), updates))
 
 setup_categories()

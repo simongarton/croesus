@@ -11,7 +11,7 @@ from con import get_con
 def convert_csv_row_to_json(row):
     return {
         'date': dateparser.parse(row[4]),
-        'amount': row[2],
+        'amount': get_value(row[2]),
         'payee': row[3].strip(),
         'particulars': None,
         'code': None,
@@ -27,6 +27,12 @@ def convert_csv_row_to_json(row):
         'foreign_currency_amount': row[6],
         'conversion_charge': row[7]
     }
+
+
+def get_value(value):
+    if value == '':
+        return 0
+    return -(float(value.strip()))
 
 
 def import_file(filename, account_id):
