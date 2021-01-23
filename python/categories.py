@@ -1,6 +1,6 @@
 import json
 
-from .con import get_con
+from con import get_con
 
 
 def convert_database_row_to_json(row):
