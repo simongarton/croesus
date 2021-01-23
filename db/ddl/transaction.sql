@@ -14,6 +14,9 @@ CREATE TABLE transaction (
     transaction_code TEXT,
     batch_number     TEXT,
     originating_bank TEXT,
-    date_processed   DATE
+    date_processed   DATE,
+
+    category         TEXT,
+    sub_category     TEXT
 );
 
