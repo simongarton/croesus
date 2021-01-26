@@ -20,3 +20,5 @@ CREATE TABLE transaction (
     sub_category     TEXT
 );
 
+ALTER TABLE transaction
+    ADD CONSTRAINT transaction_account_fk FOREIGN KEY (account_id) REFERENCES account;
