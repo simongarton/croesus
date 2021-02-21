@@ -1,7 +1,7 @@
 import boto3
 import json
+import os
 from botocore.exceptions import ClientError
-from botocore.utils import parse_key_val_file_contents
 
 BUCKET_NAME = 'croesus'
 
@@ -49,6 +49,8 @@ def transaction(exchange, symbol, date, amount, price):
     except ClientError as e:
         print(e)
 
+    os.delete(FILE_NAME)
+
     return transactions
 
 
@@ -71,6 +73,7 @@ def get_holdings():
             s3_client.download_file(BUCKET_NAME, file_name, TEMP_NAME)
             with open(TEMP_NAME, 'r') as input:
                 transactions = json.load(input)
+            os.delete(TEMP_NAME)
             total = 0
             exchange = '-'
             symbol = '-'
@@ -124,6 +127,7 @@ def get_values():
         s3_client.download_file(BUCKET_NAME, FILE_NAME, FILE_NAME)
         with open(FILE_NAME, 'r') as input:
             price_data = json.load(input)
+        os.delete(FILE_NAME)
     except ClientError as e:
         pass
 
