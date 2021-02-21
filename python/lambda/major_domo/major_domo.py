@@ -1,11 +1,11 @@
 import boto3
 import json
-from decimal import Decimal
 from botocore.exceptions import ClientError
 
+BUCKET_NAME = 'croesus'
 
-# There is a flaw with this approach, in that the maximum size of an attribute in
-# DynamoDB is 400KB.
+# better error handling
+# logs
 
 
 def response(code, body):
@@ -19,48 +19,65 @@ def response(code, body):
 
 
 def save_price(exchange, symbol, price):
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('stock_price')
+    s3_client = boto3.client('s3')
+    FILE_NAME = 'prices.json'
 
-    db_response = table.put_item(
-        Item={
-            'exchange': exchange,
-            'symbol': symbol,
-            'price': Decimal(str(price)),
-        }
-    )
-    return db_response
+    price_data = {}
+    try:
+        s3_client.download_file(BUCKET_NAME, FILE_NAME, FILE_NAME)
+        with open(FILE_NAME, 'r') as input:
+            price_data = json.load(input)
+    except ClientError as e:
+        pass
+
+    if not exchange in price_data:
+        price_data[exchange] = {}
+    price_data[exchange][symbol] = price
+
+    with open(FILE_NAME, 'w') as output:
+        json.dump(price_data, output)
+
+    try:
+        response = s3_client.upload_file(FILE_NAME, BUCKET_NAME, FILE_NAME)
+    except ClientError as e:
+        print(e)
+
+    return price_data
 
 
 def save_price_history(exchange, symbol, date, price):
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('stock_price_history')
 
+    s3_client = boto3.client('s3')
+    FILE_NAME = 'price_history.json'
+
+    price_data = {}
     try:
-        historical_data_response = table.get_item(
-            Key={'exchange': exchange, 'symbol': symbol})
+        s3_client.download_file(BUCKET_NAME, FILE_NAME, FILE_NAME)
+        with open(FILE_NAME, 'r') as input:
+            price_data = json.load(input)
     except ClientError as e:
-        historical_data_response = {'history': {}}
+        pass
+
+    if not exchange in price_data:
+        price_data[exchange] = {}
+    if not symbol in price_data[exchange]:
+        price_data[exchange][symbol] = {}
+    price_data[exchange][symbol][date] = price
+
+    with open(FILE_NAME, 'w') as output:
+        json.dump(price_data, output)
 
     try:
-        historical_data = historical_data_response['Item']['history']
-    except KeyError as e:
-        historical_data = {}
+        response = s3_client.upload_file(FILE_NAME, BUCKET_NAME, FILE_NAME)
+    except ClientError as e:
+        print(e)
 
-    historical_data[date] = Decimal(str(price))
-    db_response = table.put_item(
-        Item={
-            'exchange': exchange,
-            'symbol': symbol,
-            'history': historical_data,
-        }
-    )
-    return db_response
+    return price_data
 
 
 def test():
     response1 = save_price('NZX', 'XXX', 1.02)
-    response2 = save_price_history('NZX', 'XXX', '2021-02-20', 1.03)
+    response2 = save_price_history('NZX', 'XXX', '2021-02-21', 1.02)
     data = {
         'response1': response1,
         'response2': response2
@@ -69,4 +86,4 @@ def test():
     return response(200, data)
 
 
-test()
+# test()
