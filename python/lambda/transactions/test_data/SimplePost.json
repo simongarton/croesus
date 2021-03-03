@@ -1,0 +1,13 @@
+{
+    "requestContext": {
+        "http": {
+            "method": "POST"
+        }
+    },
+    "pathParameters": {
+        "exchange": "nzx",
+        "symbol": "test"
+    },
+    "body": "{\n    \"date\":\"2021-02-21\",\n    \"quantity\":2.5,\n    \"price\":100\n}",
+    "isBase64Encoded": false
+}

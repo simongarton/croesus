@@ -1,0 +1,12 @@
+{
+    "requestContext": {
+        "http": {
+            "method": "GET"
+        }
+    },
+    "pathParameters": {
+        "exchange": "nzx",
+        "symbol": "test"
+    },
+    "isBase64Encoded": false
+}
