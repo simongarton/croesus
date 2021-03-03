@@ -1,12 +1,13 @@
 import boto3
 import json
 import os
+import datetime
 from botocore.exceptions import ClientError
 
 BUCKET_NAME = 'croesus'
 
 # better error handling
-# logs
+# write to logs
 
 
 def response(code, body):
@@ -19,14 +20,69 @@ def response(code, body):
     }
 
 
-def transaction(exchange, symbol, date, amount, price):
+def lambda_handler(event, context):
 
+    if not 'pathParameters' in event:
+        method = event['requestContext']['http']['method']
+        if method == 'GET':
+            return get_total_response()
+        return response(405, {'error': 'unhandled method'})
+
+    method = event['requestContext']['http']['method']
+    parameters = event['pathParameters']
+
+    if method == 'GET':
+        return get(parameters)
+    if method == 'POST':
+        return post(parameters, json.loads(event['body']))
+    return response(405, {'error': 'unhandled method'})
+
+
+def get(parameters):
+    if 'symbol' in parameters:
+        return get_symbol_response(parameters)
+    if 'exchange' in parameters:
+        return get_exchange_response(parameters)
+    return response(500, {'error': 'get() is lost'})
+
+
+def post(parameters, body):
+    if 'symbol' in parameters:
+        return post_symbol(parameters, body)
+
+
+def get_total_response():
+    return response(200, get_total_value())
+
+
+def get_exchange_response(parameters):
+    exchange = parameters['exchange']
+    return response(200, get_exchange_value(exchange))
+
+
+def get_symbol_response(parameters):
+    exchange = parameters['exchange']
+    symbol = parameters['symbol']
+    return response(200, get_symbol_value(exchange, symbol))
+
+
+def post_symbol(parameters, body):
+    exchange = parameters['exchange']
+    symbol = parameters['symbol']
+    date = body['date']
+    amount = body['amount']
+    price = body['price']
+    return response(200, add_transaction(exchange, symbol, date, amount, price))
+
+
+def add_transaction(exchange, symbol, date, amount, price):
     s3_client = boto3.client('s3')
-    FILE_NAME = 'holding-{}-{}.json'.format(exchange, symbol)
+    KEY_NAME = 'holding-{}-{}.json'.format(exchange, symbol)
+    FILE_NAME = '/tmp/' + KEY_NAME
 
     transactions = []
     try:
-        s3_client.download_file(BUCKET_NAME, FILE_NAME, FILE_NAME)
+        s3_client.download_file(BUCKET_NAME, KEY_NAME, FILE_NAME)
         with open(FILE_NAME, 'r') as input:
             transactions = json.load(input)
     except ClientError as e:
@@ -45,11 +101,11 @@ def transaction(exchange, symbol, date, amount, price):
         json.dump(transactions, output)
 
     try:
-        response = s3_client.upload_file(FILE_NAME, BUCKET_NAME, FILE_NAME)
+        response = s3_client.upload_file(FILE_NAME, BUCKET_NAME, KEY_NAME)
     except ClientError as e:
         print(e)
 
-    os.delete(FILE_NAME)
+    os.remove(FILE_NAME)
 
     return transactions
 
@@ -58,22 +114,22 @@ def get_holdings():
     s3 = boto3.resource('s3')
     my_bucket = s3.Bucket(BUCKET_NAME)
 
-    files = []
-    for file in my_bucket.objects.all():
-        if 'holding' in file.key:
-            files.append(file.key)
+    key_names = []
+    for object in my_bucket.objects.all():
+        if 'holding' in object.key:
+            key_names.append(object.key)
 
     s3_client = boto3.client('s3')
 
-    TEMP_NAME = 'temp.json'
+    TEMP_NAME = '/tmp/temp.json'
     transactions = []
     holdings = {}
-    for file_name in files:
+    for key_name in key_names:
         try:
-            s3_client.download_file(BUCKET_NAME, file_name, TEMP_NAME)
+            s3_client.download_file(BUCKET_NAME, key_name, TEMP_NAME)
             with open(TEMP_NAME, 'r') as input:
                 transactions = json.load(input)
-            os.delete(TEMP_NAME)
+            os.remove(TEMP_NAME)
             total = 0
             exchange = '-'
             symbol = '-'
@@ -98,6 +154,16 @@ def get_exchange_value(exchange):
     return {'exchange': exchange, 'value': total}
 
 
+def get_symbol_value(exchange, symbol):
+    values = get_values()
+    total = 0
+    for value_data in values:
+        if value_data['exchange'] == exchange:
+            if value_data['symbol'] == symbol:
+                total = total + value_data['value']
+    return {'exchange': exchange, 'symbol': symbol, 'value': total}
+
+
 def get_exchange_values():
     values = get_values()
     total = 0
@@ -120,14 +186,15 @@ def get_total_value():
 
 def get_values():
     s3_client = boto3.client('s3')
-    FILE_NAME = 'prices.json'
+    KEY_NAME = 'prices.json'
+    FILE_NAME = '/tmp/' + KEY_NAME
 
     price_data = {}
     try:
-        s3_client.download_file(BUCKET_NAME, FILE_NAME, FILE_NAME)
+        s3_client.download_file(BUCKET_NAME, KEY_NAME, FILE_NAME)
         with open(FILE_NAME, 'r') as input:
             price_data = json.load(input)
-        os.delete(FILE_NAME)
+        os.remove(FILE_NAME)
     except ClientError as e:
         pass
 
@@ -150,14 +217,15 @@ def get_values():
 
 
 def test():
-    #data = transaction('NZX', 'XXX', '2021-02-21', 10.5, 1.02)
-    data = get_holdings()
-    print(get_values())
-    print(get_total_value())
-    print(get_exchange_values())
-    print(get_exchange_value('NZX'))
-    print(get_exchange_value('NYSE'))
-    return response(200, data)
+    # data = transaction('NZX', 'XXX', '2021-02-21', 10.5, 1.02)
+    # data = get_holdings()
+    # print(get_values())
+    # print(get_total_value())
+    # print(get_exchange_values())
+    # print(get_exchange_value('NZX'))
+    # print(get_exchange_value('NYSE'))
+    # return response(200, data)
+    print(get_symbol_value('NZX', 'XXX'))
 
 
-test()
+# test()
