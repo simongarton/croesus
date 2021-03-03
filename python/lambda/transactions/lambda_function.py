@@ -1,8 +1,8 @@
 import boto3
 import json
 import os
-import datetime
 from botocore.exceptions import ClientError
+import dateparser
 
 BUCKET_NAME = 'croesus'
 
@@ -70,14 +70,15 @@ def post_symbol(parameters, body):
     exchange = parameters['exchange']
     symbol = parameters['symbol']
     date = body['date']
-    amount = body['amount']
+    quantity = body['quantity']
     price = body['price']
-    return response(200, add_transaction(exchange, symbol, date, amount, price))
+    return response(200, add_transaction(exchange, symbol, date, quantity, price))
 
 
-def add_transaction(exchange, symbol, date, amount, price):
+def add_transaction(exchange, symbol, date, quantity, price):
     s3_client = boto3.client('s3')
-    KEY_NAME = 'holding-{}-{}.json'.format(exchange, symbol)
+    #KEY_NAME = 'holding-{}-{}.json'.format(exchange, symbol)
+    KEY_NAME = 'transactions.json'
     FILE_NAME = '/tmp/' + KEY_NAME
 
     transactions = []
@@ -88,11 +89,14 @@ def add_transaction(exchange, symbol, date, amount, price):
     except ClientError as e:
         pass
 
+    # sort out the date format
+    date_value = dateparser.parse(date)
+    formatted_date = date_value.strftime('%Y-%m-%d')
     transaction = {
         'exchange': exchange,
         'symbol': symbol,
-        'date': date,
-        'amount': amount,
+        'date': formatted_date,
+        'quantity': quantity,
         'price': price,
     }
     transactions.append(transaction)
@@ -214,18 +218,3 @@ def get_values():
             values.append(data)
 
     return values
-
-
-def test():
-    # data = transaction('NZX', 'XXX', '2021-02-21', 10.5, 1.02)
-    # data = get_holdings()
-    # print(get_values())
-    # print(get_total_value())
-    # print(get_exchange_values())
-    # print(get_exchange_value('NZX'))
-    # print(get_exchange_value('NYSE'))
-    # return response(200, data)
-    print(get_symbol_value('NZX', 'XXX'))
-
-
-# test()

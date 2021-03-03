@@ -1,0 +1,45 @@
+
+# note - doesn't work with python38 unless you upgrade the AMI and do some extras
+
+# build the image
+
+docker build -f "croesus.Dockerfile" -t lambdalayer:latest .
+
+# run it
+
+docker run -it --name lambdalayer lambdalayer:latest bash
+
+# in the shell, create a venv
+
+python3.8 -m venv croesus
+
+# activate it
+
+source croesus/bin/activate
+
+# install the requirements - how do I do this from requirements.txt ?
+
+mkdir python
+pip install boto3 -t ./python
+pip install requests -t ./python
+pip install dateparser -t ./python
+
+# come out of the venv
+
+deactivate
+
+# zip it up
+
+zip -r croesus_layer.zip ./python/
+
+# exit the docker container
+
+exit
+
+# and copy the file locally 
+
+docker cp lambdalayer:croesus_layer.zip ~/Desktop/
+
+# upload to S3
+
+This doesn't work - either with transactions or croesus as the folder/layer.

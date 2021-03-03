@@ -1,1 +1,0 @@
-aws lambda update-function-code --function-name holdings --zip-file fileb://lambda.zip

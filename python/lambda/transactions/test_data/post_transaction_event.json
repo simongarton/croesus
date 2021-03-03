@@ -1,0 +1,43 @@
+{
+    "version": "2.0",
+    "routeKey": "POST /holdings/{exchange}/{symbol}",
+    "rawPath": "/prod/holdings/nzx/test",
+    "rawQueryString": "",
+    "headers": {
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br",
+        "cache-control": "no-cache",
+        "content-length": "63",
+        "content-type": "application/json",
+        "host": "g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com",
+        "user-agent": "PostmanRuntime/7.26.10",
+        "x-amzn-trace-id": "Root=1-602f4c12-46a1d7b86bf0dc51308204c5",
+        "x-forwarded-for": "203.96.204.4",
+        "x-forwarded-port": "443",
+        "x-forwarded-proto": "https"
+    },
+    "requestContext": {
+        "accountId": "396194066872",
+        "apiId": "g4spmx84mk",
+        "domainName": "g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com",
+        "domainPrefix": "g4spmx84mk",
+        "http": {
+            "method": "POST",
+            "path": "/prod/holdings/nzx/test",
+            "protocol": "HTTP/1.1",
+            "sourceIp": "203.96.204.4",
+            "userAgent": "PostmanRuntime/7.26.10"
+        },
+        "requestId": "a-jS7jnQSwMEPow=",
+        "routeKey": "POST /holdings/{exchange}/{symbol}",
+        "stage": "prod",
+        "time": "19/Feb/2021:05:26:42 +0000",
+        "timeEpoch": 1613712402619
+    },
+    "pathParameters": {
+        "exchange": "nzx",
+        "symbol": "test"
+    },
+    "body": "{\n    \"date\":\"2021-02-21\",\n    \"quantity\":2.5,\n    \"price\":100\n}",
+    "isBase64Encoded": false
+}
