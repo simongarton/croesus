@@ -23,6 +23,7 @@ mkdir python
 pip install boto3 -t ./python
 pip install requests -t ./python
 pip install dateparser -t ./python
+pip install bs4 -t ./python
 
 # come out of the venv
 
