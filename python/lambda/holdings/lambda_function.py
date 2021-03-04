@@ -21,8 +21,6 @@ def response(code, body):
 
 
 def lambda_handler(event, context):
-    print(event)
-
     if not 'queryStringParameters' in event:
         return response(400, {'error': 'must include query parameter for date (1)'})
     if not 'date' in event['queryStringParameters']:
@@ -86,23 +84,21 @@ def get_holdings(exchange, symbol, query_date):
     for transaction in transactions:
         print(transaction)
         transaction_date = dateparser.parse(transaction['date'])
-        key = 'total'
         if transaction_date > query_date:
             print('out of date range {} > {}'.format(
                 transaction_date, query_date))
             continue
         if exchange is not None:
-            key = exchange
             if transaction['exchange'] != exchange:
                 print('failed exchange {} != {}'.format(
                     transaction['exchange'], exchange))
                 continue
         if symbol is not None:
-            key = exchange + ':' + symbol
             if transaction['symbol'] != symbol:
                 print('failed symbol {} != {}'.format(
                     transaction['symbol'], symbol))
                 continue
+        key = transaction['exchange'] + ':' + transaction['symbol']
         if not key in holdings_map:
             holdings_map[key] = 0
         print('adding {}:{}'.format(key, transaction['quantity']))
@@ -110,7 +106,11 @@ def get_holdings(exchange, symbol, query_date):
 
     holdings = []
     for key, value in holdings_map.items():
-        holdings.append({'holding': key,
+        parts = key.split(':')
+        exchange = parts[0]
+        symbol = parts[1]
+        holdings.append({'exchange': exchange,
+                         'symbol': symbol,
                          'quantity': value})
 
     # sort
