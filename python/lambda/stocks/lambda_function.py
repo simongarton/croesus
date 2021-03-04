@@ -44,7 +44,7 @@ def lambda_handler(event, context):
     else:
         price = get_stock(exchange, symbol)
     if not price:
-        return response(404, 'price for {}.{} not found, cached = {}'.format(exchange, symbol, cached))
+        return response(404, 'price for {}.{} not found, cached={}'.format(exchange, symbol, cached))
     data = {
         'date': date.today().strftime('%Y-%m-%d'),
         'exchange': exchange,
@@ -80,16 +80,19 @@ def get_stock(exchange, symbol):
 
 def get_cached_stock(exchange, symbol):
     s3_client = boto3.client('s3')
-    FILE_NAME = 'prices.json'
+    KEY_NAME = 'prices.json'
+    FILE_NAME = '/tmp/' + KEY_NAME
 
     price_data = {}
     try:
-        s3_client.download_file(BUCKET_NAME, FILE_NAME, FILE_NAME)
+        s3_client.download_file(BUCKET_NAME, KEY_NAME, FILE_NAME)
         with open(FILE_NAME, 'r') as input:
             price_data = json.load(input)
     except ClientError as e:
+        print('error : {}'.format(e))
         pass
 
+    print(price_data)
     price = None
     if exchange in price_data:
         if symbol in price_data[exchange]:
