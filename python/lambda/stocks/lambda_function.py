@@ -33,7 +33,6 @@ def lambda_handler(event, context):
     exchange = parameters['exchange']
     symbol = parameters['symbol']
     cached = False
-    print(event)
     if 'queryStringParameters' in event:
         print(event['queryStringParameters'])
         if 'cached' in event['queryStringParameters']:

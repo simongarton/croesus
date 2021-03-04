@@ -6,6 +6,10 @@ import requests
 import datetime
 import random
 import time
+import os
+import psycopg2
+import sys
+
 
 BUCKET_NAME = 'croesus'
 HOST = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com'
@@ -71,13 +75,31 @@ def response(code, body):
     }
 
 
+def get_database_connection():
+    try:
+        dbname = os.environ.get('PGDATABASE')
+        user = os.environ.get('PGUSER')
+        host = os.environ.get('PGHOST')
+        password = os.environ.get('PGPASSWORD')
+        connection = "dbname='{}' user='{}' host='{}' password='{}'".format(
+            dbname, user, host, password)
+        conn = psycopg2.connect(connection)
+        return conn
+    except:
+        return {
+            'statusCode': 500,
+            'body': json.dumps('connection error : {}'.format(sys.exc_info()[0]))
+        }
+
+
 def save_price(exchange, symbol, price):
     s3_client = boto3.client('s3')
-    FILE_NAME = 'prices.json'
+    KEY_NAME = 'prices.json'
+    FILE_NAME = '/tmp/' + KEY_NAME
 
     price_data = {}
     try:
-        s3_client.download_file(BUCKET_NAME, FILE_NAME, FILE_NAME)
+        s3_client.download_file(BUCKET_NAME, KEY_NAME, FILE_NAME)
         with open(FILE_NAME, 'r') as input:
             price_data = json.load(input)
     except ClientError as e:
@@ -95,17 +117,35 @@ def save_price(exchange, symbol, price):
     except ClientError as e:
         print(e)
 
+    save_price_to_database(exchange, symbol, price)
+
     return price_data
+
+
+def save_price_to_database(exchange, symbol, price):
+    conn = get_database_connection()
+    if not conn:
+        return
+    cur = conn.cursor()
+    cur.execute('INSERT INTO price (exchange, symbol, price) '
+                'VALUES (%s, %s, %s);',
+                [
+                    exchange,
+                    symbol,
+                    price
+                ])
+    conn.commit()
 
 
 def save_price_history(exchange, symbol, date, price):
 
     s3_client = boto3.client('s3')
-    FILE_NAME = 'price_history.json'
+    KEY_NAME = 'price_history.json'
+    FILE_NAME = '/tmp/' + KEY_NAME
 
     price_data = {}
     try:
-        s3_client.download_file(BUCKET_NAME, FILE_NAME, FILE_NAME)
+        s3_client.download_file(BUCKET_NAME, KEY_NAME, FILE_NAME)
         with open(FILE_NAME, 'r') as input:
             price_data = json.load(input)
     except ClientError as e:
@@ -125,4 +165,28 @@ def save_price_history(exchange, symbol, date, price):
     except ClientError as e:
         print(e)
 
+    save_price_history_to_database(exchange, symbol, date, price)
+
     return price_data
+
+
+def save_price_history_to_database(exchange, symbol, date, price):
+    conn = get_database_connection()
+    if not conn:
+        return
+    cur = conn.cursor()
+    cur.execute('DELETE FROM price_history WHERE exchange = %s AND symbol = %s AND date = %s',
+                [
+                    exchange,
+                    symbol,
+                    date
+                ])
+    cur.execute('INSERT INTO price_history (exchange, symbol, date, price) '
+                'VALUES (%s, %s, %s, %s);',
+                [
+                    exchange,
+                    symbol,
+                    date,
+                    price
+                ])
+    conn.commit()
