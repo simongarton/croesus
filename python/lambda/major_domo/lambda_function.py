@@ -126,10 +126,3 @@ def save_price_history(exchange, symbol, date, price):
         print(e)
 
     return price_data
-
-
-def test():
-    lambda_handler(None, None)
-
-
-test()

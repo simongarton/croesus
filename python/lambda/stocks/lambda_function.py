@@ -6,6 +6,11 @@ import argparse
 import requests
 import json
 from datetime import date
+import boto3
+from botocore.exceptions import ClientError
+
+BUCKET_NAME = 'croesus'
+HOST = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com'
 
 
 def lambda_handler(event, context):
@@ -27,19 +32,35 @@ def lambda_handler(event, context):
         }
     exchange = parameters['exchange']
     symbol = parameters['symbol']
-    price = get_stock(exchange, symbol)
+    cached = False
+    print(event)
+    if 'queryStringParameters' in event:
+        print(event['queryStringParameters'])
+        if 'cached' in event['queryStringParameters']:
+            print(event['queryStringParameters']['cached'])
+            cached = event['queryStringParameters']['cached']
+    if cached:
+        price = get_cached_stock(exchange, symbol)
+    else:
+        price = get_stock(exchange, symbol)
+    if not price:
+        return response(404, 'price for {}.{} not found, cached = {}'.format(exchange, symbol, cached))
     data = {
         'date': date.today().strftime('%Y-%m-%d'),
         'exchange': exchange,
         'symbol': symbol,
         'price': price
     }
+    return response(200, data)
+
+
+def response(code, body):
     return {
-        'statusCode': 200,
+        'statusCode': code,
         "headers": {
             "Content-Type": "application/json"
         },
-        'body': json.dumps(data)
+        'body': json.dumps(body)
     }
 
 
@@ -57,21 +78,20 @@ def get_stock(exchange, symbol):
     raise Exception('invalid exchange ' + exchange)
 
 
-def run():
-    parser = argparse.ArgumentParser(description='get stock value')
-    parser.add_argument('--exchange', required=True,
-                        type=Text, help='exchange code')
-    parser.add_argument('--symbol', required=True,
-                        type=Text, help='stock symbol')
+def get_cached_stock(exchange, symbol):
+    s3_client = boto3.client('s3')
+    FILE_NAME = 'prices.json'
 
-    args = parser.parse_args()
-    exchange = args.exchange
-    symbol = args.symbol
-    price = get_stock(exchange, symbol)
-    data = {
-        'date': date.today().strftime('%Y-%m-%d'),
-        'exchange': exchange,
-        'symbol': symbol,
-        'price': price
-    }
-    return data
+    price_data = {}
+    try:
+        s3_client.download_file(BUCKET_NAME, FILE_NAME, FILE_NAME)
+        with open(FILE_NAME, 'r') as input:
+            price_data = json.load(input)
+    except ClientError as e:
+        pass
+
+    price = None
+    if exchange in price_data:
+        if symbol in price_data[exchange]:
+            price = price_data[exchange][symbol]
+    return price
