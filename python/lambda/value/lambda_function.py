@@ -13,6 +13,15 @@ HOST = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com'
 
 def lambda_handler(event, context):
 
+    if 'pathParameters' in event:
+        parameters = event['pathParameters']
+        filter_symbol = parameters['symbol'] if 'symbol' in parameters else None
+        filter_exchange = parameters['exchange'] if 'exchange' in parameters else None
+        print("got {} and {}".format(filter_exchange, filter_symbol))
+    else:
+        filter_symbol = None
+        filter_exchange = None
+
     # for now, limit to today otherwise no way of getting value
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
     holdings_response = requests.get(
@@ -25,7 +34,11 @@ def lambda_handler(event, context):
     holdings = []
     for holding in holdings_response.json():
         exchange = holding['exchange']
+        if filter_exchange and (exchange != filter_exchange):
+            continue
         symbol = holding['symbol']
+        if filter_symbol and (symbol != filter_symbol):
+            continue
         quantity = holding['quantity']
         price = get_cached_price(exchange, symbol)
         if not price:

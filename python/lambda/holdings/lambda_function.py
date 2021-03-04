@@ -1,6 +1,6 @@
 import boto3
 import json
-import os
+import datetime
 from botocore.exceptions import ClientError
 import dateparser
 
@@ -21,12 +21,12 @@ def response(code, body):
 
 
 def lambda_handler(event, context):
-    if not 'queryStringParameters' in event:
-        return response(400, {'error': 'must include query parameter for date (1)'})
-    if not 'date' in event['queryStringParameters']:
-        return response(400, {'error': 'must include query parameter for date (2)'})
+    query_date = datetime.datetime.now()
+    if 'queryStringParameters' in event:
+        if 'date' in event['queryStringParameters']:
+            query_date = dateparser.parse(
+                event['queryStringParameters']['date'])
 
-    query_date = dateparser.parse(event['queryStringParameters']['date'])
     if not 'pathParameters' in event:
         method = event['requestContext']['http']['method']
         if method == 'GET':
