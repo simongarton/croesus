@@ -9,6 +9,18 @@ docker build -f "croesus.Dockerfile" -t lambdalayer:latest .
 
 docker run -it --name lambdalayer lambdalayer:latest bash
 
+# or if it's running, find it
+
+docker container ls -aq
+
+# and start it
+
+docker start 5c351cb24e5e
+
+# and enter it
+
+docker exec -it lambdalayer bash
+
 # in the shell, create a venv
 
 python3.8 -m venv croesus
@@ -24,6 +36,8 @@ pip install boto3 -t ./python
 pip install requests -t ./python
 pip install dateparser -t ./python
 pip install bs4 -t ./python
+pip install psycopg2 -t ./python
+pip install psycopg2-binary -t ./python
 
 # come out of the venv
 
@@ -41,6 +55,9 @@ exit
 
 docker cp lambdalayer:croesus_layer.zip ~/Desktop/
 
-# upload to S3
 
-This doesn't work - either with transactions or croesus as the folder/layer.
+
+
+# postgres
+
+https://pypi.org/project/aws-psycopg2/
