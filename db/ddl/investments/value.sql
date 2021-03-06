@@ -4,6 +4,7 @@ CREATE TABLE "value" (
     exchange      TEXT      NOT NULL,
     symbol        TEXT      NOT NULL,
     price         MONEY     NOT NULL, -- NZ dollars
+    quantity      DOUBLE PRECISION NOT NULL,
     value         MONEY     NOT NULL -- NZ dollars
 );
 

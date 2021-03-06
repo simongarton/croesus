@@ -13,11 +13,11 @@ def response(code, body):
         "headers": {
             "Content-Type": "application/json"
         },
-        'body': json.dumps(body, default=myconverter)
+        'body': json.dumps(body, default=date_converter)
     }
 
 
-def myconverter(o):
+def date_converter(o):
     if isinstance(o, datetime.datetime):
         return o.strftime('%Y-%m-%d')
     if isinstance(o, datetime.date):

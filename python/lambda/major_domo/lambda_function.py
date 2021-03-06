@@ -40,7 +40,7 @@ def lambda_handler(event, context):
         print('saving {}.{} at {}'.format(exchange, symbol, price))
         save_price(exchange, symbol, price)
         save_price_history(exchange, symbol, todays_date, price)
-        save_value(exchange, symbol, todays_date, price, value)
+        save_value(exchange, symbol, todays_date, price, quantity, value)
         updates = updates + 1
         time.sleep(random.randint(0, 20)/10.0)
 
@@ -123,7 +123,7 @@ def get_value_data_from_database():
 
     cur = conn.cursor()
     cur.execute(
-        'SELECT id, date, exchange, symbol, price, value FROM value ORDER BY date DESC, exchange, symbol')
+        'SELECT id, date, exchange, symbol, price, quantity, value FROM value ORDER BY date DESC, exchange, symbol')
     rows = cur.fetchall()
     return rows
 
@@ -175,8 +175,8 @@ def save_price_history(exchange, symbol, date, price):
     return get_price_history_data_from_database()
 
 
-def save_value(exchange, symbol, date, price, value):
-    save_value_to_database(exchange, symbol, date, price, value)
+def save_value(exchange, symbol, date, price, quantity, value):
+    save_value_to_database(exchange, symbol, date, price, quantity, value)
 
     return get_value_data_from_database()
 
@@ -219,7 +219,7 @@ def save_price_history_to_database(exchange, symbol, date, price):
     conn.commit()
 
 
-def save_value_to_database(exchange, symbol, date, price, value):
+def save_value_to_database(exchange, symbol, date, price, quantity, value):
     conn = get_database_connection()
     if not conn:
         return
@@ -232,22 +232,24 @@ def save_value_to_database(exchange, symbol, date, price, value):
                 ])
     rows = cur.fetchall()
     if len(rows) > 0:
-        cur.execute('UPDATE value SET price = %s, value = %s WHERE exchange = %s AND symbol = %s AND date = %s;',
+        cur.execute('UPDATE value SET price = %s, quantity = %s, value = %s WHERE exchange = %s AND symbol = %s AND date = %s;',
                     [
                         price,
+                        quantity,
                         value,
                         exchange,
                         symbol,
                         date
                     ])
     else:
-        cur.execute('INSERT INTO value (exchange, symbol, date, price, value) '
-                    'VALUES (%s, %s, %s, %s, %s);',
+        cur.execute('INSERT INTO value (exchange, symbol, date, price, quantity, value) '
+                    'VALUES (%s, %s, %s, %s, %s, %s);',
                     [
                         exchange,
                         symbol,
                         date,
                         price,
+                        quantity,
                         value
                     ])
     conn.commit()
