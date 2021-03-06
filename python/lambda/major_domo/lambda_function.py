@@ -21,12 +21,13 @@ def lambda_handler(event, context):
     # I have to do the current day's holdings as I only can get new prices for the current day
 
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
+    print("getting holdings for {}".format(todays_date))
     holdings_response = requests.get(
         '{}/holdings?date={}'.format(HOST, todays_date))
     if holdings_response.status_code != 200:
         print(holdings_response)
         return response(holdings_response.status_code, holdings_response.text)
-
+    print(holdings_response)
     updates = 0
     for holding in holdings_response.json():
         exchange = holding['exchange']

@@ -1,8 +1,9 @@
-import boto3
 import json
 import datetime
 from botocore.exceptions import ClientError
 import dateparser
+import psycopg2
+import os
 
 BUCKET_NAME = 'croesus'
 
@@ -20,12 +21,29 @@ def response(code, body):
     }
 
 
+def get_database_connection():
+    try:
+        dbname = os.environ.get('PGDATABASE')
+        user = os.environ.get('PGUSER')
+        host = os.environ.get('PGHOST')
+        password = os.environ.get('PGPASSWORD')
+        connection = "dbname='{}' user='{}' host='{}' password='{}'".format(
+            dbname, user, host, password)
+        conn = psycopg2.connect(connection)
+        return conn
+    except:
+        print("could not get database connection")
+        return None
+
+
 def lambda_handler(event, context):
-    query_date = datetime.datetime.now()
+    query_date = datetime.date.today()
+    print('defaulted query date as {}'.format(query_date))
     if 'queryStringParameters' in event:
         if 'date' in event['queryStringParameters']:
             query_date = dateparser.parse(
-                event['queryStringParameters']['date'])
+                event['queryStringParameters']['date']).date()
+            print('parsed query date as {}'.format(query_date))
 
     if not 'pathParameters' in event:
         method = event['requestContext']['http']['method']
@@ -65,17 +83,15 @@ def get_symbol_response(parameters, query_date):
 
 
 def get_holdings(exchange, symbol, query_date):
-    s3_client = boto3.client('s3')
-    KEY_NAME = 'transactions.json'
-    FILE_NAME = '/tmp/' + KEY_NAME
+    conn = get_database_connection()
+    if not conn:
+        return []
+    print(conn)
+    cur = conn.cursor()
+    cur.execute(
+        'SELECT id, date, exchange, symbol, quantity, price FROM transaction ORDER BY date, exchange, symbol')
 
-    transactions = []
-    try:
-        s3_client.download_file(BUCKET_NAME, KEY_NAME, FILE_NAME)
-        with open(FILE_NAME, 'r') as input:
-            transactions = json.load(input)
-    except ClientError as e:
-        pass
+    transactions = cur.fetchall()
 
     holdings_map = {}
 
@@ -83,26 +99,27 @@ def get_holdings(exchange, symbol, query_date):
 
     for transaction in transactions:
         print(transaction)
-        transaction_date = dateparser.parse(transaction['date'])
+        transaction_date = transaction[1]
+        print('{}={}'.format(transaction_date, query_date))
         if transaction_date > query_date:
             print('out of date range {} > {}'.format(
                 transaction_date, query_date))
             continue
         if exchange is not None:
-            if transaction['exchange'] != exchange:
+            if transaction[2] != exchange:
                 print('failed exchange {} != {}'.format(
-                    transaction['exchange'], exchange))
+                    transaction[2], exchange))
                 continue
         if symbol is not None:
-            if transaction['symbol'] != symbol:
+            if transaction[3] != symbol:
                 print('failed symbol {} != {}'.format(
-                    transaction['symbol'], symbol))
+                    transaction[3], symbol))
                 continue
-        key = transaction['exchange'] + ':' + transaction['symbol']
+        key = transaction[2] + ':' + transaction[3]
         if not key in holdings_map:
             holdings_map[key] = 0
-        print('adding {}:{}'.format(key, transaction['quantity']))
-        holdings_map[key] = holdings_map[key] + transaction['quantity']
+        print('adding {}:{}'.format(key, transaction[4]))
+        holdings_map[key] = holdings_map[key] + transaction[4]
 
     holdings = []
     for key, value in holdings_map.items():
