@@ -65,7 +65,15 @@ def get_total_history():
     cur = conn.cursor()
     cur.execute(
         'SELECT date, sum(value::numeric::float8) AS total_value FROM value GROUP BY date ORDER BY date;')
-    return cur.fetchall()
+    rows = cur.fetchall()
+    data = []
+    for row in rows:
+        point = {
+            'date': row[0],
+            'value': row[1]
+        }
+        data.append(point)
+    return data
 
 
 def get_exchange_history(exchange):
@@ -84,7 +92,16 @@ def get_exchange_history(exchange):
                 [
                     exchange,
                 ])
-    return cur.fetchall()
+    rows = cur.fetchall()
+    data = []
+    for row in rows:
+        point = {
+            'date': row[0],
+            'exchange': row[1],
+            'value': row[2]
+        }
+        data.append(point)
+    return data
 
 
 def get_symbol_history(exchange, symbol):
@@ -103,4 +120,16 @@ def get_symbol_history(exchange, symbol):
                     exchange,
                     symbol
                 ])
-    return cur.fetchall()
+    rows = cur.fetchall()
+    data = []
+    for row in rows:
+        point = {
+            'date': row[0],
+            'exchange': row[1],
+            'symbol': row[2],
+            'price': row[3],
+            'quantity': row[4],
+            'value': row[5]
+        }
+        data.append(point)
+    return data
