@@ -63,7 +63,8 @@ def get_total_history():
         return None
 
     cur = conn.cursor()
-    cur.execute('SELECT date, value::numeric::float8 FROM value ORDER BY date;')
+    cur.execute(
+        'SELECT date, sum(value::numeric::float8) AS total_value FROM value GROUP BY date ORDER BY date;')
     return cur.fetchall()
 
 
