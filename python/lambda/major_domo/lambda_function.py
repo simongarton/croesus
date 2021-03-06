@@ -1,7 +1,4 @@
-import re
-import boto3
 import json
-from botocore.exceptions import ClientError
 import requests
 import datetime
 import random
@@ -21,12 +18,6 @@ HOST = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com'
 
 def lambda_handler(event, context):
 
-    # need to GET my list of holdings from
-    # https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/holdings/nzx/test?date=2021-03-10
-    # for the current day (think API key)
-    # then iterate over each, with delays, calling the stocks lambda for each and updating price
-    # and price history
-
     # I have to do the current day's holdings as I only can get new prices for the current day
 
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -37,13 +28,11 @@ def lambda_handler(event, context):
         return response(holdings_response.status_code, holdings_response.text)
 
     updates = 0
-    print(holdings_response.json())
     for holding in holdings_response.json():
         exchange = holding['exchange']
         symbol = holding['symbol']
         price = get_price(exchange, symbol)
         if not price:
-            print('not saving ')
             continue
         print('saving {}.{} at {}'.format(exchange, symbol, price))
         save_price(exchange, symbol, price)
@@ -61,7 +50,6 @@ def get_price(exchange, symbol):
         print('could not get price for {}.{} : status {}'.format(
             exchange, symbol, price_response.status_code))
         return None
-    print(price_response.json())
     return price_response.json()['price']
 
 
@@ -93,33 +81,33 @@ def get_database_connection():
 
 
 def save_price(exchange, symbol, price):
-    s3_client = boto3.client('s3')
-    KEY_NAME = 'prices.json'
-    FILE_NAME = '/tmp/' + KEY_NAME
-
-    price_data = {}
-    try:
-        s3_client.download_file(BUCKET_NAME, KEY_NAME, FILE_NAME)
-        with open(FILE_NAME, 'r') as input:
-            price_data = json.load(input)
-    except ClientError as e:
-        pass
-
-    if not exchange in price_data:
-        price_data[exchange] = {}
-    price_data[exchange][symbol] = price
-
-    with open(FILE_NAME, 'w') as output:
-        json.dump(price_data, output)
-
-    try:
-        s3_client.upload_file(FILE_NAME, BUCKET_NAME, FILE_NAME)
-    except ClientError as e:
-        print(e)
 
     save_price_to_database(exchange, symbol, price)
 
-    return price_data
+    return get_price_data_from_database()
+
+
+def get_price_data_from_database():
+    conn = get_database_connection()
+    if not conn:
+        return None
+
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM price ORDER BY exchange, symbol')
+    rows = cur.fetchall()
+    return rows
+
+
+def get_price_history_data_from_database():
+    conn = get_database_connection()
+    if not conn:
+        return None
+
+    cur = conn.cursor()
+    cur.execute(
+        'SELECT * FROM price_history ORDER BY date DESC, exchange, symbol')
+    rows = cur.fetchall()
+    return rows
 
 
 def save_price_to_database(exchange, symbol, price):
@@ -153,35 +141,9 @@ def save_price_to_database(exchange, symbol, price):
 
 def save_price_history(exchange, symbol, date, price):
 
-    s3_client = boto3.client('s3')
-    KEY_NAME = 'price_history.json'
-    FILE_NAME = '/tmp/' + KEY_NAME
-
-    price_data = {}
-    try:
-        s3_client.download_file(BUCKET_NAME, KEY_NAME, FILE_NAME)
-        with open(FILE_NAME, 'r') as input:
-            price_data = json.load(input)
-    except ClientError as e:
-        pass
-
-    if not exchange in price_data:
-        price_data[exchange] = {}
-    if not symbol in price_data[exchange]:
-        price_data[exchange][symbol] = {}
-    price_data[exchange][symbol][date] = price
-
-    with open(FILE_NAME, 'w') as output:
-        json.dump(price_data, output)
-
-    try:
-        s3_client.upload_file(FILE_NAME, BUCKET_NAME, FILE_NAME)
-    except ClientError as e:
-        print(e)
-
     save_price_history_to_database(exchange, symbol, date, price)
 
-    return price_data
+    return get_price_history_data_from_database()
 
 
 def save_price_history_to_database(exchange, symbol, date, price):

@@ -61,3 +61,5 @@ docker cp lambdalayer:croesus_layer.zip ~/Desktop/
 # postgres
 
 https://pypi.org/project/aws-psycopg2/
+https://www.linkedin.com/pulse/accessing-postgresql-databases-from-aws-python-lambda-wang/
+https://github.com/jkehler/awslambda-psycopg2

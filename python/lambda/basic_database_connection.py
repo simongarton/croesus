@@ -2,6 +2,8 @@ import json
 import psycopg2
 import os
 
+# must have VPC and RDS security groups
+
 
 def lambda_handler(event, context):
     try:
