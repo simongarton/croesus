@@ -5,3 +5,5 @@ CREATE TABLE "price" (
     price         MONEY -- NZ dollars
 );
 
+ALTER TABLE "price"
+    ADD CONSTRAINT price_unique UNIQUE (exchange, symbol);

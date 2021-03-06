@@ -127,13 +127,27 @@ def save_price_to_database(exchange, symbol, price):
     if not conn:
         return
     cur = conn.cursor()
-    cur.execute('INSERT INTO price (exchange, symbol, price) '
-                'VALUES (%s, %s, %s);',
+    cur.execute('SELECT * FROM price WHERE exchange = %s AND symbol = %s;',
                 [
                     exchange,
-                    symbol,
-                    price
+                    symbol
                 ])
+    rows = cur.fetchall()
+    if len(rows) > 0:
+        cur.execute('UPDATE price SET price = %s WHERE exchange = %s AND symbol = %s;',
+                    [
+                        price,
+                        exchange,
+                        symbol
+                    ])
+    else:
+        cur.execute('INSERT INTO price (exchange, symbol, price) '
+                    'VALUES (%s, %s, %s);',
+                    [
+                        exchange,
+                        symbol,
+                        price
+                    ])
     conn.commit()
 
 
