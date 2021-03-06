@@ -1,7 +1,6 @@
 import json
 import os
-import sys
-from botocore.exceptions import ClientError
+import datetime
 import psycopg2
 
 # better error handling
@@ -14,8 +13,16 @@ def response(code, body):
         "headers": {
             "Content-Type": "application/json"
         },
-        'body': json.dumps(body)
+        'body': json.dumps(body, default=myconverter)
     }
+
+
+def myconverter(o):
+    if isinstance(o, datetime.datetime):
+        return o.strftime('%Y-%m-%d')
+    if isinstance(o, datetime.date):
+        return o.strftime('%Y-%m-%d')
+    return '{}'.format(o)
 
 
 def get_database_connection():
@@ -111,9 +118,9 @@ def get_transactions(exchange, symbol):
     conn = get_database_connection()
     if not conn:
         return []
-    print(conn)
     cur = conn.cursor()
-    cur.execute('SELECT * FROM transaction ORDER BY date, exchange, symbol')
+    cur.execute(
+        'SELECT id, date, exchange, symbol, quantity, price FROM transaction ORDER BY date, exchange, symbol')
 
     transactions = cur.fetchall()
 
@@ -121,13 +128,13 @@ def get_transactions(exchange, symbol):
         return transactions
 
     exchange_transactions = [
-        t for t in transactions if t['exchange'] == exchange]
+        t for t in transactions if t[2] == exchange]
 
     if symbol is None:
         return exchange_transactions
 
     symbol_transactions = [
-        t for t in exchange_transactions if t['symbol'] == symbol]
+        t for t in exchange_transactions if t[3] == symbol]
     return symbol_transactions
 
 

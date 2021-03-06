@@ -6,7 +6,6 @@ import os
 import requests
 import json
 from datetime import date
-from botocore.exceptions import ClientError
 import psycopg2
 
 HOST = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com'
@@ -117,7 +116,7 @@ def get_cached_stock(exchange, symbol):
         return None
 
     cur = conn.cursor()
-    cur.execute('SELECT id, exchange, symbol, price FROM price WHERE exchange = %s AND symbol = %s',
+    cur.execute('SELECT id, exchange, symbol, price::numeric::float8 FROM price WHERE exchange = %s AND symbol = %s',
                 [
                     exchange,
                     symbol

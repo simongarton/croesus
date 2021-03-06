@@ -1,5 +1,4 @@
 import json
-from botocore.exceptions import ClientError
 import requests
 import datetime
 
@@ -14,13 +13,17 @@ def lambda_handler(event, context):
 
     if 'pathParameters' in event:
         parameters = event['pathParameters']
-        filter_symbol = parameters['symbol'] if 'symbol' in parameters else None
         filter_exchange = parameters['exchange'] if 'exchange' in parameters else None
+        filter_symbol = parameters['symbol'] if 'symbol' in parameters else None
         print("got {} and {}".format(filter_exchange, filter_symbol))
     else:
-        filter_symbol = None
         filter_exchange = None
+        filter_symbol = None
 
+    return handle(filter_exchange, filter_symbol)
+
+
+def handle(filter_exchange, filter_symbol):
     # for now, limit to today otherwise no way of getting value
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
     holdings_response = requests.get(
@@ -44,7 +47,7 @@ def lambda_handler(event, context):
             holding = {
                 'exchange': exchange,
                 'symbol': symbol,
-                'quantity': quantity,
+                'quantity': round(quantity, 2),
                 'price': None,
                 'value': None
             }
@@ -54,7 +57,7 @@ def lambda_handler(event, context):
         holding = {
             'exchange': exchange,
             'symbol': symbol,
-            'quantity': quantity,
+            'quantity': round(quantity, 2),
             'price': price,
             'value': round(quantity * price, 2)
         }

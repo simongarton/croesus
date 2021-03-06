@@ -26,20 +26,25 @@ def lambda_handler(event, context):
     if holdings_response.status_code != 200:
         print(holdings_response)
         return response(holdings_response.status_code, holdings_response.text)
-    print(holdings_response)
+    total_value = 0
     updates = 0
     for holding in holdings_response.json():
         exchange = holding['exchange']
         symbol = holding['symbol']
+        quantity = holding['quantity']
         price = get_price(exchange, symbol)
         if not price:
             continue
+        value = quantity * price
+        total_value = total_value + value
         print('saving {}.{} at {}'.format(exchange, symbol, price))
         save_price(exchange, symbol, price)
         save_price_history(exchange, symbol, todays_date, price)
+        save_value(exchange, symbol, todays_date, price, value)
         updates = updates + 1
         time.sleep(random.randint(0, 20)/10.0)
 
+    save_total_value(todays_date, total_value)
     return response(200, {'message': '{} prices updated'.format(updates)})
 
 
@@ -106,7 +111,31 @@ def get_price_history_data_from_database():
 
     cur = conn.cursor()
     cur.execute(
-        'SELECT * FROM price_history ORDER BY date DESC, exchange, symbol')
+        'SELECT id, date, exchange, symbol, price FROM price_history ORDER BY date DESC, exchange, symbol')
+    rows = cur.fetchall()
+    return rows
+
+
+def get_value_data_from_database():
+    conn = get_database_connection()
+    if not conn:
+        return None
+
+    cur = conn.cursor()
+    cur.execute(
+        'SELECT id, date, exchange, symbol, price, value FROM value ORDER BY date DESC, exchange, symbol')
+    rows = cur.fetchall()
+    return rows
+
+
+def get_total_value_data_from_database():
+    conn = get_database_connection()
+    if not conn:
+        return None
+
+    cur = conn.cursor()
+    cur.execute(
+        'SELECT id, date, value FROM total_value ORDER BY date DESC')
     rows = cur.fetchall()
     return rows
 
@@ -116,7 +145,7 @@ def save_price_to_database(exchange, symbol, price):
     if not conn:
         return
     cur = conn.cursor()
-    cur.execute('SELECT * FROM price WHERE exchange = %s AND symbol = %s;',
+    cur.execute('SELECT id FROM price WHERE exchange = %s AND symbol = %s;',
                 [
                     exchange,
                     symbol
@@ -141,10 +170,21 @@ def save_price_to_database(exchange, symbol, price):
 
 
 def save_price_history(exchange, symbol, date, price):
-
     save_price_history_to_database(exchange, symbol, date, price)
 
     return get_price_history_data_from_database()
+
+
+def save_value(exchange, symbol, date, price, value):
+    save_value_to_database(exchange, symbol, date, price, value)
+
+    return get_value_data_from_database()
+
+
+def save_total_value(date, total_value):
+    save_total_value_to_database(date, total_value)
+
+    return get_total_value_data_from_database()
 
 
 def save_price_history_to_database(exchange, symbol, date, price):
@@ -152,18 +192,88 @@ def save_price_history_to_database(exchange, symbol, date, price):
     if not conn:
         return
     cur = conn.cursor()
-    cur.execute('DELETE FROM price_history WHERE exchange = %s AND symbol = %s AND date = %s',
+    cur.execute('SELECT id FROM price_history WHERE exchange = %s AND symbol = %s AND date = %s;',
                 [
                     exchange,
                     symbol,
                     date
                 ])
-    cur.execute('INSERT INTO price_history (exchange, symbol, date, price) '
-                'VALUES (%s, %s, %s, %s);',
+    rows = cur.fetchall()
+    if len(rows) > 0:
+        cur.execute('UPDATE price_history SET price = %s WHERE exchange = %s AND symbol = %s AND date = %s;',
+                    [
+                        price,
+                        exchange,
+                        symbol,
+                        date
+                    ])
+    else:
+        cur.execute('INSERT INTO price_history (exchange, symbol, date, price) '
+                    'VALUES (%s, %s, %s, %s);',
+                    [
+                        exchange,
+                        symbol,
+                        date,
+                        price
+                    ])
+    conn.commit()
+
+
+def save_value_to_database(exchange, symbol, date, price, value):
+    conn = get_database_connection()
+    if not conn:
+        return
+    cur = conn.cursor()
+    cur.execute('SELECT id FROM value WHERE exchange = %s AND symbol = %s AND date = %s;',
                 [
                     exchange,
                     symbol,
-                    date,
-                    price
+                    date
                 ])
+    rows = cur.fetchall()
+    if len(rows) > 0:
+        cur.execute('UPDATE value SET price = %s, value = %s WHERE exchange = %s AND symbol = %s AND date = %s;',
+                    [
+                        price,
+                        value,
+                        exchange,
+                        symbol,
+                        date
+                    ])
+    else:
+        cur.execute('INSERT INTO value (exchange, symbol, date, price, value) '
+                    'VALUES (%s, %s, %s, %s, %s);',
+                    [
+                        exchange,
+                        symbol,
+                        date,
+                        price,
+                        value
+                    ])
+    conn.commit()
+
+
+def save_total_value_to_database(date, value):
+    conn = get_database_connection()
+    if not conn:
+        return
+    cur = conn.cursor()
+    cur.execute('SELECT id FROM total_value WHERE date = %s;',
+                [
+                    date
+                ])
+    rows = cur.fetchall()
+    if len(rows) > 0:
+        cur.execute('UPDATE total_value SET value = %s WHERE date = %s;',
+                    [
+                        value,
+                        date
+                    ])
+    else:
+        cur.execute('INSERT INTO total_value (date, value) '
+                    'VALUES (%s, %s);',
+                    [
+                        date,
+                        value
+                    ])
     conn.commit()

@@ -1,6 +1,5 @@
 import json
 import datetime
-from botocore.exceptions import ClientError
 import dateparser
 import psycopg2
 import os

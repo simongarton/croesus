@@ -3,7 +3,7 @@ CREATE TABLE "price_history" (
     date          date      NOT NULL,
     exchange      TEXT      NOT NULL,
     symbol        TEXT      NOT NULL,
-    price         MONEY -- NZ dollars
+    price         MONEY     NOT NULL -- NZ dollars
 );
 
 ALTER TABLE "price_history"
