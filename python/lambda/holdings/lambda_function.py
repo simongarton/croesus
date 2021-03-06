@@ -5,8 +5,6 @@ import dateparser
 import psycopg2
 import os
 
-BUCKET_NAME = 'croesus'
-
 # better error handling
 # write to logs
 

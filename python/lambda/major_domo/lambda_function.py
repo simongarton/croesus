@@ -8,7 +8,6 @@ import psycopg2
 import sys
 
 
-BUCKET_NAME = 'croesus'
 HOST = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com'
 
 
@@ -94,7 +93,8 @@ def get_price_data_from_database():
         return None
 
     cur = conn.cursor()
-    cur.execute('SELECT * FROM price ORDER BY exchange, symbol')
+    cur.execute(
+        'SELECT id, exchange, symbol, price FROM price ORDER BY exchange, symbol')
     rows = cur.fetchall()
     return rows
 

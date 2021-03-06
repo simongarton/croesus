@@ -4,8 +4,6 @@ import sys
 from botocore.exceptions import ClientError
 import psycopg2
 
-BUCKET_NAME = 'croesus'
-
 # better error handling
 # write to logs
 

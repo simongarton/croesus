@@ -2,15 +2,41 @@
 
 from typing import Text
 from bs4 import BeautifulSoup
-import argparse
+import os
 import requests
 import json
 from datetime import date
-import boto3
 from botocore.exceptions import ClientError
+import psycopg2
 
-BUCKET_NAME = 'croesus'
 HOST = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com'
+
+
+def response(code, body):
+    return {
+        'statusCode': code,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        'body': json.dumps(body)
+    }
+
+
+def get_database_connection():
+    try:
+        dbname = os.environ.get('PGDATABASE')
+        user = os.environ.get('PGUSER')
+        host = os.environ.get('PGHOST')
+        password = os.environ.get('PGPASSWORD')
+        connection = "dbname='{}' user='{}' host='{}' password='{}'".format(
+            dbname, user, host, password)
+        conn = psycopg2.connect(connection)
+        return conn
+    except:
+        return {
+            'statusCode': 500,
+            'body': json.dumps('connection error : {}'.format(sys.exc_info()[0]))
+        }
 
 
 def lambda_handler(event, context):
@@ -40,6 +66,8 @@ def lambda_handler(event, context):
             cached = event['queryStringParameters']['cached']
     if cached:
         price = get_cached_stock(exchange, symbol)
+        if price == None:
+            return response(404, '{}:{} not found'.format(exchange, symbol))
     else:
         price = get_stock(exchange, symbol)
     if not price:
@@ -51,16 +79,6 @@ def lambda_handler(event, context):
         'price': price
     }
     return response(200, data)
-
-
-def response(code, body):
-    return {
-        'statusCode': code,
-        "headers": {
-            "Content-Type": "application/json"
-        },
-        'body': json.dumps(body)
-    }
 
 
 def getRandomUserAgent():
@@ -94,22 +112,17 @@ def get_stock(exchange, symbol):
 
 
 def get_cached_stock(exchange, symbol):
-    s3_client = boto3.client('s3')
-    KEY_NAME = 'prices.json'
-    FILE_NAME = '/tmp/' + KEY_NAME
+    conn = get_database_connection()
+    if not conn:
+        return None
 
-    price_data = {}
-    try:
-        s3_client.download_file(BUCKET_NAME, KEY_NAME, FILE_NAME)
-        with open(FILE_NAME, 'r') as input:
-            price_data = json.load(input)
-    except ClientError as e:
-        print('error : {}'.format(e))
-        pass
-
-    print(price_data)
-    price = None
-    if exchange in price_data:
-        if symbol in price_data[exchange]:
-            price = price_data[exchange][symbol]
-    return price
+    cur = conn.cursor()
+    cur.execute('SELECT id, exchange, symbol, price FROM price WHERE exchange = %s AND symbol = %s',
+                [
+                    exchange,
+                    symbol
+                ])
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        return None
+    return rows[0][3]

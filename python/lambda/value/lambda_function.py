@@ -3,7 +3,6 @@ from botocore.exceptions import ClientError
 import requests
 import datetime
 
-BUCKET_NAME = 'croesus'
 HOST = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com'
 
 
