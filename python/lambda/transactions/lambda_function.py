@@ -1,8 +1,8 @@
-import boto3
 import json
 import os
+import sys
 from botocore.exceptions import ClientError
-import dateparser
+import psycopg2
 
 BUCKET_NAME = 'croesus'
 
@@ -18,6 +18,21 @@ def response(code, body):
         },
         'body': json.dumps(body)
     }
+
+
+def get_database_connection():
+    try:
+        dbname = os.environ.get('PGDATABASE')
+        user = os.environ.get('PGUSER')
+        host = os.environ.get('PGHOST')
+        password = os.environ.get('PGPASSWORD')
+        connection = "dbname='{}' user='{}' host='{}' password='{}'".format(
+            dbname, user, host, password)
+        conn = psycopg2.connect(connection)
+        return conn
+    except:
+        print("could not get database connection")
+        return None
 
 
 def lambda_handler(event, context):
@@ -61,41 +76,22 @@ def post_symbol(parameters, body):
 
 
 def add_transaction(exchange, symbol, date, quantity, price):
-    s3_client = boto3.client('s3')
-    KEY_NAME = 'transactions.json'
-    FILE_NAME = '/tmp/' + KEY_NAME
+    conn = get_database_connection()
+    if not conn:
+        return False
+    cur = conn.cursor()
+    cur.execute('INSERT INTO transaction (date, exchange, symbol, quantity, price) '
+                'VALUES (%s, %s, %s, %s, %s);',
+                [
+                    date,
+                    exchange,
+                    symbol,
+                    quantity,
+                    price
+                ])
 
-    transactions = []
-    try:
-        s3_client.download_file(BUCKET_NAME, KEY_NAME, FILE_NAME)
-        with open(FILE_NAME, 'r') as input:
-            transactions = json.load(input)
-    except ClientError as e:
-        pass
-
-    # sort out the date format
-    date_value = dateparser.parse(date)
-    formatted_date = date_value.strftime('%Y-%m-%d')
-    transaction = {
-        'exchange': exchange,
-        'symbol': symbol,
-        'date': formatted_date,
-        'quantity': quantity,
-        'price': price,
-    }
-    transactions.append(transaction)
-
-    with open(FILE_NAME, 'w') as output:
-        json.dump(transactions, output)
-
-    try:
-        response = s3_client.upload_file(FILE_NAME, BUCKET_NAME, KEY_NAME)
-    except ClientError as e:
-        print(e)
-
-    os.remove(FILE_NAME)
-
-    return transactions
+    conn.commit()
+    return True
 
 
 def get_total_response():
@@ -114,17 +110,14 @@ def get_symbol_response(parameters):
 
 
 def get_transactions(exchange, symbol):
-    s3_client = boto3.client('s3')
-    KEY_NAME = 'transactions.json'
-    FILE_NAME = '/tmp/' + KEY_NAME
+    conn = get_database_connection()
+    if not conn:
+        return []
+    print(conn)
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM transaction ORDER BY date, exchange, symbol')
 
-    transactions = []
-    try:
-        s3_client.download_file(BUCKET_NAME, KEY_NAME, FILE_NAME)
-        with open(FILE_NAME, 'r') as input:
-            transactions = json.load(input)
-    except ClientError as e:
-        pass
+    transactions = cur.fetchall()
 
     if exchange is None:
         return transactions
@@ -137,5 +130,11 @@ def get_transactions(exchange, symbol):
 
     symbol_transactions = [
         t for t in exchange_transactions if t['symbol'] == symbol]
-
     return symbol_transactions
+
+
+def test():
+    print(get_transactions(None, None))
+
+
+test()
