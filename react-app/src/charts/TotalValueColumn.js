@@ -9,7 +9,6 @@ class TotalValueColumn extends React.Component {
     }
 
     componentDidMount() {
-        //this.setState(this.loadData());
         fetch("https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value")
             .then(res => res.json())
             .then(
@@ -42,7 +41,7 @@ class TotalValueColumn extends React.Component {
         let chartData = {};
         chartData['labels'] = chartLabels;
         let chartDatasets = {
-            label: 'Shares',
+            label: 'Value',
             backgroundColor: 'rgba(75,192,192,0.4)',
             borderColor: 'rgba(0,0,0,1)',
             borderWidth: 0,
@@ -56,7 +55,8 @@ class TotalValueColumn extends React.Component {
     render() {
         return <Bar
         data={this.state}
-        options={{
+        options={
+          {
           title:{
             display:true,
             text:'Current value',
@@ -65,10 +65,19 @@ class TotalValueColumn extends React.Component {
           legend:{
             display:false,
             position:'right'
-          }
+          },
+          scales: {
+            yAxes: [{
+              ticks: {
+                  callback: function(value, index, values) {
+                    //return value.toLocaleString("en-US",{style:"currency", currency:"USD"});
+                    return '$' + Math.round(value).toLocaleString();
+                  }
+              }
+          }]
         }}
+      }
       />
-
     }
   }
 
