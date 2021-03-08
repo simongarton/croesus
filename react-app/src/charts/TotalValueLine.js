@@ -2,7 +2,6 @@ import React from 'react';
 import {Scatter} from 'react-chartjs-2';
 import moment from 'moment';
 
-
 function formatDate(date) {
   const s = date.toLocaleString();
   const parts = s.split(',')
@@ -91,7 +90,7 @@ class TotalValueColumn extends React.Component {
             intersect: false,
             callbacks: {
                 label: function (t, d) {
-                  return formatDate(t.xLabel) + ' : $' + Math.round(t.y).toLocaleString();
+                  return formatDate(t.xLabel) + ' : $' + Math.round(t.value).toLocaleString();
                 }
             }
         },
@@ -102,7 +101,8 @@ class TotalValueColumn extends React.Component {
                     unit: 'day'
                 },
                 ticks: {
-                  min: moment('2021/01/01')
+                  min:'2020-01-01',
+                  max:'2022-01-01'
               }
 
             }],
