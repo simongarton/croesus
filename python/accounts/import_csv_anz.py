@@ -1,4 +1,5 @@
 import csv
+import sys
 
 import dateparser
 
@@ -10,7 +11,7 @@ from con import get_con
 
 def convert_csv_row_to_json(row):
     return {
-        'date': dateparser.parse(row[6]),
+        'date': dateparser.parse(row[6], settings={'DATE_ORDER': 'DMY'}),
         'amount': row[5],
         'payee': row[1],
         'particulars': row[2],
@@ -46,4 +47,5 @@ def import_file(filename, account_id):
 
     con.commit()
 
-import_file('../data/06-0287-0322436-00_Transactions_2019-01-25_2021-01-23.csv', 2)
+
+import_file(sys.argv[1], 2)

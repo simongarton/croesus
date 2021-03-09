@@ -1,0 +1,60 @@
+Bills	Bank Interest	1
+Bills	Bank fees	2
+Bills	Kids phones	1
+Bills	Mobile	1
+Bills	Pets	3
+Bills	Phone & BB	1
+Bills	Power	1
+Bills	Rates	1
+Bills	Water	1
+Groceries	Countdown	6
+Groceries	PakNSave	1
+Home	Bunnings	3
+Home	Mitre 10	1
+Insurance	Health	1
+Insurance	Life	1
+Insurance	State	2
+Media	Amazon	1
+Media	Apple	2
+Media	Disney	1
+Media	Neon	1
+Media	Netflix	2
+Mortgage	Home	1
+Pool	Pool	1
+Rowing	Maddy1	1
+Rowing	Maddy2	1
+Simon	Alcohol	7
+Simon	Cafe / Dairy	3
+Simon	Car	10
+Simon	Eating	26
+Simon	Gym	2
+Simon	Health	1
+Simon	Kung Fu	1
+Simon	Lotto	1
+Simon	Parking	8
+Simon	Petrol	8
+Simon	Rowing	1
+Simon	Spending	8
+Simon	Tech	4
+Simon	Transferwise	1
+Simon	Travel	4
+Simon	Uber	1
+Simon	Web	3
+Transfer	Helen - BNZ	1
+Transfer	Helen - shares	1
+Transfer	Jake - long term saving	1
+Transfer	Jake - pocket	1
+Transfer	Jake - spending	1
+Transfer	Maddy - long term saving	1
+Transfer	Maddy - pocket	1
+Transfer	Maddy - spending	1
+Transfer	Online	1
+Transfer	Sam - long term saving	1
+Transfer	Sam - pocket	1
+Transfer	Sam - spending	1
+Transfer	Schools account	1
+Transfer	Simon - ANZ	1
+Transfer	Simon - BNZ	2
+Transfer	Simon - income	1
+Transfer	Simon - work	1
+Transfer	Supermarket	1

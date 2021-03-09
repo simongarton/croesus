@@ -1,5 +1,5 @@
 import csv
-
+import sys
 import dateparser
 
 from con import get_con
@@ -10,7 +10,7 @@ from common import maybe_load_row
 
 def convert_csv_row_to_json(row):
     return {
-        'date': dateparser.parse(row[0]),
+        'date': dateparser.parse(row[0], settings={'DATE_ORDER': 'DMY'}),
         'amount': row[1],
         'payee': row[2],
         'particulars': row[3],
@@ -23,7 +23,7 @@ def convert_csv_row_to_json(row):
         'transaction_code': row[10],
         'batch_number': row[11],
         'originating_bank': row[12],
-        'date_processed': dateparser.parse(row[13]),
+        'date_processed': dateparser.parse(row[13], settings={'DATE_ORDER': 'DMY'}),
         'foreign_currency_amount': None,
         'conversion_charge': None
     }
@@ -38,6 +38,7 @@ def import_file(filename, account_id):
         next(csv_reader, None)  # skip headers
         for row in csv_reader:
             data = convert_csv_row_to_json(row)
+            print(data)
             if maybe_load_row(data, con, account_id):
                 print('loaded row {} : {}'.format(line_count, data))
             else:
@@ -46,4 +47,5 @@ def import_file(filename, account_id):
 
     con.commit()
 
-import_file('../data/Joint-account-22JAN2019-to-22JAN2021.csv', 1)
+
+import_file(sys.argv[1], 1)

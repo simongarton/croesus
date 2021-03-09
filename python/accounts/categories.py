@@ -28,7 +28,8 @@ def convert_database_row_to_json(row):
 
 def get_categories(con):
     cur = con.cursor()
-    cur.execute('SELECT id, category, sub_category, rules FROM category ORDER BY id')
+    cur.execute(
+        'SELECT id, category, sub_category, rules FROM category ORDER BY id')
     rows = cur.fetchall()
     categories = []
     for row in rows:
@@ -65,7 +66,7 @@ def guess_category(record, categories):
 
 def update_row_category(record, category, con):
     cur = con.cursor()
-    cur.execute('UPDATE transaction SET category = %s, sub_category = %s WHERE id = %s',
+    cur.execute('UPDATE transaction SET category = %s, sub_category = %s WHERE id = %s AND category IS NULL AND sub_category IS NULL;',
                 [category['category'], category['sub_category'], record['id']])
     con.commit()
 
@@ -83,10 +84,12 @@ def setup_categories():
     for row in rows:
         record = convert_database_row_to_json(row)
         category = guess_category(record, categories)
-        print('{} : {} = {}'.format(record['id'], record['category'], category))
+        print('{} : {} = {}'.format(
+            record['id'], record['category'], category))
         if category:
             update_row_category(record, category, con)
             updates = updates + 1
     print('checked {} rows and updated {}'.format(len(rows), updates))
+
 
 setup_categories()
