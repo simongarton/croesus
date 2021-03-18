@@ -42,7 +42,7 @@ class TotalValueColumn extends React.Component {
         (result) => {
           this.setState({
             isLoaded: true,
-            spendingData: this.processSpending(result)
+            spendingData: this.processSpendingFillInBlanks(result)
           });
         },
         (error) => {
@@ -52,7 +52,6 @@ class TotalValueColumn extends React.Component {
           });
         }
       )
-
   }
 
   processValue(data) {
@@ -64,6 +63,39 @@ class TotalValueColumn extends React.Component {
       }
       this.valueChartPoints.push(point)
     });
+    this.rebuildChart();
+  }
+
+  processSpendingFillInBlanks(data) {
+    this.spendingChartPoints = [];
+    let actuals = {};
+    let minDate = null;
+    data.forEach(element => {
+      let thisDate = new Date(moment(element['date']));
+      console.log("thisDate ",thisDate," minDate ",minDate)
+      actuals[thisDate] = element['total']
+      if ((minDate == null) || (minDate > thisDate)) {
+        minDate = thisDate;
+      }
+    })  
+    console.log("got minDate " + minDate);
+    console.log("actuals");
+    console.log(actuals);
+    let total = 0;
+    for (var d = new Date(2021, 0, 1); d <= new Date(); d.setDate(d.getDate() + 1)) {
+      console.log(new Date(d));
+      let currentDate = d;
+      if (currentDate in actuals) {
+        total = total + actuals[currentDate]
+      }
+      let point = {
+        'x': moment(currentDate),
+        'y': total,
+      }
+      this.spendingChartPoints.push(point)
+      console.log("pushing  ",point)
+      currentDate = currentDate + 1;
+    }
     this.rebuildChart();
   }
 
@@ -89,7 +121,7 @@ class TotalValueColumn extends React.Component {
       labels: ['Scatter'],
       datasets: [
         this.buildSeries('value', this.valueChartPoints, 'rgba(0,192,0,0.4)', false, null),
-        this.buildSeries('spending', this.spendingChartPoints, 'rgba(192,0,0,0.4)', true, 'cross')
+        this.buildSeries('spending', this.spendingChartPoints, 'rgba(192,0,0,0.4)', false, 'cross')
       ]
     };
     this.setState(chartData);
