@@ -59,9 +59,6 @@ def lambda_handler(event, context):
 
     print("{} {} {} {}".format(exchange, symbol, date, method))
     if method == "POST":
-        if exchange == "NZX":
-            if date:
-                return response(400, "can't use dates with NZX")
         return post_stock(exchange, symbol, date)
     return get_stock(exchange, symbol, date)
 
@@ -82,30 +79,42 @@ def getRandomUserAgent():
 
 
 def post_nzx_stock(symbol):
+    exchange = "NZX"
     headers = {"User-Agent": getRandomUserAgent()}
     page = requests.get(
         "https://www.nzx.com/instruments/{}/".format(symbol), headers=headers
     )
     soup = BeautifulSoup(page.content, "html.parser")
     h1 = soup.find_all("h1")
-    price = h1[1].text.strip().replace("$", "")
-    save_price_to_database("NZX", symbol, price)
-    save_price_history_to_database("NZX", symbol, datetime.now().date, price)
-    return float(price)
+    price = float(h1[1].text.strip().replace("$", ""))
+    save_price_to_database(exchange, symbol, price)
+    save_price_history_to_database(exchange, symbol, datetime.now().date(), price)
+    return response(
+        200,
+        {
+            "exchange": exchange,
+            "symbol": symbol,
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "price": price,
+        },
+    )
 
 
 def post_nyse_stock(symbol, date):
+    exchange = "NYSE"
     actual_date = datetime.strptime(date, "%Y-%m-%d")
     date = actual_date.strftime("%Y-%m-%d")
     url = "https://api.polygon.io/v1/open-close/{}/{}?apiKey={}".format(
         symbol, date, API_KEY
     )
-    response = requests.get(url)
-    response.raise_for_status()
-    price = response.json()["close"]
-    save_price_to_database("NYSE", symbol, price)
-    save_price_history_to_database("NYSE", symbol, actual_date, price)
-    return price
+    api_response = requests.get(url)
+    api_response.raise_for_status()
+    price = api_response.json()["close"]
+    save_price_to_database(exchange, symbol, price)
+    save_price_history_to_database(exchange, symbol, actual_date, price)
+    return response(
+        200, {"exchange": exchange, "symbol": symbol, "date": date, "price": price}
+    )
 
 
 def post_stock(exchange, symbol, date):
@@ -129,7 +138,9 @@ def get_stock(exchange, symbol, date):
     rows = cur.fetchall()
     if len(rows) == 0:
         return response(404, "not found")
-    return response(200, {exchange, symbol, date, rows[0][3]})
+    return response(
+        200, {"exchange": exchange, "symbol": symbol, "date": date, "price": rows[0][3]}
+    )
 
 
 def save_price_to_database(exchange, symbol, price):

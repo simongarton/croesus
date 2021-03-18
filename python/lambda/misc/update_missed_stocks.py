@@ -1,4 +1,4 @@
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 import time
 import requests
 
@@ -8,21 +8,20 @@ def daterange(start_date, end_date):
         yield start_date + timedelta(n)
 
 
+# API limit = 5 per minute
+
 start_date = date(2021, 1, 5)
 end_date = date(2021, 3, 15)
 for single_date in daterange(start_date, end_date):
-    print(single_date.strftime("%Y-%m-%d"))
-    response = requests.post(
-        "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/stocks/NYSE/TAN/{}".format(
-            single_date.strftime("%Y-%m-%d")
-        )
+    url = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/stocks/NYSE/TAN/{}".format(
+        single_date.strftime("%Y-%m-%d")
     )
-    print(response.status_code)
-    time.sleep(5)
-    response = requests.post(
-        "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/stocks/NYSE/VOO/{}".format(
-            single_date.strftime("%Y-%m-%d")
-        )
+    response = requests.post(url)
+    print("{} {} : {}".format(datetime.now(), url, response.status_code))
+    time.sleep(60)
+    url = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/stocks/NYSE/VOO/{}".format(
+        single_date.strftime("%Y-%m-%d")
     )
-    print(response.status_code)
-    time.sleep(5)
+    response = requests.post(url)
+    print("{} {} : {}".format(datetime.now(), url, response.status_code))
+    time.sleep(60)
