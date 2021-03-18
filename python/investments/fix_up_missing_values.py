@@ -55,21 +55,29 @@ def add_record(exchange, symbol, date, price, quantity):
 
 def catch_up(exchange, symbol):
     start_date = dateparser.parse('01/Jan/2021').date()
+    current_price = None
     while start_date < datetime.date.today():
-        print("trying {}.{} on {}".format(exchange, symbol, start_date))
 
         start_date = start_date + datetime.timedelta(days=1)
-        if has_value(exchange, symbol, start_date):
-            print('no value')
-            continue
-        price = get_price(exchange, symbol, start_date)
-        if not price:
-            print('no price')
-            continue
         quantity = get_quantity(exchange, symbol, start_date)
         if not quantity or quantity == 0:
-            print('no quantity')
+            print('{}.{} has no quantity on {} so skipping'.format(
+                exchange, symbol, start_date))
             continue
+        price = get_price(exchange, symbol, start_date)
+        if price:
+            current_price = price
+        if has_value(exchange, symbol, start_date):
+            print('{}.{} has value on {} already so skipping'.format(
+                exchange, symbol, start_date))
+            continue
+        print('{} {} {}'.format(quantity, price, current_price))
+        if not price:
+            if not current_price:
+                print('{}.{} has no price or current price available on {} so skipping'.format(
+                    exchange, symbol, start_date))
+                continue
+            price = current_price
         print("    I could add {} * {} = {} for {}.{} on {}".format(price,
                                                                     quantity, price * quantity, exchange, symbol, start_date))
         add_record(exchange, symbol, start_date, price, quantity)

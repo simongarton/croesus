@@ -88,14 +88,14 @@ class TotalValueColumn extends React.Component {
     let chartData = {
       labels: ['Scatter'],
       datasets: [
-        this.buildSeries('value', this.valueChartPoints, 'rgba(0,192,0,0.4)'),
-        this.buildSeries('spending', this.spendingChartPoints, 'rgba(192,0,0,0.4)')
+        this.buildSeries('value', this.valueChartPoints, 'rgba(0,192,0,0.4)', false, null),
+        this.buildSeries('spending', this.spendingChartPoints, 'rgba(192,0,0,0.4)', true, 'cross')
       ]
     };
     this.setState(chartData);
   }
 
-  buildSeries(label, xyPoints, mainColor) {
+  buildSeries(label, xyPoints, mainColor, showPoints, pointStyle) {
     return {
       label: label,
       fill: false,
@@ -106,8 +106,9 @@ class TotalValueColumn extends React.Component {
       pointHoverRadius: 8,
       pointHoverBorderColor: 'rgba(0,0,0,1)',
       pointHoverBorderWidth: 2,
-      pointRadius: 4,
+      pointRadius: showPoints ? 4 : 0,
       pointHitRadius: 10,
+      pointStyle,
       showLine: true,
       lineTension: 0,
       data: xyPoints

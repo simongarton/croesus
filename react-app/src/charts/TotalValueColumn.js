@@ -3,12 +3,6 @@ import {
   Bar
 } from 'react-chartjs-2';
 
-function formatDate(date) {
-  const s = date.toLocaleString();
-  const parts = s.split(',')
-  return parts[0] + ',' + parts[1];
-}
-
 class TotalValueColumn extends React.Component {
 
   constructor(props) {
