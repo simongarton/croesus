@@ -43,24 +43,46 @@ def get_database_connection():
 
 
 def lambda_handler(event, context):
+    print("starting stocks")
     if not "pathParameters" in event:
+        print("no path params")
         return {"statusCode": 400, "body": {"message": "no pathParameters"}}
     parameters = event["pathParameters"]
-    for param in ["symbol", "exchange", "date"]:
+    for param in ["symbol", "exchange"]:
         if not param in parameters:
+            print("no param {}".format(param))
             return {
                 "statusCode": 400,
                 "body": {"message": "no {} in parameters".format(param)},
             }
     exchange = parameters["exchange"].upper()
     symbol = parameters["symbol"].upper()
+    if not "date" in parameters:
+        return get_most_recent_value(exchange, symbol)
     date = parameters["date"]
     method = event["requestContext"]["http"]["method"]
 
-    print("{} {} {} {}".format(exchange, symbol, date, method))
+    print("stocks : {} {} {} {}".format(exchange, symbol, date, method))
     if method == "POST":
         return post_stock(exchange, symbol, date)
     return get_stock(exchange, symbol, date)
+
+
+def get_most_recent_value(exchange, symbol):
+    print("get_most_recent_value({},{})".format(exchange, symbol))
+    conn = get_database_connection()
+    if not conn:
+        return None
+
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, exchange, symbol, price::numeric::float8 FROM price WHERE exchange = %s AND symbol = %s",
+        [exchange, symbol],
+    )
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        return response(404, "not found")
+    return response(200, {"exchange": exchange, "symbol": symbol, "price": rows[0][3]})
 
 
 def getRandomUserAgent():
