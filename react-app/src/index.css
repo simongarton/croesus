@@ -15,3 +15,16 @@ code {
 body {
   background-color: whitesmoke;
 }
+
+.right-align {
+  text-align: right;
+}
+
+.left-align {
+  text-align: left;
+}
+
+.table-cell-pad {
+  padding-left: 16px;
+  padding-right: 0px;
+}
