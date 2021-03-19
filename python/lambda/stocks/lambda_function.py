@@ -9,6 +9,7 @@ import sys
 
 HOST = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com"
 API_KEY = "5tl4ks_0QZJP5J8pE6JdvDbeXuQ7Cm1f"
+EXCHANGE_RATE = 1.39434
 
 # boto3 and getting secrets from SSM
 
@@ -82,7 +83,8 @@ def get_most_recent_value(exchange, symbol):
     rows = cur.fetchall()
     if len(rows) == 0:
         return response(404, "not found")
-    return response(200, {"exchange": exchange, "symbol": symbol, "price": rows[0][3]})
+    price = rows[0][3] * EXCHANGE_RATE if exchange.upper() == "NYSE" else rows[0][3]
+    return response(200, {"exchange": exchange, "symbol": symbol, "price": price})
 
 
 def getRandomUserAgent():
@@ -135,7 +137,13 @@ def post_nyse_stock(symbol, date):
     save_price_to_database(exchange, symbol, price)
     save_price_history_to_database(exchange, symbol, actual_date, price)
     return response(
-        200, {"exchange": exchange, "symbol": symbol, "date": date, "price": price}
+        200,
+        {
+            "exchange": exchange,
+            "symbol": symbol,
+            "date": date,
+            "price": price * EXCHANGE_RATE,
+        },
     )
 
 
@@ -160,8 +168,9 @@ def get_stock(exchange, symbol, date):
     rows = cur.fetchall()
     if len(rows) == 0:
         return response(404, "not found")
+    price = rows[0][3] * EXCHANGE_RATE if exchange.upper() == "NYSE" else rows[0][3]
     return response(
-        200, {"exchange": exchange, "symbol": symbol, "date": date, "price": rows[0][3]}
+        200, {"exchange": exchange, "symbol": symbol, "date": date, "price": price}
     )
 
 

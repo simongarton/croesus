@@ -38,9 +38,9 @@ class TotalValue extends React.Component {
         <td className="right-align table-cell-pad">{this.formatNumber(element['quantity'])}</td>
         <td className="right-align table-cell-pad">{this.formatDollars(element['price'])}</td>
         <td className="right-align table-cell-pad">{this.formatDollars(element['value'])}</td>
-        <td />
-        <td />
-        <td />
+        <td className="right-align table-cell-pad">{this.formatDollars(element['spend'])}</td>
+        <td className="right-align table-cell-pad">{this.formatDollars(element['gain_loss'])}</td>
+        <td className="right-align table-cell-pad">{this.formatPercentage(element['percentage'])}</td>
       </tr>
     );
   }
@@ -53,11 +53,18 @@ class TotalValue extends React.Component {
     return Number(amount).toLocaleString();
   }
 
+  formatPercentage(amount) {
+    return Number(amount).toLocaleString() + '%';
+  }
+
   render() {
     if (this.state.response == null) {
-      return <h1>Sorry, nothing available right now ...</h1>;
+      return <h1>thinking ...</h1>;
     }
     const totalValue = this.state.response['total'];
+    const gainLoss = this.state.response['gain_loss'];
+    const spend = this.state.response['spend'];
+    const percentage = this.state.response['percentage'];
     const fields = [];
     let index = 0;
     this.state.response['holdings'].forEach((element) => {
@@ -68,7 +75,11 @@ class TotalValue extends React.Component {
     console.log(this.state.response['holdings']);
     return (
       <div>
-        <h1>Total values : {this.formatDollars(totalValue)}</h1>
+        <h1>Total value : {this.formatDollars(totalValue)}</h1>
+        <p>
+          Spend : {this.formatDollars(spend)} &nbsp; Gain/Loss : {this.formatDollars(gainLoss)} &nbsp; {'% : '}
+          {this.formatPercentage(percentage)}
+        </p>
         <table>
           <thead>
             <tr>
