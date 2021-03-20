@@ -106,10 +106,7 @@ def get_spend(exchange, symbol):
         )
         return None
     print(spend_response.json())
-    total = 0
-    for spend in spend_response.json():
-        total = total + spend["total"]
-    return total
+    return spend_response.json()["total"]
 
 
 def response(code, body):

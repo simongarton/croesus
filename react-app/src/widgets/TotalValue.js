@@ -39,14 +39,26 @@ class TotalValue extends React.Component {
         <td className="right-align table-cell-pad">{this.formatDollars(element['price'])}</td>
         <td className="right-align table-cell-pad">{this.formatDollars(element['value'])}</td>
         <td className="right-align table-cell-pad">{this.formatDollars(element['spend'])}</td>
-        <td className="right-align table-cell-pad">{this.formatDollars(element['gain_loss'])}</td>
-        <td className="right-align table-cell-pad">{this.formatPercentage(element['percentage'])}</td>
+        <td className={this.redGreen(element['gain_loss'], 'right-align table-cell-pad')}>{this.formatDollars(element['gain_loss'])}</td>
+        <td className={this.redGreen(element['percentage'], 'right-align table-cell-pad')}>
+          {this.formatPercentage(element['percentage'])}
+        </td>
       </tr>
     );
   }
 
+  redGreen(amount, otherStyles) {
+    if (Number(amount) < 0) {
+      return otherStyles + ' red-text';
+    }
+    if (Number(amount) > 0) {
+      return otherStyles + ' green-text';
+    }
+    return otherStyles;
+  }
+
   formatDollars(amount) {
-    return '$' + Number(amount).toLocaleString();
+    return ('$' + Number(amount).toLocaleString()).replace('$-', '-$');
   }
 
   formatNumber(amount) {
@@ -72,9 +84,8 @@ class TotalValue extends React.Component {
       index++;
     });
 
-    console.log(this.state.response['holdings']);
     return (
-      <div>
+      <div className="pad-table">
         <h1>Total value : {this.formatDollars(totalValue)}</h1>
         <p>
           Spend : {this.formatDollars(spend)} &nbsp; Gain/Loss : {this.formatDollars(gainLoss)} &nbsp; {'% : '}

@@ -29,3 +29,16 @@ body {
   padding-left: 16px;
   padding-right: 0px;
 }
+
+.pad-table {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.red-text {
+  color: red;
+}
+
+.green-text {
+  color: green;
+}

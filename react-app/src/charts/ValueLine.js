@@ -8,16 +8,16 @@ function formatDate(date) {
   return parts[0] + ',' + parts[1];
 }
 
-class TotalValueLine extends React.Component {
+class ValueLine extends React.Component {
   constructor(props) {
     super();
-    this.state = {};
+    this.state = { exchange: props.exchange, symbol: props.symbol };
     this.valueChartPoints = [];
     this.spendingChartPoints = [];
   }
 
   componentDidMount() {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history')
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/' + this.state.exchange + '/' + this.state.symbol)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -33,7 +33,7 @@ class TotalValueLine extends React.Component {
           });
         }
       );
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending')
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/' + this.state.exchange + '/' + this.state.symbol)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -55,7 +55,7 @@ class TotalValueLine extends React.Component {
     this.valueChartPoints = [];
     data.forEach((element) => {
       let point = {
-        x: this.getDate(element['date']),
+        x: moment(element['date']),
         y: element['value'],
       };
       this.valueChartPoints.push(point);
@@ -68,7 +68,7 @@ class TotalValueLine extends React.Component {
     let actuals = {};
     let minDate = null;
     data.forEach((element) => {
-      let thisDate = new Date(this.getDate(element['date']));
+      let thisDate = new Date(moment(element['date']));
       actuals[thisDate] = element['total'];
       if (minDate == null || minDate > thisDate) {
         minDate = thisDate;
@@ -81,7 +81,7 @@ class TotalValueLine extends React.Component {
         total = total + actuals[currentDate];
       }
       let point = {
-        x: this.getDate(currentDate),
+        x: moment(currentDate),
         y: total,
       };
       this.spendingChartPoints.push(point);
@@ -90,8 +90,18 @@ class TotalValueLine extends React.Component {
     this.rebuildChart();
   }
 
-  getDate(dateString) {
-    return moment(dateString);
+  processSpending(data) {
+    this.spendingChartPoints = [];
+    let total = 0;
+    data.forEach((element) => {
+      total = total + element['total'];
+      let point = {
+        x: moment(element['date']),
+        y: total,
+      };
+      this.spendingChartPoints.push(point);
+    });
+    this.rebuildChart();
   }
 
   rebuildChart() {
@@ -103,12 +113,6 @@ class TotalValueLine extends React.Component {
       ],
     };
     this.setState(chartData);
-    // for (let i = 0; i < this.valueChartPoints.length; i++) {
-    //   console.log(i + ' value ' + this.valueChartPoints[i]['x'].toLocaleString() + ':' + this.valueChartPoints[i]['y']);
-    // }
-    // for (let i = 0; i < this.spendingChartPoints.length; i++) {
-    //   console.log(i + ' spend ' + this.spendingChartPoints[i]['x'].toLocaleString() + ':' + this.spendingChartPoints[i]['y']);
-    // }
   }
 
   buildSeries(label, xyPoints, mainColor, showPoints, pointStyle) {
@@ -138,7 +142,7 @@ class TotalValueLine extends React.Component {
         options={{
           title: {
             display: true,
-            text: 'Spending vs Value',
+            text: this.state.exchange + ':' + this.state.symbol,
             fontSize: 20,
           },
           legend: {
@@ -162,8 +166,8 @@ class TotalValueLine extends React.Component {
                   unit: 'day',
                 },
                 ticks: {
-                  min: this.getDate('2020-12-01'),
-                  max: this.getDate('2021-07-01'),
+                  min: '2020-12-01',
+                  max: '2021-07-01',
                 },
               },
             ],
@@ -184,4 +188,4 @@ class TotalValueLine extends React.Component {
   }
 }
 
-export default TotalValueLine;
+export default ValueLine;

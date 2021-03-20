@@ -8,7 +8,7 @@ function formatDate(date) {
   return parts[0] + ',' + parts[1];
 }
 
-class GainLossColumn extends React.Component {
+class GainLossLine extends React.Component {
   constructor(props) {
     super();
     this.state = {};
@@ -40,7 +40,7 @@ class GainLossColumn extends React.Component {
         (result) => {
           this.setState({
             isLoaded: true,
-            spendingData: this.processSpendingFillInBlanks(result),
+            spendingData: this.processSpendingFillInBlanks(result['spending']),
           });
         },
         (error) => {
@@ -64,7 +64,7 @@ class GainLossColumn extends React.Component {
       }
     });
     let total = 0;
-    for (var d = new Date(2021, 0, 1); d <= new Date(); d.setDate(d.getDate() + 1)) {
+    for (var d = new Date(2020, 11, 31); d <= new Date(); d.setDate(d.getDate() + 1)) {
       let currentDate = d;
       if (currentDate in actuals) {
         total = actuals[currentDate];
@@ -91,7 +91,7 @@ class GainLossColumn extends React.Component {
       }
     });
     let total = 0;
-    for (var d = new Date(2021, 0, 1); d <= new Date(); d.setDate(d.getDate() + 1)) {
+    for (var d = new Date(2020, 11, 31); d <= new Date(); d.setDate(d.getDate() + 1)) {
       let currentDate = d;
       if (currentDate in actuals) {
         total = total + actuals[currentDate];
@@ -125,6 +125,7 @@ class GainLossColumn extends React.Component {
         x: value['x'],
         y: value['y'] - spending['y'],
       });
+      // console.log('calc ' + spending['x'] + '=' + value['x'] + ' ' + value['y'] + '-' + spending['y'] + '=' + (value['y'] - spending['y']));
     }
 
     this.rebuildChart();
@@ -211,4 +212,4 @@ class GainLossColumn extends React.Component {
   }
 }
 
-export default GainLossColumn;
+export default GainLossLine;
