@@ -88,8 +88,9 @@ class TotalValue extends React.Component {
       <div className="pad-table">
         <h1>Total value : {this.formatDollars(totalValue)}</h1>
         <p>
-          Spend : {this.formatDollars(spend)} &nbsp; Gain/Loss : {this.formatDollars(gainLoss)} &nbsp; {'% : '}
-          {this.formatPercentage(percentage)}
+          Spend : {this.formatDollars(spend)} &nbsp; Gain/Loss :{' '}
+          <span className={this.redGreen(gainLoss)}>{this.formatDollars(gainLoss)} </span>&nbsp; {'% : '}
+          <span className={this.redGreen(gainLoss)}>{this.formatPercentage(percentage)}</span>
         </p>
         <table>
           <thead>
