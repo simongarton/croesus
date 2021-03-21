@@ -19,6 +19,9 @@ select date, sum(value) from value v group by date order by date;
 
 insert into total_value (date, value)
 
+select * from price;
+select * from price_history where exchange = 'nzx' order by date, symbol ;
+
 select * from total_value order by date;
 
 select * from value where date = '2021-02-08';

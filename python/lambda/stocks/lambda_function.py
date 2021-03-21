@@ -9,7 +9,6 @@ import sys
 
 HOST = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com"
 API_KEY = "5tl4ks_0QZJP5J8pE6JdvDbeXuQ7Cm1f"
-EXCHANGE_RATE = 1.39434
 
 # boto3 and getting secrets from SSM
 
@@ -83,8 +82,8 @@ def get_most_recent_value(exchange, symbol):
     rows = cur.fetchall()
     if len(rows) == 0:
         return response(404, "not found")
-    price = rows[0][3] * EXCHANGE_RATE if exchange.upper() == "NYSE" else rows[0][3]
-    return response(200, {"exchange": exchange, "symbol": symbol, "price": price})
+
+    return response(200, {"exchange": exchange, "symbol": symbol, "price": rows[0][3]})
 
 
 def getRandomUserAgent():
@@ -124,6 +123,13 @@ def post_nzx_stock(symbol):
     )
 
 
+def get_exchange_rate(date):
+    url = "{}/exchange-rate/USD/NZD/{}".format(HOST, date)
+    api_response = requests.get(url)
+    api_response.raise_for_status()
+    return api_response.json()["rate"]
+
+
 def post_nyse_stock(symbol, date):
     exchange = "NYSE"
     actual_date = datetime.strptime(date, "%Y-%m-%d")
@@ -133,16 +139,21 @@ def post_nyse_stock(symbol, date):
     )
     api_response = requests.get(url)
     api_response.raise_for_status()
-    price = api_response.json()["close"]
+    exchange_rate = get_exchange_rate(date)
+    if exchange_rate == None:
+        return response(500, {"message": "no exchange rate for " + date})
+    price = round(api_response.json()["close"] * exchange_rate, 2)
     save_price_to_database(exchange, symbol, price)
     save_price_history_to_database(exchange, symbol, actual_date, price)
+    # temp
+    save_value_to_database(exchange, symbol, actual_date, price)
     return response(
         200,
         {
             "exchange": exchange,
             "symbol": symbol,
             "date": date,
-            "price": price * EXCHANGE_RATE,
+            "price": price,
         },
     )
 
@@ -168,9 +179,8 @@ def get_stock(exchange, symbol, date):
     rows = cur.fetchall()
     if len(rows) == 0:
         return response(404, "not found")
-    price = rows[0][3] * EXCHANGE_RATE if exchange.upper() == "NYSE" else rows[0][3]
     return response(
-        200, {"exchange": exchange, "symbol": symbol, "date": date, "price": price}
+        200, {"exchange": exchange, "symbol": symbol, "date": date, "price": rows[0][3]}
     )
 
 
@@ -220,5 +230,38 @@ def save_price_history_to_database(exchange, symbol, date, price):
             "INSERT INTO price_history (exchange, symbol, date, price) "
             "VALUES (%s, %s, %s, %s);",
             [exchange, symbol, date, price],
+        )
+    conn.commit()
+
+
+def save_value_to_database(exchange, symbol, date, price):
+    holdings_response = requests.get(
+        "{}/holdings/{}/{}?date={}".format(HOST, exchange, symbol, date)
+    )
+    holdings_response.raise_for_status()
+    quantity = 0
+    for holding in holdings_response.json():
+        quantity = quantity = holding["quantity"]
+    value = quantity * price
+
+    conn = get_database_connection()
+    if not conn:
+        return
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id FROM value WHERE exchange = %s AND symbol = %s AND date = %s;",
+        [exchange, symbol, date],
+    )
+    rows = cur.fetchall()
+    if len(rows) > 0:
+        cur.execute(
+            "UPDATE value SET price = %s, quantity = %s, value = %s WHERE exchange = %s AND symbol = %s AND date = %s;",
+            [price, quantity, value, exchange, symbol, date],
+        )
+    else:
+        cur.execute(
+            "INSERT INTO value (exchange, symbol, date, price, quantity, value) "
+            "VALUES (%s, %s, %s, %s, %s, %s);",
+            [exchange, symbol, date, price, quantity, value],
         )
     conn.commit()

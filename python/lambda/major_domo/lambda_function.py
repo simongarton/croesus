@@ -21,6 +21,7 @@ def lambda_handler(event, context):
     older_date = (datetime.datetime.now() - datetime.timedelta(days=3)).strftime(
         "%Y-%m-%d"
     )
+    # bug where's older_date in this ? compare to older price used later
     print("getting holdings for {}".format(todays_date))
     holdings_response = requests.get("{}/holdings?date={}".format(HOST, todays_date))
     if holdings_response.status_code != 200:
