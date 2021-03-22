@@ -75,7 +75,7 @@ class TotalValueLine extends React.Component {
       }
     });
     let total = 0;
-    for (var d = new Date(2020, 11, 31); d <= new Date(); d.setDate(d.getDate() + 1)) {
+    for (var d = minDate; d <= new Date(); d.setDate(d.getDate() + 1)) {
       let currentDate = d;
       if (currentDate in actuals) {
         total = total + actuals[currentDate];
@@ -103,12 +103,6 @@ class TotalValueLine extends React.Component {
       ],
     };
     this.setState(chartData);
-    // for (let i = 0; i < this.valueChartPoints.length; i++) {
-    //   console.log(i + ' value ' + this.valueChartPoints[i]['x'].toLocaleString() + ':' + this.valueChartPoints[i]['y']);
-    // }
-    // for (let i = 0; i < this.spendingChartPoints.length; i++) {
-    //   console.log(i + ' spend ' + this.spendingChartPoints[i]['x'].toLocaleString() + ':' + this.spendingChartPoints[i]['y']);
-    // }
   }
 
   buildSeries(label, xyPoints, mainColor, showPoints, pointStyle) {

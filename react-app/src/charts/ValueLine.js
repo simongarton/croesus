@@ -75,7 +75,7 @@ class ValueLine extends React.Component {
       }
     });
     let total = 0;
-    for (var d = new Date(2020, 11, 31); d <= new Date(); d.setDate(d.getDate() + 1)) {
+    for (var d = minDate; d <= new Date(); d.setDate(d.getDate() + 1)) {
       let currentDate = d;
       if (currentDate in actuals) {
         total = total + actuals[currentDate];
