@@ -3,9 +3,6 @@ import os
 import datetime
 import psycopg2
 
-# better error handling
-# logs
-
 
 def response(code, body):
     return {

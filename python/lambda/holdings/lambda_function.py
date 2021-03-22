@@ -4,9 +4,6 @@ import dateparser
 import psycopg2
 import os
 
-# better error handling
-# write to logs
-
 
 def response(code, body):
     return {

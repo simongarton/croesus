@@ -6,10 +6,6 @@ import datetime
 HOST = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com"
 
 
-# better error handling
-# logs
-
-
 def lambda_handler(event, context):
 
     if "pathParameters" in event:

@@ -10,8 +10,6 @@ import sys
 HOST = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com"
 API_KEY = "5tl4ks_0QZJP5J8pE6JdvDbeXuQ7Cm1f"
 
-# boto3 and getting secrets from SSM
-
 # GET calls will always go cached.
 # POST calls will create the current and the historical record
 # both will accept a date as the mandatory third parameter : /exchange/symbol/date
