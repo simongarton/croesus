@@ -25,3 +25,14 @@ select * from price_history where exchange = 'nzx' order by date, symbol ;
 select * from total_value order by date;
 
 select * from value where date = '2021-02-08';
+
+CREATE TABLE "exchange-rate" (
+    id            BIGSERIAL PRIMARY KEY,
+    date          DATE      NOT NULL,
+    source          TEXT      NOT NULL,
+    target            TEXT      NOT NULL,
+    price         DOUBLE PRECISION     NOT NULL
+);
+
+ALTER TABLE "exchange-rate"
+    ADD CONSTRAINT exchange-rate-unique UNIQUE (date, source, target);

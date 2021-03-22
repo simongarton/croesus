@@ -58,11 +58,13 @@ class TotalValue extends React.Component {
   }
 
   formatDollars(amount) {
-    return ('$' + Number(amount).toLocaleString()).replace('$-', '-$');
+    var formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'NZD' });
+    return formatter.format(amount);
   }
 
   formatNumber(amount) {
-    return Number(amount).toLocaleString();
+    var formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 });
+    return formatter.format(amount);
   }
 
   formatPercentage(amount) {
