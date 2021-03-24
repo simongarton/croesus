@@ -55,7 +55,7 @@ class ValueLine extends React.Component {
     this.valueChartPoints = [];
     data.forEach((element) => {
       let point = {
-        x: moment(element['date']),
+        x: this.getDate(element['date']),
         y: element['value'],
       };
       this.valueChartPoints.push(point);
@@ -68,7 +68,7 @@ class ValueLine extends React.Component {
     let actuals = {};
     let minDate = null;
     data.forEach((element) => {
-      let thisDate = new Date(moment(element['date']));
+      let thisDate = new Date(this.getDate(element['date']));
       actuals[thisDate] = element['total'];
       if (minDate == null || minDate > thisDate) {
         minDate = thisDate;
@@ -81,7 +81,7 @@ class ValueLine extends React.Component {
         total = total + actuals[currentDate];
       }
       let point = {
-        x: moment(currentDate),
+        x: this.getDate(currentDate),
         y: total,
       };
       this.spendingChartPoints.push(point);
@@ -90,18 +90,8 @@ class ValueLine extends React.Component {
     this.rebuildChart();
   }
 
-  processSpending(data) {
-    this.spendingChartPoints = [];
-    let total = 0;
-    data.forEach((element) => {
-      total = total + element['total'];
-      let point = {
-        x: moment(element['date']),
-        y: total,
-      };
-      this.spendingChartPoints.push(point);
-    });
-    this.rebuildChart();
+  getDate(dateString) {
+    return moment(dateString);
   }
 
   rebuildChart() {

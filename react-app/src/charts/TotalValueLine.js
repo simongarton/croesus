@@ -156,8 +156,8 @@ class TotalValueLine extends React.Component {
                   unit: 'day',
                 },
                 ticks: {
-                  min: this.getDate('2020-12-01'),
-                  max: this.getDate('2021-07-01'),
+                  min: '2020-12-01',
+                  max: '2021-07-01',
                 },
               },
             ],
