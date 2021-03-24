@@ -46,7 +46,6 @@ def lambda_handler(event, context):
         updates = updates + 1
         time.sleep(random.randint(0, 20) / 10.0)
 
-    save_total_value(todays_date, total_value)
     return response(200, {"message": "{} prices updated".format(updates)})
 
 
@@ -144,17 +143,6 @@ def get_value_data_from_database():
     return rows
 
 
-def get_total_value_data_from_database():
-    conn = get_database_connection()
-    if not conn:
-        return None
-
-    cur = conn.cursor()
-    cur.execute("SELECT id, date, value FROM total_value ORDER BY date DESC")
-    rows = cur.fetchall()
-    return rows
-
-
 def save_price_to_database(exchange, symbol, price):
     conn = get_database_connection()
     if not conn:
@@ -187,12 +175,6 @@ def save_value(exchange, symbol, date, price, quantity, value):
     save_value_to_database(exchange, symbol, date, price, quantity, value)
 
     return get_value_data_from_database()
-
-
-def save_total_value(date, total_value):
-    save_total_value_to_database(date, total_value)
-
-    return get_total_value_data_from_database()
 
 
 def save_price_history_to_database(exchange, symbol, date, price):
@@ -239,21 +221,5 @@ def save_value_to_database(exchange, symbol, date, price, quantity, value):
             "INSERT INTO value (exchange, symbol, date, price, quantity, value) "
             "VALUES (%s, %s, %s, %s, %s, %s);",
             [exchange, symbol, date, price, quantity, value],
-        )
-    conn.commit()
-
-
-def save_total_value_to_database(date, value):
-    conn = get_database_connection()
-    if not conn:
-        return
-    cur = conn.cursor()
-    cur.execute("SELECT id FROM total_value WHERE date = %s;", [date])
-    rows = cur.fetchall()
-    if len(rows) > 0:
-        cur.execute("UPDATE total_value SET value = %s WHERE date = %s;", [value, date])
-    else:
-        cur.execute(
-            "INSERT INTO total_value (date, value) " "VALUES (%s, %s);", [date, value]
         )
     conn.commit()

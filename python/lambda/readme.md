@@ -29,7 +29,7 @@ GET /history/{exchange}
 GET /history/{exchange}/{symbol}
 ```
 
-DB reads (value, total_value)
+DB reads (value)
 
 ## holdings
 
