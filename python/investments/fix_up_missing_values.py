@@ -102,11 +102,10 @@ def run():
         symbol = row[1]
         catch_up(exchange, symbol)
 
-    fix_up_totals()
-
 
 def test():
-    catch_up("NZX", "NZG")
+    catch_up("NYSE", "TAN")
+    catch_up("NYSE", "VOO")
 
 
-run()
+test()

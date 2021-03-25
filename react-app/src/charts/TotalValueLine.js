@@ -23,7 +23,7 @@ class TotalValueLine extends React.Component {
         (result) => {
           this.setState({
             isLoaded: true,
-            valueData: this.processValue(result),
+            valueData: this.processValueFillInBlanks(result),
           });
         },
         (error) => {
@@ -60,6 +60,34 @@ class TotalValueLine extends React.Component {
       };
       this.valueChartPoints.push(point);
     });
+    this.rebuildChart();
+  }
+
+  processValueFillInBlanks(data) {
+    this.valueChartPoints = [];
+    let actuals = {};
+    let minDate = null;
+    data.forEach((element) => {
+      let thisDate = new Date(this.getDate(element['date']));
+      actuals[thisDate] = element['value'];
+      if (minDate == null || minDate > thisDate) {
+        minDate = thisDate;
+      }
+    });
+    let total = 0;
+    for (var d = minDate; d <= new Date(); d.setDate(d.getDate() + 1)) {
+      let currentDate = d;
+      if (currentDate in actuals) {
+        total = actuals[currentDate];
+      }
+      let point = {
+        x: this.getDate(currentDate),
+        y: total,
+      };
+      this.valueChartPoints.push(point);
+      currentDate = currentDate + 1;
+    }
+    console.log(this.valueChartPoints);
     this.rebuildChart();
   }
 

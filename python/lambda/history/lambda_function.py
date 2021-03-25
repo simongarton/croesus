@@ -53,6 +53,7 @@ def lambda_handler(event, context):
 
 
 def get_total_history():
+    # here is the problem. If I don't get a value for a US stock on a day, then the total drops. I need to fix that value table at source.
     conn = get_database_connection()
     if not conn:
         return None

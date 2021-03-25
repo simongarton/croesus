@@ -7,4 +7,4 @@ and I'll build a nice Javascript client on the front next.
 
 ## To do
 
-* LIKE operator
+Update from Notion when ready.
