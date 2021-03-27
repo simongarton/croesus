@@ -46,7 +46,15 @@ def lambda_handler(event, context):
         updates = updates + 1
         time.sleep(random.randint(0, 20) / 10.0)
 
+    # also do exchange rate
+    post_todays_exchange_rate("USD", "NZD")
+
     return response(200, {"message": "{} prices updated".format(updates)})
+
+
+def post_todays_exchange_rate(source, target):
+    url = "{}/exchange-rate/{}/{}".format(HOST, source, target)
+    requests.post(url)
 
 
 def get_price(exchange, symbol, todays_date):

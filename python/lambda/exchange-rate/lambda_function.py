@@ -5,7 +5,6 @@ from datetime import date, datetime, timedelta
 import psycopg2
 import sys
 
-HOST = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com"
 API_KEY = "d3dce964c1b31b848333b69d"
 
 
