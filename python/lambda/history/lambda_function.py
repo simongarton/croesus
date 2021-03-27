@@ -148,7 +148,7 @@ def get_symbol_history(account, exchange, symbol):
             "exchange": row[1],
             "symbol": row[2],
             "price": row[3],
-            "quantity": row[4],
+            "quantity": round(row[4], 2),
             "value": row[5],
         }
         data.append(point)

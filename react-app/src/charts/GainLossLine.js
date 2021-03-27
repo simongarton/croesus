@@ -18,7 +18,7 @@ class GainLossLine extends React.Component {
   }
 
   componentDidMount() {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history')
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/all')
       .then((res) => res.json())
       .then(
         (result) => {
@@ -34,7 +34,7 @@ class GainLossLine extends React.Component {
           });
         }
       );
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending')
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/all')
       .then((res) => res.json())
       .then(
         (result) => {

@@ -125,7 +125,7 @@ def get_holdings(account, exchange, symbol, query_date):
                 "exchange": exchange,
                 "symbol": symbol,
                 "account": account,
-                "quantity": value,
+                "quantity": round(value, 2),
             }
         )
 

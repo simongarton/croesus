@@ -8,7 +8,7 @@ class TotalValueColumn extends React.Component {
   }
 
   componentDidMount() {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value')
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/all')
       .then((res) => res.json())
       .then(
         (result) => {

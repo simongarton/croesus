@@ -37,42 +37,46 @@ def get_database_connection():
 
 
 def lambda_handler(event, context):
+    if not "pathParameters" in event:
+        return response(400, {"error": "no parameters - need account"})
+    parameters = event["pathParameters"]
+    if not "account" in parameters:
+        return response(400, {"error": "no parameters - need account"})
 
-    if "pathParameters" in event:
-        parameters = event["pathParameters"]
-        filter_exchange = parameters["exchange"] if "exchange" in parameters else None
-        filter_symbol = parameters["symbol"] if "symbol" in parameters else None
-        print("got {} and {}".format(filter_exchange, filter_symbol))
-    else:
-        filter_exchange = None
-        filter_symbol = None
-
-    return handle(filter_exchange, filter_symbol)
-
-
-def handle(filter_exchange, filter_symbol):
-    if filter_exchange == None:
-        return response(200, get_total_spending())
-    if filter_symbol == None:
-        return response(200, get_exchange_spending(filter_exchange))
-    return response(200, get_symbol_spending(filter_exchange, filter_symbol))
+    account = parameters["account"]
+    if not "exchange" in parameters:
+        return response(200, get_total_spending(account))
+    if not "symbol" in parameters:
+        exchange = parameters["exchange"]
+        return response(200, get_exchange_spending(account, exchange))
+    exchange = parameters["exchange"]
+    symbol = parameters["symbol"]
+    return response(200, get_symbol_spending(account, exchange, symbol))
 
 
-def get_total_spending():
+def get_total_spending(account):
     conn = get_database_connection()
     if not conn:
         return None
 
     cur = conn.cursor()
-    cur.execute(
-        """
+    sql = """
         SELECT date, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
         GROUP BY date
         ORDER BY date;
-        """,
-        [],
-    )
+        """
+    params = []
+    if account != "all":
+        sql = """
+        SELECT date, sum(price * quantity)::numeric::float8 AS total
+        FROM transaction
+        GROUP BY date
+        ORDER BY date;
+        """
+        params = [account]
+    cur.execute(sql, params)
+
     rows = cur.fetchall()
     total = 0
     data = []
@@ -80,25 +84,35 @@ def get_total_spending():
         point = {"date": row[0], "total": round(row[1], 2)}
         data.append(point)
         total = total + row[1]
-    return {"total": total, "spending": data}
+    return {"total": round(total, 2), "spending": data}
 
 
-def get_exchange_spending(filter_exchange):
+def get_exchange_spending(account, filter_exchange):
     conn = get_database_connection()
     if not conn:
         return None
 
     cur = conn.cursor()
-    cur.execute(
-        """
+    sql = """
         SELECT date, exchange, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
         WHERE exchange = %s 
         GROUP BY date, exchange
         ORDER BY date, exchange;
-        """,
-        [filter_exchange],
-    )
+        """
+    params = [filter_exchange]
+    if account != "all":
+        sql = """
+        SELECT date, exchange, sum(price * quantity)::numeric::float8 AS total
+        FROM transaction
+        WHERE exchange = %s 
+        AND account = %s 
+        GROUP BY date, exchange
+        ORDER BY date, exchange;
+        """
+        params = [filter_exchange, account]
+    cur.execute(sql, params)
+
     rows = cur.fetchall()
     total = 0
     data = []
@@ -106,25 +120,34 @@ def get_exchange_spending(filter_exchange):
         point = {"date": row[0], "exchange": row[1], "total": round(row[2], 2)}
         data.append(point)
         total = total + row[2]
-    return {"total": total, "spending": data}
+    return {"total": round(total, 2), "spending": data}
 
 
-def get_symbol_spending(filter_exchange, filter_symbol):
+def get_symbol_spending(account, filter_exchange, filter_symbol):
     conn = get_database_connection()
     if not conn:
         return None
 
     cur = conn.cursor()
-    cur.execute(
-        """
+    sql = """
         SELECT date, exchange, symbol, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
         WHERE exchange = %s AND symbol = %s
         GROUP BY date, exchange, symbol
         ORDER BY date, exchange, symbol;
-        """,
-        [filter_exchange, filter_symbol],
-    )
+        """
+    params = [filter_exchange, filter_symbol]
+    if account != "all":
+        sql = """
+        SELECT date, exchange, symbol, sum(price * quantity)::numeric::float8 AS total
+        FROM transaction
+        WHERE exchange = %s AND symbol = %s AND account = %s
+        GROUP BY date, exchange, symbol
+        ORDER BY date, exchange, symbol;
+        """
+        params = [filter_exchange, filter_symbol, account]
+    cur.execute(sql, params)
+
     rows = cur.fetchall()
     total = 0
     data = []
@@ -137,4 +160,4 @@ def get_symbol_spending(filter_exchange, filter_symbol):
         }
         data.append(point)
         total = total + row[3]
-    return {"total": total, "spending": data}
+    return {"total": round(total, 2), "spending": data}

@@ -17,7 +17,7 @@ class ValueLine extends React.Component {
   }
 
   componentDidMount() {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/' + this.state.exchange + '/' + this.state.symbol)
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/all/' + this.state.exchange + '/' + this.state.symbol)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -33,7 +33,7 @@ class ValueLine extends React.Component {
           });
         }
       );
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/' + this.state.exchange + '/' + this.state.symbol)
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/all/' + this.state.exchange + '/' + this.state.symbol)
       .then((res) => res.json())
       .then(
         (result) => {
