@@ -6,13 +6,18 @@ class TotalValue extends React.Component {
     this.state = {
       isLoaded: false,
       response: null,
+      account: props.account,
     };
     this.valueChartPoints = [];
     this.spendingChartPoints = [];
   }
 
   componentDidMount() {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/all')
+    this.updateAmount(this.state.account);
+  }
+
+  updateAmount(account) {
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/' + account)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -29,6 +34,11 @@ class TotalValue extends React.Component {
           });
         }
       );
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({ account: nextProps.account });
+    this.updateAmount(nextProps.account);
   }
 
   buildRow(element, index) {
@@ -75,20 +85,28 @@ class TotalValue extends React.Component {
     if (this.state.response == null) {
       return <h1>thinking ...</h1>;
     }
-    const totalValue = this.state.response['total'];
-    const gainLoss = this.state.response['gain_loss'];
-    const spend = this.state.response['spend'];
-    const percentage = this.state.response['percentage'];
+    let totalValue = 0;
+    let gainLoss = 0;
+    let spend = 0;
+    let percentage = 0;
     const fields = [];
     let index = 0;
-    this.state.response['holdings'].forEach((element) => {
-      fields.push(this.buildRow(element, index));
-      index++;
-    });
+    if (this.state.response['holdings']) {
+      totalValue = this.state.response['total'];
+      gainLoss = this.state.response['gain_loss'];
+      spend = this.state.response['spend'];
+      percentage = this.state.response['percentage'];
+      this.state.response['holdings'].forEach((element) => {
+        fields.push(this.buildRow(element, index));
+        index++;
+      });
+    }
 
     return (
       <div className="pad-table">
-        <h1>Total value : {this.formatDollars(totalValue)}</h1>
+        <h1>
+          Total value ({this.state.account}): {this.formatDollars(totalValue)}
+        </h1>
         <p>
           Spend : {this.formatDollars(spend)} &nbsp; Gain/Loss :{' '}
           <span className={this.redGreen(gainLoss)}>{this.formatDollars(gainLoss)} </span>&nbsp; {'% : '}

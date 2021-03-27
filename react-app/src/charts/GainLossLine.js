@@ -11,14 +11,23 @@ function formatDate(date) {
 class GainLossLine extends React.Component {
   constructor(props) {
     super();
-    this.state = {};
+    this.state = { account: props.account };
     this.valueChartPoints = [];
     this.spendingChartPoints = [];
     this.gainAndLossChartPoints = [];
   }
 
   componentDidMount() {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/all')
+    this.updateAmount(this.state.account);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({ account: nextProps.account });
+    this.updateAmount(nextProps.account);
+  }
+
+  updateAmount(account) {
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/' + account)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -34,7 +43,7 @@ class GainLossLine extends React.Component {
           });
         }
       );
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/all')
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/' + account)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -125,7 +134,6 @@ class GainLossLine extends React.Component {
         x: value['x'],
         y: value['y'] - spending['y'],
       });
-      // console.log('calc ' + spending['x'] + '=' + value['x'] + ' ' + value['y'] + '-' + spending['y'] + '=' + (value['y'] - spending['y']));
     }
 
     this.rebuildChart();

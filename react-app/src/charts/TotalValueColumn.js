@@ -4,11 +4,17 @@ import { Bar } from 'react-chartjs-2';
 class TotalValueColumn extends React.Component {
   constructor(props) {
     super();
-    this.state = {};
+    this.state = {
+      account: props.account,
+    };
   }
 
   componentDidMount() {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/all')
+    this.updateAmount(this.state.account);
+  }
+
+  updateAmount(account) {
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/' + account)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -29,11 +35,13 @@ class TotalValueColumn extends React.Component {
       );
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({ account: nextProps.account });
+    this.updateAmount(nextProps.account);
+  }
+
   processData(data) {
-    const holdings = data['holdings'];
-    if (holdings == null) {
-      return;
-    }
+    let holdings = data['holdings'] == null ? [] : data['holdings'];
     let chartPoints = [];
     let chartLabels = [];
     holdings.forEach((element) => {

@@ -11,13 +11,19 @@ function formatDate(date) {
 class TotalValueLine extends React.Component {
   constructor(props) {
     super();
-    this.state = {};
+    this.state = {
+      account: props.account,
+    };
     this.valueChartPoints = [];
     this.spendingChartPoints = [];
   }
 
   componentDidMount() {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/all')
+    this.updateAmount(this.state.account);
+  }
+
+  updateAmount(account) {
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/' + account)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -33,7 +39,7 @@ class TotalValueLine extends React.Component {
           });
         }
       );
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/all')
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/' + account)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -49,6 +55,11 @@ class TotalValueLine extends React.Component {
           });
         }
       );
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({ account: nextProps.account });
+    this.updateAmount(nextProps.account);
   }
 
   processValue(data) {
@@ -74,6 +85,10 @@ class TotalValueLine extends React.Component {
         minDate = thisDate;
       }
     });
+    if (minDate == null) {
+      this.rebuildChart();
+      return;
+    }
     let total = 0;
     for (var d = minDate; d <= new Date(); d.setDate(d.getDate() + 1)) {
       let currentDate = d;
@@ -87,7 +102,6 @@ class TotalValueLine extends React.Component {
       this.valueChartPoints.push(point);
       currentDate = currentDate + 1;
     }
-    console.log(this.valueChartPoints);
     this.rebuildChart();
   }
 

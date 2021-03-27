@@ -42,3 +42,8 @@ body {
 .green-text {
   color: green;
 }
+
+.options-class {
+  margin: auto;
+  padding: 10px;
+}

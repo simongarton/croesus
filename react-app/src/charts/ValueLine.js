@@ -11,13 +11,24 @@ function formatDate(date) {
 class ValueLine extends React.Component {
   constructor(props) {
     super();
-    this.state = { exchange: props.exchange, symbol: props.symbol };
+    this.state = { exchange: props.exchange, symbol: props.symbol, account: props.account };
     this.valueChartPoints = [];
     this.spendingChartPoints = [];
   }
 
   componentDidMount() {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/all/' + this.state.exchange + '/' + this.state.symbol)
+    this.updateAmount(this.state.account);
+  }
+
+  updateAmount(account) {
+    let url =
+      'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/' +
+      account +
+      '/' +
+      this.state.exchange +
+      '/' +
+      this.state.symbol;
+    fetch(url)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -33,7 +44,14 @@ class ValueLine extends React.Component {
           });
         }
       );
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/all/' + this.state.exchange + '/' + this.state.symbol)
+    url =
+      'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/' +
+      account +
+      '/' +
+      this.state.exchange +
+      '/' +
+      this.state.symbol;
+    fetch(url)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -49,6 +67,11 @@ class ValueLine extends React.Component {
           });
         }
       );
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({ account: nextProps.account });
+    this.updateAmount(nextProps.account);
   }
 
   processValue(data) {
@@ -74,6 +97,10 @@ class ValueLine extends React.Component {
         minDate = thisDate;
       }
     });
+    if (minDate == null) {
+      this.rebuildChart();
+      return;
+    }
     let total = 0;
     for (var d = minDate; d <= new Date(); d.setDate(d.getDate() + 1)) {
       let currentDate = d;
