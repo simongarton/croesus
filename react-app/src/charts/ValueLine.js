@@ -35,6 +35,7 @@ class ValueLine extends React.Component {
           this.setState({
             isLoaded: true,
             valueData: this.processValue(result),
+            account,
           });
         },
         (error) => {
@@ -70,7 +71,6 @@ class ValueLine extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({ account: nextProps.account });
     this.updateAmount(nextProps.account);
   }
 

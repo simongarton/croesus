@@ -121,10 +121,11 @@ def get_symbol_history(account, exchange, symbol):
 
     cur = conn.cursor()
     sql = """
-        SELECT date, exchange, symbol, price::numeric::float8, quantity, value::numeric::float8
+        SELECT date, exchange, symbol, sum(value::numeric::float8) AS symbol_value
         FROM value 
         WHERE exchange = %s 
         AND symbol = %s 
+        GROUP BY date, exchange, symbol
         ORDER BY date, exchange, symbol;
         """
     params = [exchange, symbol]
@@ -143,13 +144,24 @@ def get_symbol_history(account, exchange, symbol):
     rows = cur.fetchall()
     data = []
     for row in rows:
-        point = {
-            "date": row[0],
-            "exchange": row[1],
-            "symbol": row[2],
-            "price": row[3],
-            "quantity": round(row[4], 2),
-            "value": row[5],
-        }
+        if account != "all":
+            point = {
+                "date": row[0],
+                "exchange": row[1],
+                "symbol": row[2],
+                "price": row[3],
+                "quantity": round(row[4], 2),
+                "value": row[5],
+            }
+        else:
+            point = {
+                "date": row[0],
+                "exchange": row[1],
+                "symbol": row[2],
+                "price": None,
+                "quantity": None,
+                "value": row[3],
+            }
+
         data.append(point)
     return data
