@@ -116,6 +116,10 @@ class TotalValueLine extends React.Component {
         minDate = thisDate;
       }
     });
+    if (minDate == null) {
+      this.rebuildChart();
+      return;
+    }
     let total = 0;
     for (var d = minDate; d <= new Date(); d.setDate(d.getDate() + 1)) {
       let currentDate = d;

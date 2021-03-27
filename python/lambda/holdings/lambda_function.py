@@ -34,7 +34,6 @@ def lambda_handler(event, context):
     if "queryStringParameters" in event:
         if "date" in event["queryStringParameters"]:
             query_date = dateparser.parse(event["queryStringParameters"]["date"]).date()
-            print("parsed query date as {}".format(query_date))
 
     if not "pathParameters" in event:
         return response(400, {"error": "no path parameters, need account"})
@@ -78,7 +77,6 @@ def get_holdings(account, exchange, symbol, query_date):
     conn = get_database_connection()
     if not conn:
         return []
-    print(conn)
     cur = conn.cursor()
     sql = "SELECT id, date, exchange, symbol, account, quantity, price FROM transaction ORDER BY date, exchange, symbol"
     params = []
@@ -91,27 +89,19 @@ def get_holdings(account, exchange, symbol, query_date):
 
     holdings_map = {}
 
-    print("{} {} {} {}".format(exchange, symbol, account, query_date))
-
     for transaction in transactions:
-        print(transaction)
         transaction_date = transaction[1]
-        print("{}={}".format(transaction_date, query_date))
         if transaction_date > query_date:
-            print("out of date range {} > {}".format(transaction_date, query_date))
             continue
         if exchange is not None:
             if transaction[2] != exchange:
-                print("failed exchange {} != {}".format(transaction[2], exchange))
                 continue
         if symbol is not None:
             if transaction[3] != symbol:
-                print("failed symbol {} != {}".format(transaction[3], symbol))
                 continue
-        key = transaction[2] + ":" + transaction[3] + ":" + transaction[4]
+        key = transaction[2] + ":" + transaction[3]
         if not key in holdings_map:
             holdings_map[key] = 0
-        print("adding {}:{}".format(key, transaction[5]))
         holdings_map[key] = holdings_map[key] + transaction[5]
 
     holdings = []
@@ -119,12 +109,10 @@ def get_holdings(account, exchange, symbol, query_date):
         parts = key.split(":")
         exchange = parts[0]
         symbol = parts[1]
-        account = parts[2]
         holdings.append(
             {
                 "exchange": exchange,
                 "symbol": symbol,
-                "account": account,
                 "quantity": round(value, 2),
             }
         )

@@ -17,11 +17,9 @@ for single_date in daterange(start_date, end_date):
         single_date.strftime("%Y-%m-%d")
     )
     response = requests.post(url)
-    print("{} {} : {}".format(datetime.now(), url, response.status_code))
     time.sleep(60)
     url = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/stocks/NYSE/VOO/{}".format(
         single_date.strftime("%Y-%m-%d")
     )
     response = requests.post(url)
-    print("{} {} : {}".format(datetime.now(), url, response.status_code))
     time.sleep(60)

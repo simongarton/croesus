@@ -32,14 +32,11 @@ def get_database_connection():
 
 
 def lambda_handler(event, context):
-    print("starting exchange-rate")
     if not "pathParameters" in event:
-        print("no path params")
         return {"statusCode": 400, "body": {"message": "no pathParameters"}}
     parameters = event["pathParameters"]
     for param in ["source", "target"]:
         if not param in parameters:
-            print("no param {}".format(param))
             return {
                 "statusCode": 400,
                 "body": {"message": "no {} in parameters".format(param)},
@@ -49,11 +46,9 @@ def lambda_handler(event, context):
     method = event["requestContext"]["http"]["method"]
 
     if method == "POST":
-        print("POST exchange-rate : {} {} {}".format(source, target, method))
         return post_rate(source, target)
     # only applies to GET
     date = parameters["date"]
-    print("GET exchange-rate : {} {} {} {}".format(source, target, date, method))
     return get_rate(source, target, date)
 
 
@@ -84,7 +79,6 @@ def get_rate(source, target, date):
         [source, target, date],
     )
     rows = cur.fetchall()
-    print("1 {}".format(len(rows)))
     if len(rows) > 0:
         return response(
             200,
@@ -95,7 +89,6 @@ def get_rate(source, target, date):
         [source, target, date],
     )
     rows = cur.fetchall()
-    print("2 {}".format(len(rows)))
     if len(rows) > 0:
         return response(
             200,
@@ -122,13 +115,11 @@ def save_rate_to_database(source, target, date, rate):
     )
     rows = cur.fetchall()
     if len(rows) > 0:
-        print("updating {}->{} on {} to {}".format(source, target, date, rate))
         cur.execute(
             'UPDATE "exchange-rate" SET rate = %s WHERE source = %s AND target = %s AND date = %s;',
             [rate, source, target, date],
         )
     else:
-        print("inserting {}->{} on {} to {}".format(source, target, date, rate))
         cur.execute(
             'INSERT INTO "exchange-rate" (source, target, date, rate) VALUES (%s, %s, %s, %s);',
             [source, target, date, rate],

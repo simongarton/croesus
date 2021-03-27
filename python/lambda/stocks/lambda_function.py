@@ -41,14 +41,11 @@ def get_database_connection():
 
 
 def lambda_handler(event, context):
-    print("starting stocks")
     if not "pathParameters" in event:
-        print("no path params")
         return {"statusCode": 400, "body": {"message": "no pathParameters"}}
     parameters = event["pathParameters"]
     for param in ["symbol", "exchange"]:
         if not param in parameters:
-            print("no param {}".format(param))
             return {
                 "statusCode": 400,
                 "body": {"message": "no {} in parameters".format(param)},
@@ -60,14 +57,12 @@ def lambda_handler(event, context):
     date = parameters["date"]
     method = event["requestContext"]["http"]["method"]
 
-    print("stocks : {} {} {} {}".format(exchange, symbol, date, method))
     if method == "POST":
         return post_stock(exchange, symbol, date)
     return get_stock(exchange, symbol, date)
 
 
 def get_most_recent_value(exchange, symbol):
-    print("get_most_recent_value({},{})".format(exchange, symbol))
     conn = get_database_connection()
     if not conn:
         return None
@@ -192,13 +187,11 @@ def save_price_to_database(exchange, symbol, price):
     )
     rows = cur.fetchall()
     if len(rows) > 0:
-        print("updating {}:{} to {}".format(exchange, symbol, price))
         cur.execute(
             "UPDATE price SET price = %s WHERE exchange = %s AND symbol = %s;",
             [price, exchange, symbol],
         )
     else:
-        print("inserting {}:{} to {}".format(exchange, symbol, price))
         cur.execute(
             "INSERT INTO price (exchange, symbol, price) VALUES (%s, %s, %s);",
             [exchange, symbol, price],
@@ -217,13 +210,11 @@ def save_price_history_to_database(exchange, symbol, date, price):
     )
     rows = cur.fetchall()
     if len(rows) > 0:
-        print("updating {}:{} to {} on {}.".format(exchange, symbol, price, date))
         cur.execute(
             "UPDATE price_history SET price = %s WHERE exchange = %s AND symbol = %s AND date = %s;",
             [price, exchange, symbol, date],
         )
     else:
-        print("inserting {}:{} to {} on {}.".format(exchange, symbol, price, date))
         cur.execute(
             "INSERT INTO price_history (exchange, symbol, date, price) "
             "VALUES (%s, %s, %s, %s);",

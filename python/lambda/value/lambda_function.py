@@ -2,9 +2,14 @@ import json
 import psycopg2
 import os
 import datetime
+from datetime import timedelta
 
 
 def lambda_handler(event, context):
+
+    method = event["requestContext"]["http"]["method"]
+    if method == 'POST':
+        return rebuild_value_table()
 
     if not "pathParameters" in event:
         return response(400, {"error": "no path parameters : need account"})
@@ -49,13 +54,15 @@ def handle(filter_exchange, filter_symbol, filter_account):
         exchange = holding["exchange"]
         symbol = holding["symbol"]
         quantity = holding["quantity"]
-        spend = get_spend(exchange, symbol)
+        account = holding["account"]
+        spend = get_spend(exchange, symbol, filter_account)
         total_spend = total_spend + spend
         price = get_price(exchange, symbol)  # from price table, so most recent
         if not price:  # should not happen
             holding = {
                 "exchange": exchange,
                 "symbol": symbol,
+                "account": account,
                 "quantity": round(quantity, 2),
                 "price": None,
                 "value": None,
@@ -70,6 +77,7 @@ def handle(filter_exchange, filter_symbol, filter_account):
         holding = {
             "exchange": exchange,
             "symbol": symbol,
+            "account": account,
             "quantity": round(quantity, 2),
             "price": price,
             "value": round(value, 2),
@@ -107,22 +115,31 @@ def get_price(exchange, symbol):
 
 
 # same code value and spending
-def get_spend(filter_exchange, filter_symbol):
+def get_spend(filter_exchange, filter_symbol, filter_account):
     conn = get_database_connection()
     if not conn:
         return None
 
     cur = conn.cursor()
-    cur.execute(
-        """
+    sql = """
         SELECT date, exchange, symbol, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
         WHERE exchange = %s AND symbol = %s
         GROUP BY date, exchange, symbol
         ORDER BY date, exchange, symbol;
-        """,
-        [filter_exchange, filter_symbol],
-    )
+        """
+    params = [filter_exchange, filter_symbol]
+    if filter_account != 'all':
+        sql = """
+            SELECT date, exchange, symbol, sum(price * quantity)::numeric::float8 AS total
+            FROM transaction
+            WHERE exchange = %s AND symbol = %s AND account = %s
+            GROUP BY date, exchange, symbol
+            ORDER BY date, exchange, symbol;
+            """
+        params = [filter_exchange, filter_symbol, filter_account]
+    
+    cur.execute(sql, params)
     rows = cur.fetchall()
     total = 0
     data = []
@@ -196,3 +213,108 @@ def get_holdings(account, exchange, symbol, query_date):
     # sort
     holdings.sort(key=lambda x: x["exchange"] + ":" + x["symbol"])
     return holdings
+
+def empty_value_table():
+    conn = get_database_connection()
+    if not conn:
+        return []
+    cur = conn.cursor()
+    cur.execute('delete from value')
+    conn.commit()
+
+def find_accounts():
+    conn = get_database_connection()
+    if not conn:
+        return []
+    cur = conn.cursor()
+    cur.execute('select distinct account from transaction order by account')
+    rows = cur.fetchall()
+    return [row[0] for row in rows]
+
+def find_holdings(account):
+    conn = get_database_connection()
+    if not conn:
+        return []
+    cur = conn.cursor()
+    cur.execute('select exchange, symbol, min(date) from transaction where account = %s group by exchange, symbol order by exchange, symbol', [account])
+    rows = cur.fetchall()
+    holdings = []
+    for row in rows:
+        holding = {
+            'exchange':row[0],
+            'symbol':row[1],
+            'earliest':row[2],
+            'account':account
+        }
+        holdings.append(holding)
+    return holdings
+
+def find_transactions(exchange, symbol, account):
+    conn = get_database_connection()
+    if not conn:
+        return []
+    cur = conn.cursor()
+    cur.execute('select date, quantity from transaction where exchange = %s and symbol = %s and account = %s',[exchange, symbol, account])
+    rows = cur.fetchall()
+    transactions = []
+    for row in rows:
+        transactions.append({
+            'date':row[0],
+            'quantity':row[1]
+        })
+    return transactions
+
+def find_prices(exchange, symbol):
+    conn = get_database_connection()
+    if not conn:
+        return []
+    cur = conn.cursor()
+    cur.execute('select date, price::numeric::float8 from price_history where exchange = %s and symbol = %s',[exchange, symbol])
+    rows = cur.fetchall()
+    prices = {}
+    for row in rows:
+        prices[row[0]] = row[1]
+    return prices
+
+def build_value(holding):
+    conn = get_database_connection()
+    if not conn:
+        return []
+    cur = conn.cursor()
+
+    exchange = holding['exchange']
+    symbol = holding['symbol']
+    earliest = holding['earliest']
+    account = holding['account']
+
+    transactions = find_transactions(exchange, symbol, account)
+
+    # this is going to get very big
+    prices = find_prices(exchange, symbol)
+
+    quantity = 0
+    price = 0
+    for day in daterange(earliest, datetime.date.today()):
+        for transaction in transactions:
+            if transaction['date'] == day:
+                quantity = quantity + transaction['quantity']
+        if day in prices:
+            price = prices[day]
+        value = quantity * price
+        # print('on {} for {}:{} ({}) I have q {} p {} v {}'.format(day,exchange, symbol, account, quantity, price, value))
+        sql = 'insert into value (date, exchange, symbol, account, price, quantity, value) values (%s,%s,%s,%s,%s,%s,%s)'
+        cur.execute(sql, [day, exchange, symbol, account, price, quantity, value])
+    conn.commit()
+
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + timedelta(n)
+
+def rebuild_value_table():
+    empty_value_table()
+    accounts = find_accounts()
+    for account in accounts:
+        holdings = find_holdings(account)
+        for holding in holdings:
+            build_value(holding)
+    return response(200, {"message":"value table rebuilt"})

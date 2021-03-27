@@ -71,6 +71,7 @@ def get_total_spending(account):
         sql = """
         SELECT date, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
+        WHERE account = %s 
         GROUP BY date
         ORDER BY date;
         """

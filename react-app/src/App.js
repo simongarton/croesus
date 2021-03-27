@@ -14,28 +14,29 @@ export default class App extends React.Component {
     super();
     this.state = {
       isLoaded: false,
-      response: {},
+      response: [],
       account: 'all',
     };
   }
 
   componentDidMount() {
-    this.updateAmount(this.state.account);
+    this.updateHoldings(this.state.account);
   }
 
-  updateAmount(account) {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/' + account)
+  updateHoldings(account) {
+    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/holdings/' + account)
       .then((res) => res.json())
       .then(
         (result) => {
           this.setState({
             response: result,
             isLoaded: true,
+            account,
           });
         },
         (error) => {
           this.setState({
-            response: null,
+            response: [],
             isLoaded: true,
             error,
           });
@@ -51,7 +52,7 @@ export default class App extends React.Component {
     const fields = [];
     let index = 0;
     let details = <div />;
-    if (this.state.response['holdings']) {
+    if (this.state.response) {
       details = (
         <div>
           <TotalValueColumn account={this.state.account} />
@@ -59,7 +60,7 @@ export default class App extends React.Component {
           <GainLossLine account={this.state.account} />
         </div>
       );
-      this.state.response['holdings'].forEach((element) => {
+      this.state.response.forEach((element) => {
         fields.push(this.buildHoldingChart(element, index, this.state.account));
         index++;
       });
@@ -69,32 +70,28 @@ export default class App extends React.Component {
       <div>
         <Button
           onClick={() => {
-            this.setState({ account: 'all' });
-            this.updateAmount('all');
+            this.updateHoldings('all');
           }}
         >
           All
         </Button>
         <Button
           onClick={() => {
-            this.setState({ account: 'simon' });
-            this.updateAmount('simon');
+            this.updateHoldings('simon');
           }}
         >
           Simon
         </Button>
         <Button
           onClick={() => {
-            this.setState({ account: 'helen' });
-            this.updateAmount('helen');
+            this.updateHoldings('helen');
           }}
         >
           Helen
         </Button>
         <Button
           onClick={() => {
-            this.setState({ account: 'trust' });
-            this.updateAmount('trust');
+            this.updateHoldings('trust');
           }}
         >
           Trust
