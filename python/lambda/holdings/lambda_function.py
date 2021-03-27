@@ -31,7 +31,6 @@ def get_database_connection():
 
 def lambda_handler(event, context):
     query_date = datetime.date.today()
-    print("defaulted query date as {}".format(query_date))
     if "queryStringParameters" in event:
         if "date" in event["queryStringParameters"]:
             query_date = dateparser.parse(event["queryStringParameters"]["date"]).date()

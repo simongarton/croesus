@@ -37,7 +37,6 @@ def get_database_connection():
 
 
 def lambda_handler(event, context):
-
     if not "pathParameters" in event:
         return response(400, {"error": "no parameters - need account"})
 

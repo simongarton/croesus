@@ -42,26 +42,36 @@ def get_database_connection():
 
 def lambda_handler(event, context):
     if not "pathParameters" in event:
-        return response(200, get_total_history())
+        return response(400, {"error": "no parameters - need account"})
     parameters = event["pathParameters"]
+    if not "account" in parameters:
+        return response(400, {"error": "no parameters - need account"})
+
+    account = parameters["account"]
+    if not "exchange" in parameters:
+        return response(200, get_total_history(account))
     if not "symbol" in parameters:
         exchange = parameters["exchange"]
-        return response(200, get_exchange_history(exchange))
+        return response(200, get_exchange_history(account, exchange))
     exchange = parameters["exchange"]
     symbol = parameters["symbol"]
-    return response(200, get_symbol_history(exchange, symbol))
+    return response(200, get_symbol_history(account, exchange, symbol))
 
 
-def get_total_history():
+def get_total_history(account):
     # here is the problem. If I don't get a value for a US stock on a day, then the total drops. I need to fix that value table at source.
     conn = get_database_connection()
     if not conn:
         return None
 
     cur = conn.cursor()
-    cur.execute(
-        "SELECT date, sum(value)::numeric::float8 AS value FROM value GROUP BY date ORDER BY date;"
-    )
+    sql = "SELECT date, sum(value)::numeric::float8 AS value FROM value GROUP BY date ORDER BY date;"
+    params = []
+    if account != "all":
+        sql = "SELECT date, sum(value)::numeric::float8 AS value FROM value WHERE account = %s GROUP BY date ORDER BY date;"
+        params = [account]
+    cur.execute(sql, params)
+
     rows = cur.fetchall()
     data = []
     for row in rows:
@@ -70,24 +80,32 @@ def get_total_history():
     return data
 
 
-def get_exchange_history(exchange):
+def get_exchange_history(account, exchange):
     conn = get_database_connection()
     if not conn:
         return None
 
     cur = conn.cursor()
-    cur.execute(
-        """
+    sql = """
         SELECT date, exchange, sum(value::numeric::float8) AS exchange_value
         FROM value 
         WHERE exchange = %s 
         GROUP BY date, exchange
         ORDER BY date, exchange;
-        """,
-        [
-            exchange,
-        ],
-    )
+        """
+    params = [exchange]
+    if account != "all":
+        sql = """
+        SELECT date, exchange, sum(value::numeric::float8) AS exchange_value
+        FROM value 
+        WHERE exchange = %s 
+        AND account = %s
+        GROUP BY date, exchange
+        ORDER BY date, exchange;
+        """
+        params = [exchange, account]
+    cur.execute(sql, params)
+
     rows = cur.fetchall()
     data = []
     for row in rows:
@@ -96,21 +114,32 @@ def get_exchange_history(exchange):
     return data
 
 
-def get_symbol_history(exchange, symbol):
+def get_symbol_history(account, exchange, symbol):
     conn = get_database_connection()
     if not conn:
         return None
 
     cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT date, exchange, symbol, price::numeric::float8, quantity, value::numeric::float8 
+    sql = """
+        SELECT date, exchange, symbol, price::numeric::float8, quantity, value::numeric::float8
         FROM value 
-        WHERE exchange = %s AND symbol = %s
+        WHERE exchange = %s 
+        AND symbol = %s 
         ORDER BY date, exchange, symbol;
-        """,
-        [exchange, symbol],
-    )
+        """
+    params = [exchange, symbol]
+    if account != "all":
+        sql = """
+        SELECT date, exchange, symbol, price::numeric::float8, quantity, value::numeric::float8
+        FROM value 
+        WHERE exchange = %s 
+        AND symbol = %s 
+        AND account = %s
+        ORDER BY date, exchange, symbol;
+        """
+        params = [exchange, symbol, account]
+    cur.execute(sql, params)
+
     rows = cur.fetchall()
     data = []
     for row in rows:
