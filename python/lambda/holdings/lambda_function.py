@@ -74,6 +74,7 @@ def get_symbol_response(parameters, query_date):
     return response(200, get_holdings(account, exchange, symbol, query_date))
 
 
+# same code : value and holdings
 def get_holdings(account, exchange, symbol, query_date):
     conn = get_database_connection()
     if not conn:

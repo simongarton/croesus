@@ -1,48 +1,58 @@
 import json
-from re import S
-import requests
+import psycopg2
+import os
 import datetime
-
-HOST = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com"
 
 
 def lambda_handler(event, context):
 
-    if "pathParameters" in event:
-        parameters = event["pathParameters"]
-        filter_exchange = parameters["exchange"] if "exchange" in parameters else None
-        filter_symbol = parameters["symbol"] if "symbol" in parameters else None
-        print("got {} and {}".format(filter_exchange, filter_symbol))
-    else:
-        filter_exchange = None
-        filter_symbol = None
+    if not "pathParameters" in event:
+        return response(400, {"error": "no path parameters : need account"})
+    parameters = event["pathParameters"]
+    if not "account" in parameters:
+        return response(400, {"error": "no path parameters : need account"})
+    filter_exchange = parameters["exchange"] if "exchange" in parameters else None
+    filter_symbol = parameters["symbol"] if "symbol" in parameters else None
+    filter_account = parameters["account"]
 
-    return handle(filter_exchange, filter_symbol)
+    return handle(filter_exchange, filter_symbol, filter_account)
 
 
-def handle(filter_exchange, filter_symbol):
-    # for now, limit to today otherwise no way of getting value
-    todays_date = datetime.datetime.now().strftime("%Y-%m-%d")
-    holdings_response = requests.get("{}/holdings?date={}".format(HOST, todays_date))
-    if holdings_response.status_code != 200:
-        print(holdings_response)
-        return response(holdings_response.status_code, holdings_response.text)
+def get_database_connection():
+    try:
+        dbname = os.environ.get("PGDATABASE")
+        user = os.environ.get("PGUSER")
+        host = os.environ.get("PGHOST")
+        password = os.environ.get("PGPASSWORD")
+        connection = "dbname='{}' user='{}' host='{}' password='{}'".format(
+            dbname, user, host, password
+        )
+        conn = psycopg2.connect(connection)
+        return conn
+    except:
+        print("could not get database connection")
+        return None
 
+
+def handle(filter_exchange, filter_symbol, filter_account):
+    # need to include filter account - and now I need to go straight to the database, not use the API.
+    todays_date = datetime.date.today()
+    database_holdings = get_holdings(
+        filter_account, filter_exchange, filter_symbol, todays_date
+    )
+    if not len(database_holdings):
+        return response(200, [])
     total_value = 0
     total_spend = 0
     holdings = []
-    for holding in holdings_response.json():
+    for holding in database_holdings:
         exchange = holding["exchange"]
-        if filter_exchange and (exchange != filter_exchange):
-            continue
         symbol = holding["symbol"]
-        if filter_symbol and (symbol != filter_symbol):
-            continue
         quantity = holding["quantity"]
         spend = get_spend(exchange, symbol)
         total_spend = total_spend + spend
-        price = get_price(exchange, symbol)
-        if not price:
+        price = get_price(exchange, symbol)  # from price table, so most recent
+        if not price:  # should not happen
             holding = {
                 "exchange": exchange,
                 "symbol": symbol,
@@ -80,29 +90,52 @@ def handle(filter_exchange, filter_symbol):
 
 
 def get_price(exchange, symbol):
-    price_response = requests.get("{}/stocks/{}/{}".format(HOST, exchange, symbol))
-    if price_response.status_code != 200:
-        print(
-            "could not get price for {}.{} : status {}".format(
-                exchange, symbol, price_response.status_code
-            )
-        )
+    conn = get_database_connection()
+    if not conn:
         return None
-    print(price_response.json())
-    return price_response.json()["price"]
+
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, exchange, symbol, price::numeric::float8 FROM price WHERE exchange = %s AND symbol = %s",
+        [exchange, symbol],
+    )
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        return response(404, "not found")
+
+    return rows[0][3]
 
 
-def get_spend(exchange, symbol):
-    spend_response = requests.get("{}/spending/{}/{}".format(HOST, exchange, symbol))
-    if spend_response.status_code != 200:
-        print(
-            "could not get price for {}.{} : status {}".format(
-                exchange, symbol, spend_response.status_code
-            )
-        )
+# same code value and spending
+def get_spend(filter_exchange, filter_symbol):
+    conn = get_database_connection()
+    if not conn:
         return None
-    print(spend_response.json())
-    return spend_response.json()["total"]
+
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT date, exchange, symbol, sum(price * quantity)::numeric::float8 AS total
+        FROM transaction
+        WHERE exchange = %s AND symbol = %s
+        GROUP BY date, exchange, symbol
+        ORDER BY date, exchange, symbol;
+        """,
+        [filter_exchange, filter_symbol],
+    )
+    rows = cur.fetchall()
+    total = 0
+    data = []
+    for row in rows:
+        point = {
+            "date": row[0],
+            "exchange": row[1],
+            "symbol": row[2],
+            "total": round(row[3], 2),
+        }
+        data.append(point)
+        total = total + row[3]
+    return total
 
 
 def response(code, body):
@@ -111,3 +144,55 @@ def response(code, body):
         "headers": {"Content-Type": "application/json"},
         "body": json.dumps(body),
     }
+
+
+# same code : value and holdings
+def get_holdings(account, exchange, symbol, query_date):
+    conn = get_database_connection()
+    if not conn:
+        return []
+    cur = conn.cursor()
+    sql = "SELECT id, date, exchange, symbol, account, quantity, price FROM transaction ORDER BY date, exchange, symbol"
+    params = []
+    if account != "all":
+        sql = "SELECT id, date, exchange, symbol, account, quantity, price FROM transaction WHERE account = %s ORDER BY date, exchange, symbol"
+        params = [account]
+    cur.execute(sql, params)
+
+    transactions = cur.fetchall()
+
+    holdings_map = {}
+
+    for transaction in transactions:
+        transaction_date = transaction[1]
+        if transaction_date > query_date:
+            continue
+        if exchange is not None:
+            if transaction[2] != exchange:
+                continue
+        if symbol is not None:
+            if transaction[3] != symbol:
+                continue
+        key = transaction[2] + ":" + transaction[3] + ":" + transaction[4]
+        if not key in holdings_map:
+            holdings_map[key] = 0
+        holdings_map[key] = holdings_map[key] + transaction[5]
+
+    holdings = []
+    for key, value in holdings_map.items():
+        parts = key.split(":")
+        exchange = parts[0]
+        symbol = parts[1]
+        account = parts[2]
+        holdings.append(
+            {
+                "exchange": exchange,
+                "symbol": symbol,
+                "account": account,
+                "quantity": value,
+            }
+        )
+
+    # sort
+    holdings.sort(key=lambda x: x["exchange"] + ":" + x["symbol"])
+    return holdings
