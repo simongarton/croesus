@@ -4,9 +4,11 @@ import json
 from datetime import date, datetime, timedelta
 import psycopg2
 import sys
+import pytz
+
 
 API_KEY = "d3dce964c1b31b848333b69d"
-
+TIMEZONE = pytz.timezone('Pacific/Auckland')
 
 def response(code, body):
     return {
@@ -61,7 +63,7 @@ def post_rate(source, target):
         return response(404, "{} not found with source {}".format(target, source))
     rate = conversion_rates[target]
     # picking up UTC time ...
-    date = datetime.now().strftime("%Y-%m-%d")
+    date = datetime.now(TIMEZONE).strftime("%Y-%m-%d")
     save_rate_to_database(source, target, date, rate)
     return response(
         200,

@@ -58,19 +58,29 @@ class TotalValue extends React.Component {
     );
   }
 
+  removeNegativeZero(amount) {
+    let amt = amount.toFixed(2);
+    if (amt <= 0 && amt >= -1) {
+      amt = 0;
+    }
+    return amt;
+  }
+
   redGreen(amount, otherStyles) {
-    if (Number(amount) < 0) {
+    let amt = this.removeNegativeZero(amount);
+    if (Number(amt) < 0) {
       return otherStyles + ' red-text';
     }
-    if (Number(amount) > 0) {
+    if (Number(amt) > 0) {
       return otherStyles + ' green-text';
     }
     return otherStyles;
   }
 
   formatDollars(amount) {
+    let amt = this.removeNegativeZero(amount);
     var formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'NZD' });
-    return formatter.format(amount);
+    return formatter.format(amt);
   }
 
   formatNumber(amount) {
@@ -79,7 +89,8 @@ class TotalValue extends React.Component {
   }
 
   formatPercentage(amount) {
-    return Number(amount).toLocaleString() + '%';
+    let amt = amount.toFixed(4);
+    return Number(amt).toLocaleString() + '%';
   }
 
   render() {

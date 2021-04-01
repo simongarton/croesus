@@ -6,8 +6,10 @@ import time
 import os
 import psycopg2
 import sys
+import pytz
 
 
+TIMEZONE = pytz.timezone('Pacific/Auckland')
 HOST = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com"
 
 
@@ -17,9 +19,9 @@ HOST = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com"
 def lambda_handler(event, context):
 
     # I can get today's NZX ...
-    todays_date = datetime.datetime.now().strftime("%Y-%m-%d")
-    # .. but for NYSE I have to work 3 days ago as the API isn't current
-    older_date = (datetime.datetime.now() - datetime.timedelta(days=3)).strftime(
+    todays_date = datetime.datetime.now(TIMEZONE).strftime("%Y-%m-%d")
+    # .. but for NASDAQ/NYSE I have to work 3 days ago as the API isn't current
+    older_date = (datetime.datetime.now(TIMEZONE) - datetime.timedelta(days=3)).strftime(
         "%Y-%m-%d"
     )
     holdings_response = requests.get("{}/holdings/all?date={}".format(HOST, todays_date))
@@ -30,7 +32,7 @@ def lambda_handler(event, context):
     for holding in holdings_response.json():
         exchange = holding["exchange"].upper()
         symbol = holding["symbol"].upper()
-        update_price(exchange, symbol, older_date if exchange == "NYSE" else todays_date)
+        update_price(exchange, symbol, todays_date if exchange == "NZX" else older_date)
         updates = updates + 1
         # to confuse NZX website as I'm scrapting it
         time.sleep(random.randint(0, 20) / 10.0)

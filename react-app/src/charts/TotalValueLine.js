@@ -75,7 +75,7 @@ class TotalValueLine extends React.Component {
   }
 
   processValueFillInBlanks(data) {
-    console.log(data);
+    console.log('value', data);
     this.valueChartPoints = [];
     let actuals = {};
     let minDate = null;
@@ -107,6 +107,7 @@ class TotalValueLine extends React.Component {
   }
 
   processSpendingFillInBlanks(data) {
+    console.log('spending', data);
     this.spendingChartPoints = [];
     let actuals = {};
     let minDate = null;

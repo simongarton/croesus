@@ -6,7 +6,10 @@ import json
 from datetime import date, datetime, timedelta
 import psycopg2
 import sys
+import pytz
 
+
+TIMEZONE = pytz.timezone('Pacific/Auckland')
 HOST = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com"
 API_KEY = "5tl4ks_0QZJP5J8pE6JdvDbeXuQ7Cm1f"
 
@@ -104,13 +107,13 @@ def post_nzx_stock(symbol):
     h1 = soup.find_all("h1")
     price = float(h1[1].text.strip().replace("$", ""))
     save_price_to_database(exchange, symbol, price)
-    save_price_history_to_database(exchange, symbol, datetime.now().date(), price)
+    save_price_history_to_database(exchange, symbol, datetime.now(TIMEZONE).date(), price)
     return response(
         200,
         {
             "exchange": exchange,
             "symbol": symbol,
-            "date": datetime.now().strftime("%Y-%m-%d"),
+            "date": datetime.now(TIMEZONE).strftime("%Y-%m-%d"),
             "price": price,
         },
     )
@@ -123,8 +126,7 @@ def get_exchange_rate(date):
     return api_response.json()["rate"]
 
 
-def post_nyse_stock(symbol, date):
-    exchange = "NYSE"
+def post_us_stock(exchange, symbol, date):
     actual_date = datetime.strptime(date, "%Y-%m-%d")
     date = actual_date.strftime("%Y-%m-%d")
     url = "https://api.polygon.io/v1/open-close/{}/{}?apiKey={}".format(
@@ -155,7 +157,11 @@ def post_stock(exchange, symbol, date):
     if exchange == "NZX":
         return post_nzx_stock(symbol)
     if exchange == "NYSE":
-        return post_nyse_stock(symbol, date)
+        return post_us_stock(exchange, symbol, date)
+    if exchange == "NASDAQ":
+        return post_us_stock(exchange, symbol, date)
+    if exchange == "CBOE":
+        return post_us_stock(exchange, symbol, date)
     return response(400, "invalid exchange " + exchange)
 
 

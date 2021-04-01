@@ -3,7 +3,10 @@ import psycopg2
 import os
 import datetime
 from datetime import timedelta
+import pytz
 
+
+TIMEZONE = pytz.timezone('Pacific/Auckland')
 
 def lambda_handler(event, context):
 
@@ -41,7 +44,8 @@ def get_database_connection():
 
 def handle(filter_exchange, filter_symbol, filter_account):
     # need to include filter account - and now I need to go straight to the database, not use the API.
-    todays_date = datetime.date.today()
+    todays_date = datetime.datetime.now(TIMEZONE).date()
+
     database_holdings = get_holdings(
         filter_account, filter_exchange, filter_symbol, todays_date
     )
@@ -294,14 +298,14 @@ def build_value(holding):
 
     quantity = 0
     price = 0
-    for day in daterange(earliest, datetime.date.today() + timedelta(days=1)):
+    for day in daterange(earliest, datetime.datetime.now(TIMEZONE).date() + datetime.timedelta(days=1)):
         for transaction in transactions:
             if transaction['date'] == day:
                 quantity = quantity + transaction['quantity']
         if day in prices:
             price = prices[day]
         value = quantity * price
-        # print('on {} for {}:{} ({}) I have q {} p {} v {}'.format(day,exchange, symbol, account, quantity, price, value))
+        print('on {} for {}:{} ({}) I have q {} p {} v {}'.format(day,exchange, symbol, account, quantity, price, value))
         sql = 'insert into value (date, exchange, symbol, account, price, quantity, value) values (%s,%s,%s,%s,%s,%s,%s)'
         cur.execute(sql, [day, exchange, symbol, account, price, quantity, value])
     conn.commit()

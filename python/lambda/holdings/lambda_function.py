@@ -30,6 +30,7 @@ def get_database_connection():
 
 
 def lambda_handler(event, context):
+    # bug this is US time so doesn't work in the mornings; should add a day ?
     query_date = datetime.date.today()
     if "queryStringParameters" in event:
         if "date" in event["queryStringParameters"]:
@@ -74,6 +75,7 @@ def get_symbol_response(parameters, query_date):
 
 # same code : value and holdings
 def get_holdings(account, exchange, symbol, query_date):
+    print("get")
     conn = get_database_connection()
     if not conn:
         return []
@@ -90,14 +92,18 @@ def get_holdings(account, exchange, symbol, query_date):
     holdings_map = {}
 
     for transaction in transactions:
+        print(transaction)
         transaction_date = transaction[1]
         if transaction_date > query_date:
+            print('date')
             continue
         if exchange is not None:
             if transaction[2] != exchange:
+                print('exchange')
                 continue
         if symbol is not None:
             if transaction[3] != symbol:
+                print('symbol')
                 continue
         key = transaction[2] + ":" + transaction[3]
         if not key in holdings_map:

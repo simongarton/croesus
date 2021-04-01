@@ -55,9 +55,6 @@ exit
 
 docker cp lambdalayer:croesus_layer.zip ~/Desktop/
 
-
-
-
 # postgres
 
 https://pypi.org/project/aws-psycopg2/
