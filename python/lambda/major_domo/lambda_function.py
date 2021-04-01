@@ -1,5 +1,4 @@
 import json
-from python.lambda.value.lambda_function import rebuild_value_table
 import requests
 import datetime
 import random
@@ -23,7 +22,8 @@ def lambda_handler(event, context):
     older_date = (datetime.datetime.now() - datetime.timedelta(days=3)).strftime(
         "%Y-%m-%d"
     )
-    holdings_response = requests.get("{}/holdings?date={}".format(HOST, todays_date))
+    holdings_response = requests.get("{}/holdings/all?date={}".format(HOST, todays_date))
+    print(holdings_response)
     if holdings_response.status_code != 200:
         return response(holdings_response.status_code, holdings_response.text)
     updates = 0
@@ -57,6 +57,7 @@ def rebuild_value_table():
 def update_price(exchange, symbol, todays_date):
     # first we get it from the cache
     url = "{}/stocks/{}/{}/{}".format(HOST, exchange, symbol, todays_date)
+    print(url)
     price_response = requests.get(url)
     # if not found, try POSTing to refresh it
     if price_response.status_code == 404:

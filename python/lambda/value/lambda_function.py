@@ -55,7 +55,7 @@ def handle(filter_exchange, filter_symbol, filter_account):
         symbol = holding["symbol"]
         quantity = holding["quantity"]
         account = holding["account"]
-        spend = get_spend(exchange, symbol, filter_account)
+        spend = get_spend(exchange, symbol, account)
         total_spend = total_spend + spend
         price = get_price(exchange, symbol)  # from price table, so most recent
         if not price:  # should not happen
@@ -294,7 +294,7 @@ def build_value(holding):
 
     quantity = 0
     price = 0
-    for day in daterange(earliest, datetime.date.today()):
+    for day in daterange(earliest, datetime.date.today() + timedelta(days=1)):
         for transaction in transactions:
             if transaction['date'] == day:
                 quantity = quantity + transaction['quantity']
