@@ -55,13 +55,10 @@ def lambda_handler(event, context):
 
 
 def post_rate(source, target):
-    url = "https://v6.exchangerate-api.com/v6/{}/latest/{}".format(API_KEY, source)
+    url = "https://v6.exchangerate-api.com/v6/{}/pair/{}/{}".format(API_KEY, source, target)
     api_response = requests.get(url)
     api_response.raise_for_status()
-    conversion_rates = api_response.json()["conversion_rates"]
-    if not target in conversion_rates:
-        return response(404, "{} not found with source {}".format(target, source))
-    rate = conversion_rates[target]
+    rate = api_response.json()["conversion_rate"]
     # picking up UTC time ...
     date = datetime.now(TIMEZONE).strftime("%Y-%m-%d")
     save_rate_to_database(source, target, date, rate)

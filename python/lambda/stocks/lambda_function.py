@@ -7,6 +7,7 @@ from datetime import date, datetime, timedelta
 import psycopg2
 import sys
 import pytz
+import yfinance as yf
 
 
 TIMEZONE = pytz.timezone('Pacific/Auckland')
@@ -96,6 +97,28 @@ def getRandomUserAgent():
         "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.104 Safari/537.36",
     ]
 
+def post_asx_stock(symbol, date):
+    actual_date = datetime.strptime(date, "%Y-%m-%d")
+    date = actual_date.strftime("%Y-%m-%d")
+    exchange = "ASX"
+    ticker = yf.Ticker(symbol)
+    data = ticker.info
+    exchange_rate = get_exchange_rate('AUD', date)
+    if exchange_rate == None:
+        return response(500, {"message": "no exchange rate for " + date})
+    price = round(data['regularMarketPrice'] * exchange_rate, 2)
+
+    save_price_to_database(exchange, symbol, price)
+    save_price_history_to_database(exchange, symbol, datetime.now(TIMEZONE).date(), price)
+    return response(
+        200,
+        {
+            "exchange": exchange,
+            "symbol": symbol,
+            "date": datetime.now(TIMEZONE).strftime("%Y-%m-%d"),
+            "price": price,
+        },
+    )
 
 def post_nzx_stock(symbol):
     exchange = "NZX"
@@ -119,8 +142,8 @@ def post_nzx_stock(symbol):
     )
 
 
-def get_exchange_rate(date):
-    url = "{}/exchange-rate/USD/NZD/{}".format(HOST, date)
+def get_exchange_rate(currency, date):
+    url = "{}/exchange-rate/{}/NZD/{}".format(HOST, currency, date)
     api_response = requests.get(url)
     api_response.raise_for_status()
     return api_response.json()["rate"]
@@ -134,7 +157,7 @@ def post_us_stock(exchange, symbol, date):
     )
     api_response = requests.get(url)
     api_response.raise_for_status()
-    exchange_rate = get_exchange_rate(date)
+    exchange_rate = get_exchange_rate('USD', date)
     if exchange_rate == None:
         return response(500, {"message": "no exchange rate for " + date})
     price = round(api_response.json()["close"] * exchange_rate, 2)
@@ -154,6 +177,8 @@ def post_us_stock(exchange, symbol, date):
 
 
 def post_stock(exchange, symbol, date):
+    if exchange == "ASX":
+        return post_asx_stock(symbol, date)
     if exchange == "NZX":
         return post_nzx_stock(symbol)
     if exchange == "NYSE":
