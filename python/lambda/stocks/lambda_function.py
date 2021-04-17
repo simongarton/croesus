@@ -101,7 +101,7 @@ def post_asx_stock(symbol, date):
     actual_date = datetime.strptime(date, "%Y-%m-%d")
     date = actual_date.strftime("%Y-%m-%d")
     exchange = "ASX"
-    ticker = yf.Ticker(symbol)
+    ticker = yf.Ticker(symbol + '.AX')
     data = ticker.info
     exchange_rate = get_exchange_rate('AUD', date)
     if exchange_rate == None:
