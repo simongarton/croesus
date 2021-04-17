@@ -33,3 +33,15 @@ CREATE TABLE "exchange-rate" (
 
 ALTER TABLE "exchange-rate"
     ADD CONSTRAINT exchange-rate-unique UNIQUE (date, source, target);
+  
+
+select * from "transaction" t ;
+
+select * from value where account  = 'simon' order by date desc;
+
+select * from "transaction" t where account  = 'simon' order by date desc;
+
+select * from price order by exchange , symbol ;
+
+select * from price_history order by date desc, exchange , symbol ;
+select date, sum(value) from value group by date order by date desc;

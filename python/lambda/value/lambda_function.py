@@ -74,6 +74,8 @@ def handle(filter_exchange, filter_symbol, filter_account):
             }
             holdings.append(holding)
             continue
+        print(quantity)
+        print(price)
         value = quantity * price
         total_value = total_value + value
         gain_loss = value - spend
@@ -113,7 +115,7 @@ def get_price(exchange, symbol):
     )
     rows = cur.fetchall()
     if len(rows) == 0:
-        return response(404, "not found")
+        return None
 
     return rows[0][3]
 

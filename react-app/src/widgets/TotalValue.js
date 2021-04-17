@@ -50,24 +50,28 @@ class TotalValue extends React.Component {
         <td className="right-align table-cell-pad">{this.formatDollars(element['price'])}</td>
         <td className="right-align table-cell-pad">{this.formatDollars(element['value'])}</td>
         <td className="right-align table-cell-pad">{this.formatDollars(element['spend'])}</td>
-        <td className={this.redGreen(element['gain_loss'], 'right-align table-cell-pad')}>{this.formatDollars(element['gain_loss'])}</td>
-        <td className={this.redGreen(element['percentage'], 'right-align table-cell-pad')}>
+        <td className={this.redGreen(element['gain_loss'], 'right-align table-cell-pad', 2)}>{this.formatDollars(element['gain_loss'])}</td>
+        <td className={this.redGreen(element['percentage'], 'right-align table-cell-pad', 5)}>
           {this.formatPercentage(element['percentage'])}
         </td>
       </tr>
     );
   }
 
-  removeNegativeZero(amount) {
-    let amt = amount.toFixed(2);
-    if (amt <= 0 && amt >= -1) {
-      amt = 0;
+  removeNegativeZero(amount, n) {
+    if (!amount) {
+      return amount;
     }
+    let amt = amount.toFixed(n);
+    // if (amt <= 0 && amt >= -1) {
+    //   amt = 0;
+    // }
     return amt;
   }
 
-  redGreen(amount, otherStyles) {
-    let amt = this.removeNegativeZero(amount);
+  redGreen(amount, otherStyles, n) {
+    let amt = this.removeNegativeZero(amount, n);
+    console.log('amount ', amount, 'n', n, 'amt', amt);
     if (Number(amt) < 0) {
       return otherStyles + ' red-text';
     }
@@ -78,7 +82,7 @@ class TotalValue extends React.Component {
   }
 
   formatDollars(amount) {
-    let amt = this.removeNegativeZero(amount);
+    let amt = this.removeNegativeZero(amount, 2);
     var formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'NZD' });
     return formatter.format(amt);
   }
@@ -89,7 +93,10 @@ class TotalValue extends React.Component {
   }
 
   formatPercentage(amount) {
-    let amt = amount.toFixed(4);
+    if (!amount) {
+      return amount;
+    }
+    let amt = (100 * amount).toFixed(4);
     return Number(amt).toLocaleString() + '%';
   }
 
@@ -121,8 +128,8 @@ class TotalValue extends React.Component {
         </h1>
         <p>
           Spend : {this.formatDollars(spend)} &nbsp; Gain/Loss :{' '}
-          <span className={this.redGreen(gainLoss)}>{this.formatDollars(gainLoss)} </span>&nbsp; {'% : '}
-          <span className={this.redGreen(gainLoss)}>{this.formatPercentage(percentage)}</span>
+          <span className={this.redGreen(gainLoss, '', 2)}>{this.formatDollars(gainLoss)} </span>&nbsp; {'% : '}
+          <span className={this.redGreen(gainLoss, '', 5)}>{this.formatPercentage(percentage)}</span>
         </p>
         <table>
           <thead>

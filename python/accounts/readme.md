@@ -10,7 +10,7 @@ are the other way around.
 - export files from bank for timeframes into data folder
 - copy files to bnz_joint.csv, anz_personal.csv, anz_visa.csv
 - move the original files to the archive sub folder
-- import : go into accounts folder and run these `batch.sh` which has these three lines
+- import : go into accounts folder and run `batch.sh` which has these three lines
 
 ```
 python3 import_csv_bnz_joint.py ../../data/bnz_joint.csv
