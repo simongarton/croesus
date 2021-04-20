@@ -75,7 +75,6 @@ class TotalValueLine extends React.Component {
   }
 
   processValueFillInBlanks(data) {
-    console.log('value', data);
     this.valueChartPoints = [];
     let actuals = {};
     let minDate = null;
@@ -107,7 +106,6 @@ class TotalValueLine extends React.Component {
   }
 
   processSpendingFillInBlanks(data) {
-    console.log('spending', data);
     this.spendingChartPoints = [];
     let actuals = {};
     let minDate = null;
@@ -204,7 +202,7 @@ class TotalValueLine extends React.Component {
                   unit: 'day',
                 },
                 ticks: {
-                  min: '2020-12-01',
+                  min: '2021-01-01',
                   max: '2021-07-01',
                 },
               },

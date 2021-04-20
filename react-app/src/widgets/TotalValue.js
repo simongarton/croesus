@@ -71,7 +71,6 @@ class TotalValue extends React.Component {
 
   redGreen(amount, otherStyles, n) {
     let amt = this.removeNegativeZero(amount, n);
-    console.log('amount ', amount, 'n', n, 'amt', amt);
     if (Number(amt) < 0) {
       return otherStyles + ' red-text';
     }

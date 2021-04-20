@@ -74,8 +74,6 @@ def handle(filter_exchange, filter_symbol, filter_account):
             }
             holdings.append(holding)
             continue
-        print(quantity)
-        print(price)
         value = quantity * price
         total_value = total_value + value
         gain_loss = value - spend
@@ -307,7 +305,7 @@ def build_value(holding):
         if day in prices:
             price = prices[day]
         value = quantity * price
-        print('on {} for {}:{} ({}) I have q {} p {} v {}'.format(day,exchange, symbol, account, quantity, price, value))
+        #print('on {} for {}:{} ({}) I have q {} p {} v {}'.format(day,exchange, symbol, account, quantity, price, value))
         sql = 'insert into value (date, exchange, symbol, account, price, quantity, value) values (%s,%s,%s,%s,%s,%s,%s)'
         cur.execute(sql, [day, exchange, symbol, account, price, quantity, value])
     conn.commit()

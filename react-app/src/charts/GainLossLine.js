@@ -73,7 +73,7 @@ class GainLossLine extends React.Component {
       }
     });
     let total = 0;
-    for (var d = new Date(2020, 11, 31); d <= new Date(); d.setDate(d.getDate() + 1)) {
+    for (var d = new Date(2021, 0, 1); d <= new Date(); d.setDate(d.getDate() + 1)) {
       let currentDate = d;
       if (currentDate in actuals) {
         total = actuals[currentDate];
@@ -83,7 +83,6 @@ class GainLossLine extends React.Component {
         y: total,
       };
       this.valueChartPoints.push(point);
-      currentDate = currentDate + 1;
     }
     this.buildGainAndLoss();
   }
@@ -100,7 +99,13 @@ class GainLossLine extends React.Component {
       }
     });
     let total = 0;
-    for (var d = new Date(2020, 11, 31); d <= new Date(); d.setDate(d.getDate() + 1)) {
+    for (var d1 = minDate; d1 < new Date(2021, 0, 1); d1.setDate(d1.getDate() + 1)) {
+      let currentDate = d1;
+      if (currentDate in actuals) {
+        total = total + actuals[currentDate];
+      }
+    }
+    for (var d = new Date(2021, 0, 1); d <= new Date(); d.setDate(d.getDate() + 1)) {
       let currentDate = d;
       if (currentDate in actuals) {
         total = total + actuals[currentDate];
@@ -110,7 +115,6 @@ class GainLossLine extends React.Component {
         y: total,
       };
       this.spendingChartPoints.push(point);
-      currentDate = currentDate + 1;
     }
     this.buildGainAndLoss();
   }
@@ -130,6 +134,7 @@ class GainLossLine extends React.Component {
     for (let i = 0; i < this.spendingChartPoints.length; i++) {
       let spending = this.spendingChartPoints[i];
       let value = this.valueChartPoints[i];
+      console.log('thing', spending['y']);
       this.gainAndLossChartPoints.push({
         x: value['x'],
         y: value['y'] - spending['y'],
@@ -198,7 +203,7 @@ class GainLossLine extends React.Component {
                   unit: 'day',
                 },
                 ticks: {
-                  min: '2020-12-01',
+                  min: '2021-01-01',
                   max: '2021-07-01',
                 },
               },
