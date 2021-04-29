@@ -34,26 +34,28 @@ def lambda_handler(event, context):
         symbol = holding["symbol"].upper()
         update_price(exchange, symbol, todays_date if exchange == "NZX" else older_date)
         updates = updates + 1
-        # to confuse NZX website as I'm scrapting it
-        time.sleep(random.randint(0, 20) / 10.0)
 
     # also do exchange rate
     post_todays_exchange_rate("USD", "NZD")
 
     # and rebuild value table
     rebuild_value_table()
-
+    
     return response(200, {"message": "{} prices updated".format(updates)})
 
 
 def post_todays_exchange_rate(source, target):
     url = "{}/exchange-rate/{}/{}".format(HOST, source, target)
+    print("updating exchange rate : {}".format(url))
     requests.post(url)
+    print("updated exchange rate.")
 
 
 def rebuild_value_table():
     url = "{}/value".format(HOST)
+    print("rebuilding value table : {}".format(url))
     requests.post(url)
+    print("rebuilt value table.")
 
 
 def update_price(exchange, symbol, todays_date):
