@@ -37,14 +37,9 @@ def get_database_connection():
 
 
 def lambda_handler(event, context):
-    if not "pathParameters" in event:
-        return response(400, {"error": "no parameters - need account"})
 
     method = event["requestContext"]["http"]["method"]
-    parameters = event["pathParameters"]
-
-    if not "account" in parameters:
-        return response(400, {"error": "no parameters - need account"})
+    parameters = event["pathParameters"] if "pathParameters" in event else {}
 
     if method == "GET":
         return get(parameters)
@@ -54,11 +49,13 @@ def lambda_handler(event, context):
 
 
 def get(parameters):
+    if not "account" in parameters:
+        return get_total_response(parameters)
     if "symbol" in parameters:
         return get_symbol_response(parameters)
     if "exchange" in parameters:
         return get_exchange_response(parameters)
-    return get_total_response(parameters)
+    return get_account_response(parameters)
 
 
 def post(parameters, body):
@@ -93,9 +90,13 @@ def add_transaction(exchange, symbol, account, date, quantity, price):
     return True
 
 
-def get_total_response(parameters):
+def get_account_response(parameters):
     account = parameters["account"]
     return response(200, get_transactions(account, None, None))
+
+
+def get_total_response(parameters):
+    return response(200, get_transactions(None, None, None))
 
 
 def get_exchange_response(parameters):
@@ -131,7 +132,7 @@ def get_transactions(account, exchange, symbol):
     cur = conn.cursor()
     sql = "SELECT id, date, exchange, symbol, account, quantity, price FROM transaction ORDER BY date, exchange, symbol"
     params = []
-    if account != "all":
+    if account:
         sql = "SELECT id, date, exchange, symbol, account, quantity, price FROM transaction WHERE account = %s ORDER BY date, exchange, symbol"
         params = [account]
 
