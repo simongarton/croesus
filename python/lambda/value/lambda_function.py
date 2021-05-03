@@ -21,7 +21,7 @@ def lambda_handler(event, context):
         return response(400, {"error": "no path parameters : need account"})
     filter_exchange = parameters["exchange"] if "exchange" in parameters else None
     filter_symbol = parameters["symbol"] if "symbol" in parameters else None
-    filter_account = parameters["account"]
+    filter_account = parameters["account"] if "account" in parameters else None
 
     return handle(filter_exchange, filter_symbol, filter_account)
 
@@ -133,7 +133,7 @@ def get_spend(filter_exchange, filter_symbol, filter_account):
         ORDER BY date, exchange, symbol;
         """
     params = [filter_exchange, filter_symbol]
-    if filter_account != 'all':
+    if filter_account:
         sql = """
             SELECT date, exchange, symbol, sum(price * quantity)::numeric::float8 AS total
             FROM transaction
@@ -175,7 +175,7 @@ def get_holdings(account, exchange, symbol, query_date):
     cur = conn.cursor()
     sql = "SELECT id, date, exchange, symbol, account, quantity, price FROM transaction ORDER BY date, exchange, symbol"
     params = []
-    if account != "all":
+    if account:
         sql = "SELECT id, date, exchange, symbol, account, quantity, price FROM transaction WHERE account = %s ORDER BY date, exchange, symbol"
         params = [account]
     cur.execute(sql, params)
