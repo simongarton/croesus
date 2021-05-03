@@ -36,10 +36,11 @@ def lambda_handler(event, context):
         if "date" in event["queryStringParameters"]:
             query_date = dateparser.parse(event["queryStringParameters"]["date"]).date()
 
-    if not "pathParameters" in event:
-        return response(400, {"error": "no path parameters, need account"})
-
     method = event["requestContext"]["http"]["method"]
+
+    if not "pathParameters" in event:
+        return get_total_response(query_date)
+
     parameters = event["pathParameters"]
 
     if method == "GET":
@@ -52,10 +53,14 @@ def get(parameters, query_date):
         return get_symbol_response(parameters, query_date)
     if "exchange" in parameters:
         return get_exchange_response(parameters, query_date)
-    return get_total_response(parameters, query_date)
+    return get_account_response(parameters, query_date)
 
 
-def get_total_response(parameters, query_date):
+def get_total_response(query_date):
+    return response(200, get_holdings(None, None, None, query_date))
+
+
+def get_account_response(parameters, query_date):
     account = parameters["account"]
     return response(200, get_holdings(account, None, None, query_date))
 
@@ -75,14 +80,13 @@ def get_symbol_response(parameters, query_date):
 
 # same code : value and holdings
 def get_holdings(account, exchange, symbol, query_date):
-    print("get")
     conn = get_database_connection()
     if not conn:
         return []
     cur = conn.cursor()
     sql = "SELECT id, date, exchange, symbol, account, quantity, price FROM transaction ORDER BY date, exchange, symbol"
     params = []
-    if account != "all":
+    if account:
         sql = "SELECT id, date, exchange, symbol, account, quantity, price FROM transaction WHERE account = %s ORDER BY date, exchange, symbol"
         params = [account]
     cur.execute(sql, params)
