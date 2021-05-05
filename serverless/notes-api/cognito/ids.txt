@@ -1,0 +1,12 @@
+User Pool
+
+ap-southeast-2_c8dxRL7kq
+Pool ARN arn:aws:cognito-idp:ap-southeast-2:396194066872:userpool/ap-southeast-2_c8dxRL7kq
+
+App Client ID
+
+7864qmfv1cvpa4apg5lb22cl02
+
+Identity Pool
+
+ap-southeast-2:b4e29b38-ddd7-48bc-912f-4235de44d7c9
