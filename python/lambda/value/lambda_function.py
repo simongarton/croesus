@@ -14,11 +14,7 @@ def lambda_handler(event, context):
     if method == 'POST':
         return rebuild_value_table()
 
-    if not "pathParameters" in event:
-        return response(400, {"error": "no path parameters : need account"})
-    parameters = event["pathParameters"]
-    if not "account" in parameters:
-        return response(400, {"error": "no path parameters : need account"})
+    parameters = event["pathParameters"] if "pathParameters" in event else {}
     filter_exchange = parameters["exchange"] if "exchange" in parameters else None
     filter_symbol = parameters["symbol"] if "symbol" in parameters else None
     filter_account = parameters["account"] if "account" in parameters else None

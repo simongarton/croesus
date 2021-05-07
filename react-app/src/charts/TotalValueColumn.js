@@ -14,7 +14,13 @@ class TotalValueColumn extends React.Component {
   }
 
   updateAmount(account) {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/' + account)
+    var url;
+    if (account === 'all') {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/all_value';
+    } else {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/' + account;
+    }
+    fetch(url)
       .then((res) => res.json())
       .then(
         (result) => {

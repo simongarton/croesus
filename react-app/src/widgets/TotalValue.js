@@ -17,7 +17,13 @@ class TotalValue extends React.Component {
   }
 
   updateAmount(account) {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/' + account)
+    var url;
+    if (account === 'all') {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/all_value';
+    } else {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/' + account;
+    }
+    fetch(url)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -63,9 +69,6 @@ class TotalValue extends React.Component {
       return amount;
     }
     let amt = amount.toFixed(n);
-    // if (amt <= 0 && amt >= -1) {
-    //   amt = 0;
-    // }
     return amt;
   }
 
@@ -74,7 +77,7 @@ class TotalValue extends React.Component {
     if (Number(amt) < 0) {
       return otherStyles + ' red-text';
     }
-    if (Number(amt) > 0) {
+    if (Number(amt) >= 0) {
       return otherStyles + ' green-text';
     }
     return otherStyles;
@@ -92,7 +95,7 @@ class TotalValue extends React.Component {
   }
 
   formatPercentage(amount) {
-    if (!amount) {
+    if (amount === null) {
       return amount;
     }
     let amt = (100 * amount).toFixed(4);

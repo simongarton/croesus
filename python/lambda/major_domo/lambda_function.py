@@ -54,7 +54,6 @@ def rebuild_value_table():
 
 
 def update_price(exchange, symbol, date):
-    # first we get it from the cache
     url = "{}/stocks/{}/{}/{}".format(HOST, exchange, symbol, date)
     print(url)
     price_response = requests.post(url)
