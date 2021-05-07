@@ -21,13 +21,13 @@ class ValueLine extends React.Component {
   }
 
   updateAmount(account) {
-    let url =
-      'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/' +
-      account +
-      '/' +
-      this.state.exchange +
-      '/' +
-      this.state.symbol;
+    var url;
+    if (account === 'all') {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/all_history';
+    } else {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/' + account;
+    }
+    url = url + '/' + this.state.exchange + '/' + this.state.symbol;
     fetch(url)
       .then((res) => res.json())
       .then(
@@ -45,13 +45,12 @@ class ValueLine extends React.Component {
           });
         }
       );
-    url =
-      'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/' +
-      account +
-      '/' +
-      this.state.exchange +
-      '/' +
-      this.state.symbol;
+    if (account === 'all') {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/all_spending';
+    } else {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/' + account;
+    }
+    url = url + '/' + this.state.exchange + '/' + this.state.symbol;
     fetch(url)
       .then((res) => res.json())
       .then(

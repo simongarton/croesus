@@ -299,6 +299,7 @@ def build_value(holding):
 
     # this is going to get very big
     prices = find_prices(exchange, symbol)
+    print("for {}.{} I have {} prices".format(exchange, symbol, len(prices)))
 
     quantity = 0
     price = 0

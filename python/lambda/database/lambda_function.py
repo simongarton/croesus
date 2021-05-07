@@ -87,6 +87,7 @@ def stocks_save_price_to_database(event):
 
 
 def save_price_to_database(exchange, symbol, price):
+    print("save_price_to_database : {}.{} @ {}".format(exchange, symbol, price))
     conn = get_database_connection()
     if not conn:
         return
@@ -106,6 +107,7 @@ def save_price_to_database(exchange, symbol, price):
             [exchange, symbol, price],
         )
     conn.commit()
+    print("save_price_to_database done")
     return response(
         200, {"exchange": exchange, "symbol": symbol, "price": price}
     )
@@ -121,6 +123,7 @@ def stocks_save_price_history_to_database(event):
 
     
 def save_price_history_to_database(exchange, symbol, date, price):
+    print("save_price_history_to_database : {}.{} @ {} on {}".format(exchange, symbol, price, date))
     conn = get_database_connection()
     if not conn:
         return
@@ -142,6 +145,7 @@ def save_price_history_to_database(exchange, symbol, date, price):
             [exchange, symbol, date, price],
         )
     conn.commit()
+    print("save_price_history_to_database done")
     return response(
         200, {"exchange": exchange, "symbol": symbol, "date": date, "price": price}
     )

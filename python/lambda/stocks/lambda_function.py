@@ -23,6 +23,8 @@ def response(code, body):
 
 
 def lambda_handler(event, context):
+    if 'update_prices' in event['rawPath']:
+        update_prices_for_date(event)
     if not "pathParameters" in event:
         return {"statusCode": 400, "body": {"message": "no pathParameters"}}
     parameters = event["pathParameters"]
@@ -135,6 +137,8 @@ def save_price_to_database(exchange, symbol, price):
             'price':price
         }
     }
+    print("save_price_to_database")
+    print(payload)
     api_response = lambda_client.invoke(
         FunctionName = 'arn:aws:lambda:ap-southeast-2:396194066872:function:database',
         InvocationType = 'RequestResponse',
@@ -156,6 +160,8 @@ def save_price_history_to_database(exchange, symbol, date, price):
             'price':price
         }
     }
+    print("save_price_history_to_database")
+    print(payload)
     api_response = lambda_client.invoke(
         FunctionName = 'arn:aws:lambda:ap-southeast-2:396194066872:function:database',
         InvocationType = 'RequestResponse',
@@ -164,3 +170,36 @@ def save_price_history_to_database(exchange, symbol, date, price):
  
     responseFromChild = json.load(api_response['Payload'])
     print(responseFromChild)
+
+def update_prices_for_date(event):
+    parameters = event["pathParameters"]
+    if not "date" in parameters:
+        date = datetime.now().strftime("%Y-%m-%d")
+    else:
+        date = parameters["date"]
+
+    holdings_response = requests.get("{}/all_holdings?date={}".format(HOST, date))
+    print(holdings_response)
+    if holdings_response.status_code != 200:
+        return response(holdings_response.status_code, holdings_response.text)
+    updates = 0
+    for holding in holdings_response.json():
+        exchange = holding["exchange"].upper()
+        symbol = holding["symbol"].upper()
+        update_price(exchange, symbol, date)
+        updates = updates + 1
+    return response(200,{"updates":updates, "date":date})
+
+def update_price(exchange, symbol, date):
+    url = "{}/stocks/{}/{}/{}".format(HOST, exchange, symbol, date)
+    print(url)
+    price_response = requests.post(url)
+    if price_response.status_code != 200:
+        print(
+            "could not get price for {}.{} : status {}".format(
+                exchange, symbol, price_response.status_code
+            )
+        )
+        return None
+    print(price_response.json())
+    return price_response.json()["price"]

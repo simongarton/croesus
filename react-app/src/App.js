@@ -24,7 +24,13 @@ export default class App extends React.Component {
   }
 
   updateHoldings(account) {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/holdings/' + account)
+    var url;
+    if (account === 'all') {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/all_holdings';
+    } else {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/holdings/' + account;
+    }
+    fetch(url)
       .then((res) => res.json())
       .then(
         (result) => {
