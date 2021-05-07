@@ -218,6 +218,7 @@ def get_holdings(account, exchange, symbol, query_date):
     holdings.sort(key=lambda x: x["exchange"] + ":" + x["symbol"])
     return holdings
 
+
 def empty_value_table():
     conn = get_database_connection()
     if not conn:
@@ -225,6 +226,7 @@ def empty_value_table():
     cur = conn.cursor()
     cur.execute('delete from value')
     conn.commit()
+
 
 def find_accounts():
     conn = get_database_connection()
@@ -268,6 +270,7 @@ def find_transactions(exchange, symbol, account):
         })
     return transactions
 
+
 def find_prices(exchange, symbol):
     conn = get_database_connection()
     if not conn:
@@ -279,6 +282,7 @@ def find_prices(exchange, symbol):
     for row in rows:
         prices[row[0]] = row[1]
     return prices
+
 
 def build_value(holding):
     conn = get_database_connection()
@@ -310,9 +314,11 @@ def build_value(holding):
         cur.execute(sql, [day, exchange, symbol, account, price, quantity, value])
     conn.commit()
 
+
 def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days)):
         yield start_date + timedelta(n)
+
 
 def rebuild_value_table():
     empty_value_table()

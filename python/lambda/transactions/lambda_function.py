@@ -49,13 +49,10 @@ def lambda_handler(event, context):
 
 
 def get(parameters):
-    if not "account" in parameters:
-        return get_total_response(parameters)
-    if "symbol" in parameters:
-        return get_symbol_response(parameters)
-    if "exchange" in parameters:
-        return get_exchange_response(parameters)
-    return get_account_response(parameters)
+    account = parameters["account"] if "account" in parameters else None
+    exchange = parameters["exchange"] if "exchange" in parameters else None
+    symbol = parameters["symbol"] if "symbol" in parameters else None
+    return response(200, get_transactions(account, exchange, symbol))
 
 
 def post(parameters, body):
@@ -88,30 +85,6 @@ def add_transaction(exchange, symbol, account, date, quantity, price):
 
     conn.commit()
     return True
-
-
-def get_account_response(parameters):
-    account = parameters["account"]
-    return response(200, get_transactions(account, None, None))
-
-
-def get_total_response(parameters):
-    return response(200, get_transactions(None, None, None))
-
-
-def get_exchange_response(parameters):
-    account = parameters["account"]
-    exchange = parameters["exchange"]
-    return response(200, get_transactions(account, exchange, None))
-
-
-def get_symbol_response(parameters):
-    account = parameters["account"]
-    exchange = parameters["exchange"]
-    symbol = parameters["symbol"]
-
-    return response(200, get_transactions(account, exchange, symbol))
-
 
 def map_transaction(row):
     return {

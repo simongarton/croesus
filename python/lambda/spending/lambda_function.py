@@ -37,20 +37,16 @@ def get_database_connection():
 
 
 def lambda_handler(event, context):
-    if not "pathParameters" in event:
-        return response(400, {"error": "no parameters - need account"})
-    parameters = event["pathParameters"]
-    if not "account" in parameters:
-        return response(400, {"error": "no parameters - need account"})
+    parameters = event["pathParameters"] if "pathParameters" in event else {}
+    account = parameters["account"] if "account" in parameters else None
+    exchange = parameters["exchange"] if "exchange" in parameters else None
+    symbol = parameters["symbol"] if "symbol" in parameters else None
 
-    account = parameters["account"]
-    if not "exchange" in parameters:
+    if not exchange:
         return response(200, get_total_spending(account))
-    if not "symbol" in parameters:
+    if not symbol:
         exchange = parameters["exchange"]
         return response(200, get_exchange_spending(account, exchange))
-    exchange = parameters["exchange"]
-    symbol = parameters["symbol"]
     return response(200, get_symbol_spending(account, exchange, symbol))
 
 
@@ -67,7 +63,7 @@ def get_total_spending(account):
         ORDER BY date;
         """
     params = []
-    if account != "all":
+    if account:
         sql = """
         SELECT date, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
@@ -102,7 +98,7 @@ def get_exchange_spending(account, filter_exchange):
         ORDER BY date, exchange;
         """
     params = [filter_exchange]
-    if account != "all":
+    if account:
         sql = """
         SELECT date, exchange, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
@@ -138,7 +134,7 @@ def get_symbol_spending(account, filter_exchange, filter_symbol):
         ORDER BY date, exchange, symbol;
         """
     params = [filter_exchange, filter_symbol]
-    if account != "all":
+    if account:
         sql = """
         SELECT date, exchange, symbol, sum(price * quantity)::numeric::float8 AS total
         FROM transaction

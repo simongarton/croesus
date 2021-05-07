@@ -23,7 +23,13 @@ class TotalValueLine extends React.Component {
   }
 
   updateAmount(account) {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/' + account)
+    var url;
+    if (account === 'all') {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/all_history';
+    } else {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/' + account;
+    }
+    fetch(url)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -39,7 +45,12 @@ class TotalValueLine extends React.Component {
           });
         }
       );
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/' + account)
+    if (account === 'all') {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/all_spending';
+    } else {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/' + account;
+    }
+    fetch(url)
       .then((res) => res.json())
       .then(
         (result) => {

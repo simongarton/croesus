@@ -27,7 +27,13 @@ class GainLossLine extends React.Component {
   }
 
   updateAmount(account) {
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/' + account)
+    var url;
+    if (account === 'all') {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/all_history';
+    } else {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/history/' + account;
+    }
+    fetch(url)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -43,7 +49,12 @@ class GainLossLine extends React.Component {
           });
         }
       );
-    fetch('https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/' + account)
+    if (account === 'all') {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/all_spending';
+    } else {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/spending/' + account;
+    }
+    fetch(url)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -134,7 +145,6 @@ class GainLossLine extends React.Component {
     for (let i = 0; i < this.spendingChartPoints.length; i++) {
       let spending = this.spendingChartPoints[i];
       let value = this.valueChartPoints[i];
-      console.log('thing', spending['y']);
       this.gainAndLossChartPoints.push({
         x: value['x'],
         y: value['y'] - spending['y'],
