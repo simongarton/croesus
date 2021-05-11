@@ -35,6 +35,8 @@ def lambda_handler(event, context):
             return handle_exchange_rate(event)
         if lambda_name == 'stocks':
             return handle_stocks(event)
+        if lambda_name == 'croesus':
+            return handle_croesus(event)
         return response(400, 'unable to handle database event for lambda \'{}\''.format(lambda_name))
     except Exception as e:
         return response(500, "failure in handler : {}".format(str(e)))
@@ -60,6 +62,14 @@ def handle_stocks(event):
     return response(400, 'unable to handle database method {} for lambda \'{}\''.format(method, lambda_name))
 
 
+def handle_croesus(event):
+    lambda_name = event['lambda']
+    method = event['method']
+    if method == 'password':
+        return croesus_password(event)
+    return response(400, 'unable to handle database method {} for lambda \'{}\''.format(method, lambda_name))
+
+
 def get_stock(exchange, symbol, date):
     conn = get_database_connection()
     if not conn:
@@ -75,6 +85,23 @@ def get_stock(exchange, symbol, date):
         return response(404, {"exchange": exchange, "symbol": symbol, "date": date})
     return response(
         200, {"exchange": exchange, "symbol": symbol, "date": date, "price": rows[0][3]}
+    )
+
+def croesus_password(event):
+    conn = get_database_connection()
+    if not conn:
+        return None
+
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT password FROM password WHERE password = %s ",
+        [event['data']['password']],
+    )
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        return response(401, {"reason": "unauthorized"})
+    return response(
+        200, {}
     )
 
 

@@ -2,7 +2,8 @@ CREATE TABLE "region" (
     id            BIGSERIAL PRIMARY KEY,
     exchange      TEXT      NOT NULL,
     symbol        TEXT      NOT NULL,
-    region        TEXT      NOT NULL
+    region        TEXT      NOT NULL,
+    type          TEXT      NOT NULL
 );
 
 ALTER TABLE "region"
