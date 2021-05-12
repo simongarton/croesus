@@ -71,7 +71,10 @@ class App extends React.Component {
   mainDetailsMobile() {
     return (
       <div>
-        <TotalValueMobileCard></TotalValueMobileCard>
+        <TotalValueMobileCard account="all"></TotalValueMobileCard>
+        <TotalValueMobileCard account="helen"></TotalValueMobileCard>
+        <TotalValueMobileCard account="simon"></TotalValueMobileCard>
+        <TotalValueMobileCard account="trust"></TotalValueMobileCard>
       </div>
     );
   }

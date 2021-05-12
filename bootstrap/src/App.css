@@ -28,7 +28,7 @@
 }
 
 .mobile-table-font {
-  font-size: 0.7em;
+  font-size: 7vw;
 }
 
 .mobile-table-pad {
@@ -51,4 +51,20 @@
 
 .App-link {
   color: #61dafb;
+}
+
+.red-text {
+  color: red;
+}
+
+.green-text {
+  color: green;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+.margin-auto {
+  margin: auto;
 }

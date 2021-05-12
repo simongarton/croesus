@@ -8,15 +8,21 @@ class TotalValueMobileCard extends React.Component {
     this.state = {
       isLoaded: false,
       response: null,
+      account: props.account,
     };
   }
 
   componentDidMount() {
-    this.updateAmount();
+    this.updateAmount(this.state.account);
   }
 
   updateAmount(account) {
-    const url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/all_value';
+    var url;
+    if (account === 'all') {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/all_value';
+    } else {
+      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/' + account;
+    }
     fetch(url)
       .then((res) => res.json())
       .then(
@@ -93,23 +99,25 @@ class TotalValueMobileCard extends React.Component {
 
   getTable() {
     return (
-      <table className="mobile-table-font mobile-table-pad">
+      <table className="mobile-table-font mobile-table-pad margin-auto">
         <thead>
           <tr>
-            <th className="left-align">account</th>
-            <th className="right-align">value</th>
-            <th className="right-align">spend</th>
-            <th className="right-align">gain/loss</th>
-            <th className="right-align">%</th>
+            <td className="left-align">value</td>
+            <td className="font-bold right-align mobile-table-cell-pad">{this.formatDollars(this.state.response['total'])}</td>
           </tr>
           <tr>
-            <td className="left-align">total</td>
-            <td className="right-align mobile-table-cell-pad">{this.formatDollars(this.state.response['total'])}</td>
-            <td className="right-align mobile-table-cell-pad">{this.formatDollars(this.state.response['spend'])}</td>
-            <td className={this.redGreen(this.state.response['gain_loss'], 'right-align mobile-table-cell-pad', 2)}>
+            <td className="left-align">spend</td>
+            <td className="font-bold right-align mobile-table-cell-pad">{this.formatDollars(this.state.response['spend'])}</td>
+          </tr>
+          <tr>
+            <td className="left-align">gain/loss</td>
+            <td className={this.redGreen(this.state.response['gain_loss'], 'font-bold right-align mobile-table-cell-pad', 2)}>
               {this.formatDollars(this.state.response['gain_loss'])}
             </td>
-            <td className={this.redGreen(this.state.response['gain_loss'], 'right-align mobile-table-cell-pad', 2)}>
+          </tr>
+          <tr>
+            <td className="left-align">%</td>
+            <td className={this.redGreen(this.state.response['gain_loss'], 'font-bold right-align mobile-table-cell-pad', 2)}>
               {this.formatPercentage(this.state.response['percentage'])}
             </td>
           </tr>
@@ -123,8 +131,8 @@ class TotalValueMobileCard extends React.Component {
     if (this.state.response == null) {
       return (
         <div>
-          <Card>
-            <Card.Title>Totals</Card.Title>
+          <Card className="mb-3">
+            <Card.Title>{this.state.account}</Card.Title>
             <Card.Body className="text-muted">thinking</Card.Body>
           </Card>
         </div>
@@ -134,8 +142,8 @@ class TotalValueMobileCard extends React.Component {
 
     return (
       <div>
-        <Card>
-          <Card.Title>Totals</Card.Title>
+        <Card className="mb-3">
+          <Card.Title>{this.state.account}</Card.Title>
           <Card.Body>{this.getTable()}</Card.Body>
         </Card>
       </div>
