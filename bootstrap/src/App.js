@@ -8,10 +8,35 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = { loggedIn: false };
+    this.doLogin = this.doLogin.bind(this);
+    this.setPassword = this.setPassword.bind(this);
   }
 
   doLogin = (event) => {
     event.preventDefault();
+    const url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/password';
+    fetch(url, {
+      method: 'POST',
+      body: '{"password":"' + this.state.password + '"}',
+    })
+      // res is the CORS response and gives me a 200
+      .then((res) => res.json())
+      .then(
+        // result is the body - and I have no status code !
+        (result) => {
+          this.setState({
+            response: result,
+            loggedIn: result['code'] === 200,
+          });
+        },
+        (error) => {
+          this.setState({
+            response: null,
+            loggedIn: false,
+            error,
+          });
+        }
+      );
     this.setState({ loggedIn: true });
   };
 
@@ -19,6 +44,10 @@ class App extends React.Component {
     event.preventDefault();
     this.setState({ loggedIn: false });
   };
+
+  setPassword(e) {
+    this.setState({ password: e.target.value });
+  }
 
   mainDetails() {
     return (
@@ -32,7 +61,7 @@ class App extends React.Component {
     return (
       <Form className="mb-3" onSubmit={this.doLogin}>
         <Form.Group controlId="password">
-          <Form.Control type="password" placeholder="Enter password"></Form.Control>
+          <Form.Control type="password" placeholder="Enter password" onChange={this.setPassword}></Form.Control>
           <Form.Text className="text-muted">secret password to mystical learnings </Form.Text>
         </Form.Group>
         <Button type="submit">Login</Button>

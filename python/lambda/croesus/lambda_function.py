@@ -24,7 +24,8 @@ def lambda_handler(event, context):
     
     method = event["requestContext"]["http"]["method"]
     parameters = event["pathParameters"] if "pathParameters" in event else {}
-
+    print(event)
+    print(event['body'])
     if method == "GET":
         return get(parameters)
     if method == "POST":

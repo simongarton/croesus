@@ -99,11 +99,16 @@ def croesus_password(event):
     )
     rows = cur.fetchall()
     if len(rows) == 0:
-        return response(401, {"reason": "unauthorized"})
-    return response(
-        200, {}
-    )
-
+        return response(401, {
+            "outcome": "unauthorized",
+            "code":401
+            }
+        )
+    return response(200, {
+            "outcome": "ok",
+            "code":200
+            }
+        )
 
 def stocks_save_price_to_database(event):
     data = event['data']

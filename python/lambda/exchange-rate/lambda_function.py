@@ -61,7 +61,6 @@ def get_rate(source, target, date):
     return response(200, json.loads(responseFromChild['body']))
 
 
-
 def post_rate(source, target):
     url = "https://v6.exchangerate-api.com/v6/{}/pair/{}/{}".format(API_KEY, source, target)
     api_response = requests.get(url)
