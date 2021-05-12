@@ -1,8 +1,12 @@
 import './App.css';
-import { Button, Container, Row, Card, Form, Alert } from 'react-bootstrap';
+import { Button, Container, Row, Col, Card, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import TotalValue from './widgets/TotalValue.js';
+import TotalValueMobileCard from './widgets/TotalValueMobileCard.js';
+
+const DESKTOP = 1;
+const MOBILE = 0;
 
 class App extends React.Component {
   constructor(props) {
@@ -49,7 +53,14 @@ class App extends React.Component {
     this.setState({ password: e.target.value });
   }
 
-  mainDetails() {
+  mainDetails(index) {
+    if (this.mainDetails === DESKTOP) {
+      return this.mainDetailsDesktop();
+    }
+    return this.mainDetailsMobile();
+  }
+
+  mainDetailsDesktop() {
     return (
       <div>
         <TotalValue account="all"></TotalValue>
@@ -57,12 +68,26 @@ class App extends React.Component {
     );
   }
 
-  loginForm() {
+  mainDetailsMobile() {
+    return (
+      <div>
+        <TotalValueMobileCard></TotalValueMobileCard>
+      </div>
+    );
+  }
+
+  loginForm(index) {
+    const autoCompleteTag = 'password' + index;
+    const controlIdTag = 'password' + index;
     return (
       <Form className="mb-3" onSubmit={this.doLogin}>
-        <Form.Group controlId="password">
-          <Form.Control type="password" placeholder="Enter password" onChange={this.setPassword}></Form.Control>
-          <Form.Text className="text-muted">secret password to mystical learnings </Form.Text>
+        <Form.Group controlId={controlIdTag}>
+          <Form.Control
+            type="password"
+            placeholder="Enter password"
+            onChange={this.setPassword}
+            autoComplete={autoCompleteTag}
+          ></Form.Control>
         </Form.Group>
         <Button type="submit">Login</Button>
       </Form>
@@ -77,28 +102,41 @@ class App extends React.Component {
     );
   }
 
-  render() {
+  body(index, imageName) {
     var details;
     var loginForm;
     var logoutForm;
     if (this.state.loggedIn) {
-      details = this.mainDetails();
+      details = this.mainDetails(index);
       loginForm = <div />;
-      logoutForm = this.logoutForm();
+      logoutForm = this.logoutForm(index);
     } else {
       details = <div />;
-      loginForm = this.loginForm();
+      loginForm = this.loginForm(index);
       logoutForm = <div />;
     }
     return (
+      <Container>
+        <Row>
+          <Col>
+            <Card className="mb-3">
+              <Card.Img src={imageName} />
+              <Card.Title>croesus</Card.Title>
+            </Card>
+            {loginForm}
+            {details}
+            {logoutForm}
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+
+  render() {
+    return (
       <div className="App">
-        <Card className="mb-3">
-          <Card.Img src="croesus.jpeg" />
-          <Card.Title>croesus</Card.Title>
-        </Card>
-        {loginForm}
-        {details}
-        {logoutForm}
+        <div className="hide-on-mobile">{this.body(DESKTOP, 'croesus-large.jpeg')}</div>
+        <div className="hide-on-desktop">{this.body(MOBILE, 'croesus.jpeg')}</div>
       </div>
     );
   }

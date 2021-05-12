@@ -1,15 +1,18 @@
 .App {
   text-align: center;
+  max-width: 1000px;
+  margin: auto;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+@media (max-width: 480px) {
+  .hide-on-mobile {
+    display: none;
+  }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+@media not all and (max-width: 480px) {
+  .hide-on-desktop {
+    display: none;
   }
 }
 
@@ -24,15 +27,28 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.mobile-table-font {
+  font-size: 0.7em;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.mobile-table-pad {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.mobile-table-cell-pad {
+  padding-left: 4px;
+  padding-right: 0px;
+}
+
+.right-align {
+  text-align: right;
+}
+
+.left-align {
+  text-align: left;
+}
+
+.App-link {
+  color: #61dafb;
 }
