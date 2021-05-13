@@ -4,6 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import TotalValue from './widgets/TotalValue.js';
 import TotalValueMobileCard from './widgets/TotalValueMobileCard.js';
+import TotalValueLineMobileCard from './widgets/TotalValueLineMobileCard.js';
+import GainLossLineMobileCard from './widgets/GainLossLineMobileCard.js';
 
 const DESKTOP = 1;
 const MOBILE = 0;
@@ -92,6 +94,8 @@ class App extends React.Component {
       <div>
         {this.toggleButtonGroup()}
         <TotalValueMobileCard account={this.state.account}></TotalValueMobileCard>
+        <TotalValueLineMobileCard account={this.state.account}></TotalValueLineMobileCard>
+        <GainLossLineMobileCard account={this.state.account}></GainLossLineMobileCard>
       </div>
     );
   }
