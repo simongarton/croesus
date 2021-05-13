@@ -71,18 +71,26 @@ class App extends React.Component {
 
   toggleButtonGroup() {
     return (
-      <ButtonGroup className="mb-3">
-        <Button onClick={this.accountChange}>all</Button>
-        <Button onClick={this.accountChange}>helen</Button>
-        <Button onClick={this.accountChange}>simon</Button>
-        <Button onClick={this.accountChange}>trust</Button>
+      <ButtonGroup className="mb-2">
+        <Button variant="secondary" onClick={this.accountChange}>
+          all
+        </Button>
+        <Button variant="secondary" onClick={this.accountChange}>
+          helen
+        </Button>
+        <Button variant="secondary" onClick={this.accountChange}>
+          simon
+        </Button>
+        <Button variant="secondary" onClick={this.accountChange}>
+          trust
+        </Button>
       </ButtonGroup>
     );
   }
 
   mainDetailsDesktop() {
     return (
-      <div>
+      <div className="mt-1">
         {this.toggleButtonGroup()}
         <TotalValue account="all"></TotalValue>
       </div>
@@ -91,7 +99,7 @@ class App extends React.Component {
 
   mainDetailsMobile() {
     return (
-      <div>
+      <div className="mt-1">
         {this.toggleButtonGroup()}
         <TotalValueMobileCard account={this.state.account}></TotalValueMobileCard>
         <TotalValueLineMobileCard account={this.state.account}></TotalValueLineMobileCard>
@@ -100,12 +108,17 @@ class App extends React.Component {
     );
   }
 
-  loginForm(index) {
+  loginForm(index, imageName) {
     const autoCompleteTag = 'password' + index;
     const controlIdTag = 'password' + index;
     return (
       <div>
-        <Form className="mb-3" onSubmit={this.doLogin}>
+        <Card className="mt-1 mb-1">
+          <Card.Img src={imageName} />
+          <Card.Title>croesus</Card.Title>
+        </Card>
+
+        <Form className="mb-1" onSubmit={this.doLogin}>
           <Form.Group controlId={controlIdTag}>
             <Form.Control
               type="password"
@@ -115,7 +128,7 @@ class App extends React.Component {
             ></Form.Control>
           </Form.Group>
         </Form>
-        <Button onClick={this.doLogin} type="submit">
+        <Button className="mb-2" variant="secondary" onClick={this.doLogin} type="submit">
           Login
         </Button>
       </div>
@@ -124,8 +137,10 @@ class App extends React.Component {
 
   logoutForm() {
     return (
-      <Form className="mb-3" onSubmit={this.doLogout}>
-        <Button type="submit">Logout</Button>
+      <Form className="mb-1" onSubmit={this.doLogout}>
+        <Button variant="secondary" type="submit">
+          Logout
+        </Button>
       </Form>
     );
   }
@@ -140,17 +155,13 @@ class App extends React.Component {
       logoutForm = this.logoutForm(index);
     } else {
       details = <div />;
-      loginForm = this.loginForm(index);
+      loginForm = this.loginForm(index, imageName);
       logoutForm = <div />;
     }
     return (
       <Container>
         <Row>
           <Col>
-            <Card className="mb-3">
-              <Card.Img src={imageName} />
-              <Card.Title>croesus</Card.Title>
-            </Card>
             {loginForm}
             {details}
             {logoutForm}

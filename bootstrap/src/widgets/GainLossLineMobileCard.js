@@ -186,7 +186,7 @@ class GainLossLineMobileCard extends React.Component {
 
   render() {
     return (
-      <Card className="mb-3">
+      <Card className="mb-1">
         <Scatter
           data={this.state}
           options={{

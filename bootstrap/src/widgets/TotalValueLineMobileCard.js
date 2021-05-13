@@ -70,10 +70,19 @@ class TotalValueLineMobileCard extends React.Component {
       );
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.setState({ account: nextProps.account });
-    this.updateAmount(nextProps.account);
+  static getDerivedStateFromProps(props, current_state) {
+    if (current_state.account !== props.account) {
+      return {
+        account: props.account,
+      };
+    }
+    return null;
   }
+
+  // componentWillReceiveProps(nextProps) {
+  //   this.setState({ account: nextProps.account });
+  //   this.updateAmount(nextProps.account);
+  // }
 
   processValue(data) {
     this.valueChartPoints = [];
@@ -186,7 +195,7 @@ class TotalValueLineMobileCard extends React.Component {
 
   render() {
     return (
-      <Card className="mb-3">
+      <Card className="mb-1">
         <Scatter
           data={this.state}
           options={{

@@ -25,11 +25,6 @@ class TotalValueMobileCard extends React.Component {
     return null;
   }
 
-  // UNSAFE_componentWillReceiveProps(nextProps) {
-  //   this.setState({ account: nextProps.account });
-  //   // this.updateAmount(nextProps.account);
-  // }
-
   updateAmount(account) {
     var url;
     if (account === 'all') {
@@ -146,7 +141,7 @@ class TotalValueMobileCard extends React.Component {
     if (this.state.response == null) {
       return (
         <div>
-          <Card className="mb-3">
+          <Card className="mb-1">
             <Card.Title>{this.state.account}</Card.Title>
             <Card.Body className="text-muted">thinking</Card.Body>
           </Card>
@@ -155,7 +150,7 @@ class TotalValueMobileCard extends React.Component {
     }
     return (
       <div>
-        <Card className="mb-3">
+        <Card className="mb-1">
           <Card.Title>{this.state.account}</Card.Title>
           <Card.Body>{this.getTable()}</Card.Body>
         </Card>
