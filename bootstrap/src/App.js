@@ -1,5 +1,5 @@
 import './App.css';
-import { Button, Container, Row, Col, Card, Form } from 'react-bootstrap';
+import { Button, Container, Row, Col, Card, Form, ButtonGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import TotalValue from './widgets/TotalValue.js';
@@ -11,9 +11,10 @@ const MOBILE = 0;
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { loggedIn: false };
+    this.state = { loggedIn: false, account: 'all' };
     this.doLogin = this.doLogin.bind(this);
     this.setPassword = this.setPassword.bind(this);
+    this.accountChange = this.accountChange.bind(this);
   }
 
   doLogin = (event) => {
@@ -60,9 +61,27 @@ class App extends React.Component {
     return this.mainDetailsMobile();
   }
 
+  accountChange(event) {
+    console.log(event);
+    console.log(event.target.outerText);
+    this.setState({ account: event.target.outerText });
+  }
+
+  toggleButtonGroup() {
+    return (
+      <ButtonGroup className="mb-3">
+        <Button onClick={this.accountChange}>all</Button>
+        <Button onClick={this.accountChange}>helen</Button>
+        <Button onClick={this.accountChange}>simon</Button>
+        <Button onClick={this.accountChange}>trust</Button>
+      </ButtonGroup>
+    );
+  }
+
   mainDetailsDesktop() {
     return (
       <div>
+        {this.toggleButtonGroup()}
         <TotalValue account="all"></TotalValue>
       </div>
     );
@@ -71,10 +90,8 @@ class App extends React.Component {
   mainDetailsMobile() {
     return (
       <div>
-        <TotalValueMobileCard account="all"></TotalValueMobileCard>
-        <TotalValueMobileCard account="helen"></TotalValueMobileCard>
-        <TotalValueMobileCard account="simon"></TotalValueMobileCard>
-        <TotalValueMobileCard account="trust"></TotalValueMobileCard>
+        {this.toggleButtonGroup()}
+        <TotalValueMobileCard account={this.state.account}></TotalValueMobileCard>
       </div>
     );
   }
@@ -83,17 +100,21 @@ class App extends React.Component {
     const autoCompleteTag = 'password' + index;
     const controlIdTag = 'password' + index;
     return (
-      <Form className="mb-3" onSubmit={this.doLogin}>
-        <Form.Group controlId={controlIdTag}>
-          <Form.Control
-            type="password"
-            placeholder="Enter password"
-            onChange={this.setPassword}
-            autoComplete={autoCompleteTag}
-          ></Form.Control>
-        </Form.Group>
-        <Button type="submit">Login</Button>
-      </Form>
+      <div>
+        <Form className="mb-3" onSubmit={this.doLogin}>
+          <Form.Group controlId={controlIdTag}>
+            <Form.Control
+              type="password"
+              placeholder="Enter password"
+              onChange={this.setPassword}
+              autoComplete={autoCompleteTag}
+            ></Form.Control>
+          </Form.Group>
+        </Form>
+        <Button onClick={this.doLogin} type="submit">
+          Login
+        </Button>
+      </div>
     );
   }
 
@@ -137,7 +158,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className="App">
+      <div className="App" key={this.state.account}>
         <div className="hide-on-mobile">{this.body(DESKTOP, 'croesus-large.jpeg')}</div>
         <div className="hide-on-desktop">{this.body(MOBILE, 'croesus.jpeg')}</div>
       </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Container, Row, Col, Card, Form } from 'react-bootstrap';
+import { Card } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 class TotalValueMobileCard extends React.Component {
@@ -16,6 +16,20 @@ class TotalValueMobileCard extends React.Component {
     this.updateAmount(this.state.account);
   }
 
+  static getDerivedStateFromProps(props, current_state) {
+    if (current_state.account !== props.account) {
+      return {
+        account: props.account,
+      };
+    }
+    return null;
+  }
+
+  // UNSAFE_componentWillReceiveProps(nextProps) {
+  //   this.setState({ account: nextProps.account });
+  //   // this.updateAmount(nextProps.account);
+  // }
+
   updateAmount(account) {
     var url;
     if (account === 'all') {
@@ -23,6 +37,7 @@ class TotalValueMobileCard extends React.Component {
     } else {
       url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/' + account;
     }
+    console.log(url);
     fetch(url)
       .then((res) => res.json())
       .then(
@@ -138,8 +153,6 @@ class TotalValueMobileCard extends React.Component {
         </div>
       );
     }
-    console.log(this.state.response);
-
     return (
       <div>
         <Card className="mb-3">
