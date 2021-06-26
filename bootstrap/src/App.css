@@ -5,6 +5,23 @@
   background-color: palegoldenrod;
 }
 
+.color-goldenrod {
+  color: palegoldenrod;
+}
+
+.background-color-goldenrod {
+  background-color: red;
+}
+
+.no-border {
+  border: none;
+}
+
+.small-logo {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
 @media (max-width: 480px) {
   .hide-on-mobile {
     display: none;
@@ -68,4 +85,12 @@
 
 .margin-auto {
   margin: auto;
+}
+
+.vertical-center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
 }

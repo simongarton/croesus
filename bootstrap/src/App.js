@@ -113,10 +113,7 @@ class App extends React.Component {
     const controlIdTag = 'password' + index;
     return (
       <div>
-        <Card className="mt-1 mb-1">
-          <Card.Img src={imageName} />
-          <Card.Title>croesus</Card.Title>
-        </Card>
+        <img alt="croesus" src={imageName} className="small-logo" />
 
         <Form className="mb-1" onSubmit={this.doLogin}>
           <Form.Group controlId={controlIdTag}>
@@ -173,9 +170,9 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className="App" key={this.state.account}>
+      <div className="App vertical-center" key={this.state.account}>
         <div className="hide-on-mobile">{this.body(DESKTOP, 'croesus-large.jpeg')}</div>
-        <div className="hide-on-desktop">{this.body(MOBILE, 'croesus.jpeg')}</div>
+        <div className="hide-on-desktop">{this.body(MOBILE, 'croesus.png')}</div>
       </div>
     );
   }
