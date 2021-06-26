@@ -10,21 +10,15 @@ import Helen from './pages/Helen';
 import Simon from './pages/Simon';
 import Trust from './pages/Trust';
 
-import TotalValue from './widgets/TotalValue.js';
-import TotalValueMobileCard from './widgets/TotalValueMobileCard.js';
-import TotalValueLineMobileCard from './widgets/TotalValueLineMobileCard.js';
-import GainLossLineMobileCard from './widgets/GainLossLineMobileCard.js';
-
 const DESKTOP = 1;
 const MOBILE = 0;
 
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { loggedIn: true, account: 'all' };
+    this.state = { loggedIn: false, account: 'all' };
     this.doLogin = this.doLogin.bind(this);
     this.setPassword = this.setPassword.bind(this);
-    this.accountChange = this.accountChange.bind(this);
   }
 
   doLogin = (event) => {
@@ -64,58 +58,6 @@ class App extends React.Component {
     this.setState({ password: e.target.value });
   }
 
-  mainDetails(index) {
-    if (this.mainDetails === DESKTOP) {
-      return this.mainDetailsDesktop();
-    }
-    return this.mainDetailsMobile();
-  }
-
-  accountChange(event) {
-    console.log(event);
-    console.log(event.target.outerText);
-    this.setState({ account: event.target.outerText });
-  }
-
-  toggleButtonGroup() {
-    return (
-      <ButtonGroup className="mb-2">
-        <Button variant="secondary" onClick={this.accountChange}>
-          all
-        </Button>
-        <Button variant="secondary" onClick={this.accountChange}>
-          helen
-        </Button>
-        <Button variant="secondary" onClick={this.accountChange}>
-          simon
-        </Button>
-        <Button variant="secondary" onClick={this.accountChange}>
-          trust
-        </Button>
-      </ButtonGroup>
-    );
-  }
-
-  mainDetailsDesktop() {
-    return (
-      <div className="mt-1">
-        {this.toggleButtonGroup()}
-        <TotalValue account="all"></TotalValue>
-      </div>
-    );
-  }
-
-  mainDetailsMobile() {
-    return (
-      <div className="mt-1">
-        {this.toggleButtonGroup()}
-        <TotalValueMobileCard account={this.state.account}></TotalValueMobileCard>
-        <TotalValueLineMobileCard account={this.state.account}></TotalValueLineMobileCard>
-        <GainLossLineMobileCard account={this.state.account}></GainLossLineMobileCard>
-      </div>
-    );
-  }
-
   loginForm(index, imageName) {
     const autoCompleteTag = 'password' + index;
     const controlIdTag = 'password' + index;
@@ -133,7 +75,7 @@ class App extends React.Component {
             ></Form.Control>
           </Form.Group>
         </Form>
-        <Button className="mb-2" variant="secondary" onClick={this.doLogin} type="submit">
+        <Button className="mb-2" variant="primary" onClick={this.doLogin} type="submit">
           Login
         </Button>
       </div>
@@ -143,57 +85,35 @@ class App extends React.Component {
   logoutForm() {
     return (
       <Form className="mb-1" onSubmit={this.doLogout}>
-        <Button variant="secondary" type="submit">
+        <Button variant="primary" type="submit">
           Logout
         </Button>
       </Form>
     );
   }
 
-  body(index, imageName) {
-    var details;
-    var loginForm;
-    var logoutForm;
-    if (this.state.loggedIn) {
-      details = this.mainDetails(index);
-      loginForm = <div />;
-      logoutForm = this.logoutForm(index);
-    } else {
-      details = <div />;
-      loginForm = this.loginForm(index, imageName);
-      logoutForm = <div />;
-    }
-    return (
-      <div>
-        <Container>
-          {loginForm}
-          {details}
-          {logoutForm}
-        </Container>
-      </div>
-    );
-  }
-
-  renderOld() {
-    return (
-      <div className="App">
-        <div className="vertical-center" key={this.state.account}>
-          <div>{this.body(MOBILE, 'croesus.png')}</div>
-        </div>
-      </div>
-    );
-  }
-
   render() {
+    if (this.state.loggedIn) {
+      return this.mainBody();
+    }
+    const loginForm = this.loginForm(MOBILE, 'croesus.png');
+    return <div className="App">{loginForm}</div>;
+  }
+
+  mainBody() {
+    const logoutForm = this.logoutForm(MOBILE);
     return (
       <>
-        <Switch>
-          <Route path="/all" component={All} />
-          <Route path="/helen" component={Helen} />
-          <Route path="/simon" component={Simon} />
-          <Route path="/trust" component={Trust} />
-          <Route path="/" component={Home} />
-        </Switch>
+        <div className="App">
+          <Switch>
+            <Route path="/all" component={All} />
+            <Route path="/helen" component={Helen} />
+            <Route path="/simon" component={Simon} />
+            <Route path="/trust" component={Trust} />
+            <Route path="/" component={Home} />
+          </Switch>
+          {logoutForm}
+        </div>
       </>
     );
   }
