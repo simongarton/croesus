@@ -1,5 +1,5 @@
 import './App.css';
-import { Button, Container, Form, ButtonGroup } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
@@ -10,19 +10,35 @@ import Helen from './pages/Helen';
 import Simon from './pages/Simon';
 import Trust from './pages/Trust';
 
+import Navigation from './components/Navigation';
+
 const DESKTOP = 1;
 const MOBILE = 0;
 
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { loggedIn: false, account: 'all' };
+    this.state = { loggedIn: this.checkForLoggedIn() };
     this.doLogin = this.doLogin.bind(this);
     this.setPassword = this.setPassword.bind(this);
+    this.checkForLoggedIn();
+  }
+
+  checkForLoggedIn() {
+    const loggedIn = window.sessionStorage.getItem('loggedIn');
+    console.log('I found ', loggedIn, ' in sessionStorage');
+    if (loggedIn && loggedIn === 'true') {
+      console.log('setting state true');
+      return true;
+    }
+    return false;
   }
 
   doLogin = (event) => {
     event.preventDefault();
+    if (!this.state.password) {
+      return;
+    }
     const url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/password';
     fetch(url, {
       method: 'POST',
@@ -37,8 +53,12 @@ class App extends React.Component {
             response: result,
             loggedIn: result['code'] === 200,
           });
+          if (result['code'] === 200) {
+            window.sessionStorage.setItem('loggedIn', 'true');
+          }
         },
         (error) => {
+          window.sessionStorage.removeItem('loggedIn');
           this.setState({
             response: null,
             loggedIn: false,
@@ -46,12 +66,12 @@ class App extends React.Component {
           });
         }
       );
-    this.setState({ loggedIn: true });
   };
 
   doLogout = (event) => {
     event.preventDefault();
     this.setState({ loggedIn: false });
+    window.sessionStorage.removeItem('loggedIn');
   };
 
   setPassword(e) {
@@ -93,6 +113,7 @@ class App extends React.Component {
   }
 
   render() {
+    console.log('rendering with ', this.state.loggedIn);
     if (this.state.loggedIn) {
       return this.mainBody();
     }
@@ -105,14 +126,17 @@ class App extends React.Component {
     return (
       <>
         <div className="App">
-          <Switch>
-            <Route path="/all" component={All} />
-            <Route path="/helen" component={Helen} />
-            <Route path="/simon" component={Simon} />
-            <Route path="/trust" component={Trust} />
-            <Route path="/" component={Home} />
-          </Switch>
-          {logoutForm}
+          <Navigation></Navigation>
+          <div className="navigationBarSpace">
+            <Switch>
+              <Route path="/all" component={All} />
+              <Route path="/helen" component={Helen} />
+              <Route path="/simon" component={Simon} />
+              <Route path="/trust" component={Trust} />
+              <Route path="/" component={Home} />
+            </Switch>
+            {logoutForm}
+          </div>
         </div>
       </>
     );
