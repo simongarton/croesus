@@ -2,6 +2,14 @@ import './App.css';
 import { Button, Container, Form, ButtonGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
+import { Route, Switch } from 'react-router-dom';
+
+import Home from './pages/Home';
+import All from './pages/All';
+import Helen from './pages/Helen';
+import Simon from './pages/Simon';
+import Trust from './pages/Trust';
+
 import TotalValue from './widgets/TotalValue.js';
 import TotalValueMobileCard from './widgets/TotalValueMobileCard.js';
 import TotalValueLineMobileCard from './widgets/TotalValueLineMobileCard.js';
@@ -166,13 +174,27 @@ class App extends React.Component {
     );
   }
 
-  render() {
+  renderOld() {
     return (
       <div className="App">
         <div className="vertical-center" key={this.state.account}>
           <div>{this.body(MOBILE, 'croesus.png')}</div>
         </div>
       </div>
+    );
+  }
+
+  render() {
+    return (
+      <>
+        <Switch>
+          <Route path="/all" component={All} />
+          <Route path="/helen" component={Helen} />
+          <Route path="/simon" component={Simon} />
+          <Route path="/trust" component={Trust} />
+          <Route path="/" component={Home} />
+        </Switch>
+      </>
     );
   }
 }
