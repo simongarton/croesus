@@ -141,19 +141,16 @@ class TotalValueMobileCard extends React.Component {
     if (this.state.response == null) {
       return (
         <div>
-          <Card className="mb-1">
-            <Card.Title>{this.state.account}</Card.Title>
-            <Card.Body className="text-muted">thinking</Card.Body>
-          </Card>
+          <p className="text-muted">thinking</p>
         </div>
       );
     }
     return (
       <div>
-        <Card className="mb-1">
-          <Card.Title>{this.state.account}</Card.Title>
-          <Card.Body>{this.getTable()}</Card.Body>
-        </Card>
+        <div>
+          <h1>Summary</h1>
+        </div>
+        <div>{this.getTable()}</div>
       </div>
     );
   }

@@ -1,5 +1,5 @@
 import './App.css';
-import { Button, Container, Row, Col, Card, Form, ButtonGroup } from 'react-bootstrap';
+import { Button, Container, Form, ButtonGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import TotalValue from './widgets/TotalValue.js';
@@ -13,7 +13,7 @@ const MOBILE = 0;
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { loggedIn: false, account: 'all' };
+    this.state = { loggedIn: true, account: 'all' };
     this.doLogin = this.doLogin.bind(this);
     this.setPassword = this.setPassword.bind(this);
     this.accountChange = this.accountChange.bind(this);
@@ -156,23 +156,22 @@ class App extends React.Component {
       logoutForm = <div />;
     }
     return (
-      <Container>
-        <Row>
-          <Col>
-            {loginForm}
-            {details}
-            {logoutForm}
-          </Col>
-        </Row>
-      </Container>
+      <div>
+        <Container>
+          {loginForm}
+          {details}
+          {logoutForm}
+        </Container>
+      </div>
     );
   }
 
   render() {
     return (
-      <div className="App vertical-center" key={this.state.account}>
-        <div className="hide-on-mobile">{this.body(DESKTOP, 'croesus-large.jpeg')}</div>
-        <div className="hide-on-desktop">{this.body(MOBILE, 'croesus.png')}</div>
+      <div className="App">
+        <div className="vertical-center" key={this.state.account}>
+          <div>{this.body(MOBILE, 'croesus.png')}</div>
+        </div>
       </div>
     );
   }
