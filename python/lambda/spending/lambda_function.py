@@ -59,6 +59,7 @@ def get_total_spending(account):
     sql = """
         SELECT date, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
+        WHERE dividend = FALSE
         GROUP BY date
         ORDER BY date;
         """
@@ -68,6 +69,7 @@ def get_total_spending(account):
         SELECT date, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
         WHERE account = %s 
+        AND dividend = FALSE
         GROUP BY date
         ORDER BY date;
         """
@@ -94,6 +96,7 @@ def get_exchange_spending(account, filter_exchange):
         SELECT date, exchange, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
         WHERE exchange = %s 
+        AND dividend = FALSE
         GROUP BY date, exchange
         ORDER BY date, exchange;
         """
@@ -104,6 +107,7 @@ def get_exchange_spending(account, filter_exchange):
         FROM transaction
         WHERE exchange = %s 
         AND account = %s 
+        AND dividend = FALSE
         GROUP BY date, exchange
         ORDER BY date, exchange;
         """
@@ -129,7 +133,9 @@ def get_symbol_spending(account, filter_exchange, filter_symbol):
     sql = """
         SELECT date, exchange, symbol, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
-        WHERE exchange = %s AND symbol = %s
+        WHERE exchange = %s 
+        AND symbol = %s
+        AND dividend = FALSE
         GROUP BY date, exchange, symbol
         ORDER BY date, exchange, symbol;
         """
@@ -138,7 +144,10 @@ def get_symbol_spending(account, filter_exchange, filter_symbol):
         sql = """
         SELECT date, exchange, symbol, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
-        WHERE exchange = %s AND symbol = %s AND account = %s
+        WHERE exchange = %s 
+        AND symbol = %s 
+        AND account = %s
+        AND dividend = FALSE
         GROUP BY date, exchange, symbol
         ORDER BY date, exchange, symbol;
         """

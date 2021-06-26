@@ -73,7 +73,10 @@ def handle(filter_exchange, filter_symbol, filter_account):
         value = quantity * price
         total_value = total_value + value
         gain_loss = value - spend
-        percentage = gain_loss / spend
+        if (spend > 0):
+            percentage = gain_loss / spend
+        else:
+            percentage = 0
         holding = {
             "exchange": exchange,
             "symbol": symbol,
@@ -124,7 +127,9 @@ def get_spend(filter_exchange, filter_symbol, filter_account):
     sql = """
         SELECT date, exchange, symbol, sum(price * quantity)::numeric::float8 AS total
         FROM transaction
-        WHERE exchange = %s AND symbol = %s
+        WHERE exchange = %s 
+        AND symbol = %s
+        AND dividend = FALSE
         GROUP BY date, exchange, symbol
         ORDER BY date, exchange, symbol;
         """
@@ -133,7 +138,10 @@ def get_spend(filter_exchange, filter_symbol, filter_account):
         sql = """
             SELECT date, exchange, symbol, sum(price * quantity)::numeric::float8 AS total
             FROM transaction
-            WHERE exchange = %s AND symbol = %s AND account = %s
+            WHERE exchange = %s 
+            AND symbol = %s 
+            AND account = %s
+            AND dividend = FALSE
             GROUP BY date, exchange, symbol
             ORDER BY date, exchange, symbol;
             """

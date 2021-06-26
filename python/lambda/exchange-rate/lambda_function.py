@@ -20,6 +20,7 @@ def response(code, body):
     }
 
 def lambda_handler(event, context):
+    print(event)
     if not "pathParameters" in event:
         return {"statusCode": 400, "body": {"message": "no pathParameters"}}
     parameters = event["pathParameters"]
@@ -36,8 +37,14 @@ def lambda_handler(event, context):
     if method == "POST":
         return post_rate(source, target)
     # only applies to GET
-    date = parameters["date"]
-    return get_rate(source, target, date)
+    query_parameters = event["queryStringParameters"]
+    if "date" in query_parameters:
+        return get_rate(source, target, query_parameters["date"])
+    rate = get_current_rate(source, target)
+    return response(
+        200,
+        {"source": source, "target": target, "date": datetime.now().strftime("%Y-%m-%d"), "rate": rate},
+    )
 
 
 def get_rate(source, target, date):
@@ -62,10 +69,7 @@ def get_rate(source, target, date):
 
 
 def post_rate(source, target):
-    url = "https://v6.exchangerate-api.com/v6/{}/pair/{}/{}".format(API_KEY, source, target)
-    api_response = requests.get(url)
-    api_response.raise_for_status()
-    rate = api_response.json()["conversion_rate"]
+    rate = get_current_rate(source, target)
     # picking up UTC time ...
     date = datetime.now(TIMEZONE).strftime("%Y-%m-%d")
     save_rate_to_database(source, target, date, rate)
@@ -73,6 +77,13 @@ def post_rate(source, target):
         200,
         {"source": source, "target": target, "date": date, "rate": rate},
     )
+
+def get_current_rate(source, target):
+    url = "https://v6.exchangerate-api.com/v6/{}/pair/{}/{}".format(API_KEY, source, target)
+    api_response = requests.get(url)
+    api_response.raise_for_status()
+    rate = api_response.json()["conversion_rate"]
+    return rate
 
 
 def save_rate_to_database(source, target, date, rate):
