@@ -24,6 +24,7 @@ class ShareSummary extends React.Component {
     } else {
       url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/' + account;
     }
+    var t0 = performance.now();
     fetch(url)
       .then((res) => res.json())
       .then(
@@ -32,6 +33,8 @@ class ShareSummary extends React.Component {
             response: result,
             isLoaded: true,
           });
+          var t1 = performance.now();
+          console.log('Call to ' + url + ' took ' + (t1 - t0) + ' milliseconds.');
         },
         (error) => {
           this.setState({
