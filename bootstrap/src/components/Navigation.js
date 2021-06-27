@@ -3,8 +3,12 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 const Navigation = () => {
   return (
     <>
-      <Navbar collapseOnSelect fixed="top" expand="sm" bg="dark" variant="dark">
+      <Navbar collapseOnSelect fixed="top" expand="sm" bg="light" variant="light">
         <Container>
+          <Navbar.Brand>
+            <img src="/favicon.ico" width="30" height="30" className="d-inline-block align-top" alt="React Bootstrap logo" />
+            &nbsp;croesus
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="responsive-navbar-nav"></Navbar.Toggle>
           <Navbar.Collapse id="responsive-navbar-nav">
             <Nav>

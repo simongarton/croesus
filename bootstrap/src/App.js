@@ -12,9 +12,6 @@ import Trust from './pages/Trust';
 
 import Navigation from './components/Navigation';
 
-const DESKTOP = 1;
-const MOBILE = 0;
-
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -76,9 +73,9 @@ class App extends React.Component {
     this.setState({ password: e.target.value });
   }
 
-  loginForm(index, imageName) {
-    const autoCompleteTag = 'password' + index;
-    const controlIdTag = 'password' + index;
+  loginForm(imageName) {
+    const autoCompleteTag = 'password';
+    const controlIdTag = 'password';
     return (
       <div>
         <img alt="croesus" src={imageName} className="small-logo" />
@@ -114,12 +111,12 @@ class App extends React.Component {
     if (this.state.loggedIn) {
       return this.mainBody();
     }
-    const loginForm = this.loginForm(MOBILE, 'croesus.png');
+    const loginForm = this.loginForm('croesus.png');
     return <div className="App">{loginForm}</div>;
   }
 
   mainBody() {
-    const logoutForm = this.logoutForm(MOBILE);
+    const logoutForm = this.logoutForm();
     return (
       <>
         <div className="App">

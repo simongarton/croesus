@@ -1,4 +1,5 @@
 import React from 'react';
+import { Spinner } from 'react-bootstrap';
 
 class TotalValue extends React.Component {
   constructor(props) {
@@ -104,7 +105,7 @@ class TotalValue extends React.Component {
 
   render() {
     if (this.state.response == null) {
-      return <h1>thinking ...</h1>;
+      return <Spinner animation="border" role="status"></Spinner>;
     }
     let totalValue = 0;
     let gainLoss = 0;

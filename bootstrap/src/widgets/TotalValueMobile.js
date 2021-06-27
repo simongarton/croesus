@@ -1,4 +1,7 @@
 import React from 'react';
+import { Spinner } from 'react-bootstrap';
+
+import SingleStat from '../components/SingleStat';
 
 class TotalValueMobile extends React.Component {
   constructor(props) {
@@ -50,7 +53,7 @@ class TotalValueMobile extends React.Component {
   buildRow(element, index) {
     return (
       <tr key={index}>
-        <td className="left-align pad-right">{element['holding']}</td>{' '}
+        <td className="left-align pad-right">{element['holding']}</td>
         <td className="right-align table-cell-pad">{this.formatDollars(element['value'])}</td>
         <td className={this.redGreen(element['gain_loss'], 'right-align table-cell-pad', 2)}>{this.formatDollars(element['gain_loss'])}</td>
         <td className={this.redGreen(element['weighted_cagr'], 'right-align table-cell-pad', 5)}>
@@ -139,36 +142,40 @@ class TotalValueMobile extends React.Component {
     return result;
   }
 
+  buildSingleStat(label, value, currency, percentage, redGreen) {
+    return <SingleStat label={label} value={value} currency={currency} percentage={percentage} redGreen={redGreen} />;
+  }
+
   render() {
     if (this.state.response == null) {
-      return <h1>thinking ...</h1>;
+      return <Spinner animation="border" role="status"></Spinner>;
     }
     let totalValue = 0;
     let gainLoss = 0;
     let spend = 0;
     let percentage = 0;
+    let cagr = 0;
     let fields = [];
     if (this.state.response['holdings']) {
       totalValue = this.state.response['total'];
       gainLoss = this.state.response['gain_loss'];
       spend = this.state.response['spend'];
       percentage = this.state.response['percentage'];
+      cagr = this.state.response['cagr'];
       fields = this.buildSummarizedHoldings(this.state.response['holdings']);
-      console.log('fields');
-      console.log(fields);
     }
 
     return (
       <div className="pad-table code smaller-text">
-        <h3>
-          Total value ({this.state.account}): {this.formatDollars(totalValue)}
-        </h3>
-        <div>Spend : {this.formatDollars(spend)} </div>
         <div>
-          Gain/Loss : <span className={this.redGreen(gainLoss, '', 2)}>{this.formatDollars(gainLoss)} </span>
-        </div>
-        <div>
-          % : <span className={this.redGreen(gainLoss, '', 5)}>{this.formatPercentage(percentage)}</span>
+          <h5>
+            Total value ({this.state.account}): {this.formatDollars(totalValue)}
+          </h5>
+          {this.buildSingleStat('Value', totalValue, true, false)}
+          {this.buildSingleStat('Spend', spend, true, false)}
+          {this.buildSingleStat('Gain/Loss', gainLoss, true, false, true)}
+          {this.buildSingleStat('Percentage', percentage, false, true, true)}
+          {this.buildSingleStat('CAGR', cagr, false, true, true)}
         </div>
         <table>
           <thead>

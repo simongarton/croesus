@@ -10,22 +10,18 @@ function formatDate(date) {
   return parts[0] + ',' + parts[1];
 }
 
-class GainLossLineMobileCard extends React.Component {
+class TotalValueLine extends React.Component {
   constructor(props) {
     super();
-    this.state = { account: props.account };
+    this.state = {
+      account: props.account,
+    };
     this.valueChartPoints = [];
     this.spendingChartPoints = [];
-    this.gainAndLossChartPoints = [];
   }
 
   componentDidMount() {
     this.updateAmount(this.state.account);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.setState({ account: nextProps.account });
-    this.updateAmount(nextProps.account);
   }
 
   updateAmount(account) {
@@ -74,30 +70,61 @@ class GainLossLineMobileCard extends React.Component {
       );
   }
 
+  static getDerivedStateFromProps(props, current_state) {
+    if (current_state.account !== props.account) {
+      return {
+        account: props.account,
+      };
+    }
+    return null;
+  }
+
+  // componentWillReceiveProps(nextProps) {
+  //   this.setState({ account: nextProps.account });
+  //   this.updateAmount(nextProps.account);
+  // }
+
+  processValue(data) {
+    this.valueChartPoints = [];
+    data.forEach((element) => {
+      let point = {
+        x: this.getDate(element['date']),
+        y: element['value'],
+      };
+      this.valueChartPoints.push(point);
+    });
+    this.rebuildChart();
+  }
+
   processValueFillInBlanks(data) {
     this.valueChartPoints = [];
     let actuals = {};
     let minDate = null;
     data.forEach((element) => {
-      let thisDate = new Date(moment(element['date']));
+      let thisDate = new Date(this.getDate(element['date']));
       actuals[thisDate] = element['value'];
       if (minDate == null || minDate > thisDate) {
         minDate = thisDate;
       }
     });
+    if (minDate == null) {
+      this.rebuildChart();
+      return;
+    }
     let total = 0;
-    for (var d = new Date(2021, 0, 1); d <= new Date(); d.setDate(d.getDate() + 1)) {
+    for (var d = minDate; d <= new Date(); d.setDate(d.getDate() + 1)) {
       let currentDate = d;
       if (currentDate in actuals) {
         total = actuals[currentDate];
       }
       let point = {
-        x: moment(currentDate),
+        x: this.getDate(currentDate),
         y: total,
       };
       this.valueChartPoints.push(point);
+      currentDate = currentDate + 1;
     }
-    this.buildGainAndLoss();
+    this.rebuildChart();
   }
 
   processSpendingFillInBlanks(data) {
@@ -105,61 +132,43 @@ class GainLossLineMobileCard extends React.Component {
     let actuals = {};
     let minDate = null;
     data.forEach((element) => {
-      let thisDate = new Date(moment(element['date']));
+      let thisDate = new Date(this.getDate(element['date']));
       actuals[thisDate] = element['total'];
       if (minDate == null || minDate > thisDate) {
         minDate = thisDate;
       }
     });
-    let total = 0;
-    for (var d1 = minDate; d1 < new Date(2021, 0, 1); d1.setDate(d1.getDate() + 1)) {
-      let currentDate = d1;
-      if (currentDate in actuals) {
-        total = total + actuals[currentDate];
-      }
+    if (minDate == null) {
+      this.rebuildChart();
+      return;
     }
-    for (var d = new Date(2021, 0, 1); d <= new Date(); d.setDate(d.getDate() + 1)) {
+    let total = 0;
+    for (var d = minDate; d <= new Date(); d.setDate(d.getDate() + 1)) {
       let currentDate = d;
       if (currentDate in actuals) {
         total = total + actuals[currentDate];
       }
       let point = {
-        x: moment(currentDate),
+        x: this.getDate(currentDate),
         y: total,
       };
       this.spendingChartPoints.push(point);
+      currentDate = currentDate + 1;
     }
-    this.buildGainAndLoss();
+    this.rebuildChart();
   }
 
-  buildGainAndLoss() {
-    this.gainAndLossChartPoints = [];
-    if (this.spendingChartPoints.length !== this.valueChartPoints.length) {
-      this.rebuildChart();
-      return;
-    }
-
-    if (this.spendingChartPoints.length === 0) {
-      this.rebuildChart();
-      return;
-    }
-
-    for (let i = 0; i < this.spendingChartPoints.length; i++) {
-      let spending = this.spendingChartPoints[i];
-      let value = this.valueChartPoints[i];
-      this.gainAndLossChartPoints.push({
-        x: value['x'],
-        y: value['y'] - spending['y'],
-      });
-    }
-
-    this.rebuildChart();
+  getDate(dateString) {
+    return moment(dateString);
   }
 
   rebuildChart() {
     let chartData = {
       labels: ['Scatter'],
-      datasets: [this.buildSeries('gain and loss', this.gainAndLossChartPoints, 'rgba(0,0,100,0.6)', false, null)],
+      datasets: [
+        this.buildSeries('value', this.valueChartPoints, 'rgba(0,192,0,0.4)', false, null),
+        this.buildSeries('spending', this.spendingChartPoints, 'rgba(192,0,0,0.4)', false, 'cross'),
+      ],
     };
     this.setState(chartData);
   }
@@ -192,7 +201,7 @@ class GainLossLineMobileCard extends React.Component {
           options={{
             title: {
               display: true,
-              text: 'Gain and Loss',
+              text: 'Spending vs Value',
               fontSize: 20,
             },
             legend: {
@@ -239,4 +248,4 @@ class GainLossLineMobileCard extends React.Component {
   }
 }
 
-export default GainLossLineMobileCard;
+export default TotalValueLine;
