@@ -26,9 +26,7 @@ class App extends React.Component {
 
   checkForLoggedIn() {
     const loggedIn = window.sessionStorage.getItem('loggedIn');
-    console.log('I found ', loggedIn, ' in sessionStorage');
     if (loggedIn && loggedIn === 'true') {
-      console.log('setting state true');
       return true;
     }
     return false;
@@ -113,7 +111,6 @@ class App extends React.Component {
   }
 
   render() {
-    console.log('rendering with ', this.state.loggedIn);
     if (this.state.loggedIn) {
       return this.mainBody();
     }

@@ -9,10 +9,14 @@ import pytz
 TIMEZONE = pytz.timezone('Pacific/Auckland')
 
 def lambda_handler(event, context):
+    print(event)
 
     method = event["requestContext"]["http"]["method"]
     if method == 'POST':
         return rebuild_value_table()
+
+    if event['rawPath'] == '/summary':
+        return summary()
 
     parameters = event["pathParameters"] if "pathParameters" in event else {}
     filter_exchange = parameters["exchange"] if "exchange" in parameters else None
@@ -21,7 +25,62 @@ def lambda_handler(event, context):
 
     return handle(filter_exchange, filter_symbol, filter_account)
 
+def summary():
 
+    share_data = get_share_data()
+    other_data = get_other_data()
+
+    other_values = [other_item['value'] for other_item in other_data]
+    print(other_values)
+    other_value = round(sum(other_values),2)
+
+    return {
+        "share_value": share_data['all']['total'],
+        "share_spend": share_data['all']['spend'],
+        "share_gain_loss": share_data['all']['gain_loss'],
+        "share_percentage": share_data['all']['percentage'],
+        "share_cagr": share_data['all']['cagr'],
+        "other_value": other_value,
+        "total_value": share_data['all']['total'] + other_value,
+        "share_data": share_data,
+        "other_data": other_data,
+        # calculations
+    }
+
+def get_share_data():
+    share_data = {}
+    for account in ['all', 'helen', 'simon', 'trust']:
+        share_data[account] = json.loads(get_share_data_for_account(None if account == 'all' else account))
+        share_data[account].pop('holdings')
+    print(share_data)
+    return share_data
+
+def get_share_data_for_account(account):
+    response = handle(None, None, account)
+    return response['body']
+
+def get_other_data():
+    other_data = []
+    conn = get_database_connection()
+    if not conn:
+        return None
+
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT date, account, asset, value::numeric::float8, details FROM other_asset ORDER BY asset, account"
+    )
+    rows = cur.fetchall()
+    for row in rows:
+        other_data.append({
+            "date":row[0].strftime('%Y-%m-%d'),
+            "account":row[1],
+            "asset":row[2],
+            "value":row[3],
+            "details":row[4]
+        })
+    return other_data
+
+    
 def get_database_connection():
     try:
         dbname = os.environ.get("PGDATABASE")
@@ -46,7 +105,7 @@ def handle(filter_exchange, filter_symbol, filter_account):
         filter_account, filter_exchange, filter_symbol, todays_date
     )
     if not len(database_holdings):
-        return response(200, [])
+        return response(200, {})
     total_value = 0
     total_spend = 0
     holdings = []
@@ -96,6 +155,7 @@ def handle(filter_exchange, filter_symbol, filter_account):
         "gain_loss": round(total_value - total_spend, 2),
         "percentage": round((total_value - total_spend) / total_spend, 4),
         "holdings": holdings,
+        "cagr": None
     }
     return response(200, response_data)
 

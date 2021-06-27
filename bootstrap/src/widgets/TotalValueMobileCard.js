@@ -30,7 +30,6 @@ class TotalValueMobileCard extends React.Component {
     } else {
       url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/' + account;
     }
-    console.log(url);
     fetch(url)
       .then((res) => res.json())
       .then(
