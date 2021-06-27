@@ -60,6 +60,7 @@ class TotalValue extends React.Component {
         <td className={this.redGreen(element['percentage'], 'right-align table-cell-pad', 5)}>
           {this.formatPercentage(element['percentage'])}
         </td>
+        <td className={this.redGreen(element['cagr'], 'right-align table-cell-pad', 5)}>{this.formatPercentage(element['cagr'])}</td>
       </tr>
     );
   }
@@ -124,10 +125,10 @@ class TotalValue extends React.Component {
     }
 
     return (
-      <div className="pad-table">
-        <h1>
+      <div className="pad-table code small-text">
+        <h3>
           Total value ({this.state.account}): {this.formatDollars(totalValue)}
-        </h1>
+        </h3>
         <p>
           Spend : {this.formatDollars(spend)} &nbsp; Gain/Loss :{' '}
           <span className={this.redGreen(gainLoss, '', 2)}>{this.formatDollars(gainLoss)} </span>&nbsp; {'% : '}
@@ -144,6 +145,7 @@ class TotalValue extends React.Component {
               <th className="right-align">spend</th>
               <th className="right-align">gain/loss</th>
               <th className="right-align">%</th>
+              <th className="right-align">cagr</th>
             </tr>
           </thead>
           <tbody>{fields}</tbody>

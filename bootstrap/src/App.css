@@ -3,6 +3,7 @@
   background-color: whitesmoke;
   margin: auto;
   padding: 10px;
+  max-width: 1000px;
 }
 
 .small-logo {
@@ -23,6 +24,20 @@
   text-align: left;
 }
 
+.table-cell-pad {
+  padding-left: 16px;
+  padding-right: 0px;
+}
+
+.pad-table {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.small-text {
+  font-size: smaller;
+}
+
 .navigationBarSpace {
   margin-top: 60px;
 }
@@ -33,4 +48,8 @@
 
 .green-text {
   color: green;
+}
+
+.bottom-margin {
+  margin-bottom: 5px;
 }
