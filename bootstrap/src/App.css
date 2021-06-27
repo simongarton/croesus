@@ -26,3 +26,11 @@
 .navigationBarSpace {
   margin-top: 60px;
 }
+
+.red-text {
+  color: red;
+}
+
+.green-text {
+  color: green;
+}

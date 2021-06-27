@@ -1,0 +1,22 @@
+.single-span-label {
+  display: inline-block;
+  width: 170px;
+}
+
+.single-span-value {
+  display: inline-block;
+  width: 120px;
+  font-weight: bold;
+}
+
+.right-align {
+  text-align: right;
+}
+
+.left-align {
+  text-align: left;
+}
+
+.code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
