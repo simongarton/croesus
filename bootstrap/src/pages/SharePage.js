@@ -2,6 +2,7 @@ import ShareSummary from '../widgets/ShareSummary.js';
 import TotalValueLineMobileCard from '../widgets/TotalValueLineMobileCard.js';
 import GainLossLineMobileCard from '../widgets/GainLossLineMobileCard.js';
 import TotalValue from '../widgets/TotalValue.js';
+import TotalValueMobile from '../widgets/TotalValueMobile.js';
 
 function SharePage(props) {
   const account = props.account;
@@ -12,7 +13,12 @@ function SharePage(props) {
       <TotalValueLineMobileCard account={account}></TotalValueLineMobileCard>
       <GainLossLineMobileCard account={account}></GainLossLineMobileCard>
       <div className="bottom-margin"></div>
-      <TotalValue account={account}></TotalValue>
+      <div className="hide-on-mobile">
+        <TotalValue account={account}></TotalValue>
+      </div>
+      <div className="hide-on-desktop">
+        <TotalValueMobile account={account}></TotalValueMobile>
+      </div>
     </div>
   );
 }

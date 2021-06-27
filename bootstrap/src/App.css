@@ -39,6 +39,10 @@
 }
 
 .small-text {
+  font-size: small;
+}
+
+.smaller-text {
   font-size: smaller;
 }
 
@@ -56,4 +60,16 @@
 
 .bottom-margin {
   margin-bottom: 5px;
+}
+
+@media (max-width: 480px) {
+  .hide-on-mobile {
+    display: none;
+  }
+}
+
+@media not all and (max-width: 480px) {
+  .hide-on-desktop {
+    display: none;
+  }
 }
