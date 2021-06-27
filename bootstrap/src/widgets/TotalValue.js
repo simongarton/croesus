@@ -50,8 +50,9 @@ class TotalValue extends React.Component {
   buildRow(element, index) {
     return (
       <tr key={index}>
-        <td className="left-align">{element['exchange'] + ':' + element['symbol']}</td>
-        <td className="left-align">{element['account']}</td>
+        <td className="left-align pad-right">{element['exchange'] + ':' + element['symbol']}</td>
+        <td className="left-align pad-right">{element['date']}</td>
+        <td className="left-align ">{element['account']}</td>
         <td className="right-align table-cell-pad">{this.formatNumber(element['quantity'])}</td>
         <td className="right-align table-cell-pad">{this.formatDollars(element['price'])}</td>
         <td className="right-align table-cell-pad">{this.formatDollars(element['value'])}</td>
@@ -138,6 +139,7 @@ class TotalValue extends React.Component {
           <thead>
             <tr>
               <th className="left-align">holding</th>
+              <th className="left-align">date</th>
               <th className="left-align">account</th>
               <th className="right-align">quantity</th>
               <th className="right-align">price</th>

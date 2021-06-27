@@ -114,12 +114,14 @@ def handle(filter_exchange, filter_symbol, filter_account):
         symbol = holding["symbol"]
         quantity = holding["quantity"]
         account = holding["account"]
-        spend = get_spend(exchange, symbol, account)
+        spend = holding["value"]
+        date = holding["date"]
         total_spend = total_spend + spend
         price = get_price(exchange, symbol)  # from price table, so most recent
         if not price:  # should not happen
             holding = {
-                "exchange": exchange,
+                "date": exchange,
+                "exchange": date,
                 "symbol": symbol,
                 "account": account,
                 "quantity": round(quantity, 2),
@@ -136,7 +138,12 @@ def handle(filter_exchange, filter_symbol, filter_account):
             percentage = gain_loss / spend
         else:
             percentage = 0
+        days = (datetime.date.today() - holding["date"]).days
+        years = days/365
+        cagr = round(pow((value/spend),(1/years)) - 1, 4)
+
         holding = {
+            "date": date.strftime('%Y-%m-%d'),
             "exchange": exchange,
             "symbol": symbol,
             "account": account,
@@ -146,6 +153,7 @@ def handle(filter_exchange, filter_symbol, filter_account):
             "spend": spend,
             "gain_loss": round(gain_loss, 2),
             "percentage": round(percentage, 4),
+            "cagr": cagr,
         }
         holdings.append(holding)
 
@@ -154,8 +162,8 @@ def handle(filter_exchange, filter_symbol, filter_account):
         "spend": round(total_spend, 2),
         "gain_loss": round(total_value - total_spend, 2),
         "percentage": round((total_value - total_spend) / total_spend, 4),
+        "cagr": None,
         "holdings": holdings,
-        "cagr": None
     }
     return response(200, response_data)
 
@@ -232,54 +240,51 @@ def response(code, body):
 
 
 # same code : value and holdings
-def get_holdings(account, exchange, symbol, query_date):
+def get_holdings(filter_account, filter_exchange, filter_symbol, query_date):
     conn = get_database_connection()
     if not conn:
         return []
     cur = conn.cursor()
-    sql = "SELECT id, date, exchange, symbol, account, quantity, price FROM transaction ORDER BY date, exchange, symbol"
+    sql = "SELECT id, date, exchange, symbol, account, quantity, price::numeric::float8 FROM transaction ORDER BY date, exchange, symbol"
     params = []
-    if account:
-        sql = "SELECT id, date, exchange, symbol, account, quantity, price FROM transaction WHERE account = %s ORDER BY date, exchange, symbol"
-        params = [account]
+    if filter_account:
+        sql = "SELECT id, date, exchange, symbol, account, quantity, price::numeric::float8 FROM transaction WHERE account = %s ORDER BY date, exchange, symbol"
+        params = [filter_account]
     cur.execute(sql, params)
 
     transactions = cur.fetchall()
 
-    holdings_map = {}
-
+    holdings = []
     for transaction in transactions:
         transaction_date = transaction[1]
         if transaction_date > query_date:
             continue
-        if exchange is not None:
-            if transaction[2] != exchange:
+        if filter_exchange is not None:
+            if transaction[2] != filter_exchange:
                 continue
-        if symbol is not None:
-            if transaction[3] != symbol:
+        if filter_symbol is not None:
+            if transaction[3] != filter_symbol:
                 continue
-        key = transaction[2] + ":" + transaction[3] + ":" + transaction[4]
-        if not key in holdings_map:
-            holdings_map[key] = 0
-        holdings_map[key] = holdings_map[key] + transaction[5]
-
-    holdings = []
-    for key, value in holdings_map.items():
-        parts = key.split(":")
-        exchange = parts[0]
-        symbol = parts[1]
-        account = parts[2]
+        date = transaction[1]
+        exchange = transaction[2]
+        symbol = transaction[3]
+        account = transaction[4]
+        quantity = transaction[5]
+        price = transaction[6]
         holdings.append(
             {
+                "date": date,
                 "exchange": exchange,
                 "symbol": symbol,
                 "account": account,
-                "quantity": value,
+                "quantity": quantity,
+                "price": price,
+                "value": quantity * price,
             }
         )
 
     # sort
-    holdings.sort(key=lambda x: x["exchange"] + ":" + x["symbol"])
+    holdings.sort(key=lambda x: x["exchange"] + ":" + x["symbol"] + ":" + x["date"].strftime("%Y-%m-%d"))
     return holdings
 
 
@@ -318,6 +323,7 @@ def find_holdings(account):
         }
         holdings.append(holding)
     return holdings
+
 
 def find_transactions(exchange, symbol, account):
     conn = get_database_connection()
