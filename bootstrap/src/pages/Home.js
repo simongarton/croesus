@@ -109,7 +109,6 @@ class Home extends React.Component {
   }
 
   render() {
-    console.log(this.state);
     if (this.state.response == null) {
       return (
         <div>

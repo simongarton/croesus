@@ -62,7 +62,7 @@ class ShareSummary extends React.Component {
         {this.buildSingleStat('Spend', shareData['spend'], true, false)}
         {this.buildSingleStat('Gain/Loss', shareData['gain_loss'], true, false, true)}
         {this.buildSingleStat('Percentage', shareData['percentage'], false, true, true)}
-        {/* {this.buildSingleStat('CAGR', shareData['cagr'], false, true, true)} */}
+        {this.buildSingleStat('CAGR', shareData['cagr'], false, true, true)}
       </div>
     );
   }
