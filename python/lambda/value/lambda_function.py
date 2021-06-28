@@ -12,29 +12,103 @@ def lambda_handler(event, context):
     print(event)
 
     method = event["requestContext"]["http"]["method"]
-    if method == 'POST':
-        return rebuild_value_table()
+
+    parameters = event["pathParameters"] if "pathParameters" in event else {}
+    if 'cache'in event['rawPath']:
+        return handle_cache(method, parameters)
+
 
     if event['rawPath'] == '/summary':
         return summary()
 
-    parameters = event["pathParameters"] if "pathParameters" in event else {}
+    if method == 'POST':
+        return rebuild_value_table()
+
     filter_exchange = parameters["exchange"] if "exchange" in parameters else None
     filter_symbol = parameters["symbol"] if "symbol" in parameters else None
     filter_account = parameters["account"] if "account" in parameters else None
 
     return handle(filter_exchange, filter_symbol, filter_account)
 
+
+def handle_cache(method, parameters):    
+    if method == "GET":
+        return get_cache(parameters)
+    if method == "POST":
+        return post_cache(parameters)    
+    if method == "DELETE":
+        return empty_cache(parameters)    
+    return response(415, {"method":method})
+
+
+def get_cache(parameters):
+    conn = get_database_connection()
+    if not conn:
+        return response(500,{"message":"no db"})
+    
+    if not "id" in parameters:
+        return response(400,{"message":"no id in parameters"})
+
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT value FROM cache WHERE id = %s;", 
+        [parameters["id"]]
+    )
+
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        return response(404,{})
+    return response(200, rows[0][0])
+
+
+def post_cache(parameters):
+    conn = get_database_connection()
+    if not conn:
+        return response(500,{"message":"no db"})
+    
+    if not "id" in parameters:
+        return response(400,{"message":"no id in parameters"})
+    if not "value" in parameters:
+        return response(400,{"message":"no value in parameters"})
+
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO cache (id, date, value) VALUES (%s, %s, %s) ON CONFLICT (id) DO UPDATE SET value = %s;", 
+        [parameters["id"], datetime.datetime.now(TIMEZONE), parameters["value"], parameters["value"]]
+    )
+
+    conn.commit()
+
+    return response(200, parameters["value"])
+
+def empty_cache(parameters):
+    conn = get_database_connection()
+    if not conn:
+        return response(500,{"message":"no db"})
+    
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM cache", 
+    )
+
+    conn.commit()
+
+    return response(200, {})
+
+
 def summary():
+
+    cached = get_cache({"id":"summary"})
+    if cached["statusCode"] == 200:
+        return json.loads(cached["body"])
 
     share_data = get_share_data()
     other_data = get_other_data()
 
     other_values = [other_item['value'] for other_item in other_data]
-    print(other_values)
     other_value = round(sum(other_values),2)
 
-    return {
+    value = {
         "share_value": share_data['all']['total'],
         "share_spend": share_data['all']['spend'],
         "share_gain_loss": share_data['all']['gain_loss'],
@@ -44,8 +118,10 @@ def summary():
         "total_value": share_data['all']['total'] + other_value,
         "share_data": share_data,
         "other_data": other_data,
-        # calculations
     }
+
+    post_cache({"id":"summary","value":json.dumps(value)})
+    return value
 
 def get_share_data():
     share_data = {}

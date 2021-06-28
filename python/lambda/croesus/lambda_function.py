@@ -24,13 +24,13 @@ def lambda_handler(event, context):
     
     method = event["requestContext"]["http"]["method"]
     parameters = event["pathParameters"] if "pathParameters" in event else {}
-    print(event)
-    print(event['body'])
+
     if method == "GET":
         return get(parameters)
     if method == "POST":
         return password(parameters, json.loads(event["body"]))
     return response(405, {"error": "unhandled method"})
+
 
 def get(parameters):
     return {

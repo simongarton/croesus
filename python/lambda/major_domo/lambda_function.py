@@ -35,9 +35,29 @@ def lambda_handler(event, context):
 
     # and rebuild value table
     rebuild_value_table()
-    
+
+    # and empty the caches
+    empty_caches()
+
+    # and repopulate the caches
+    repopulate_caches()
+
     return response(200, {"message": "{} prices updated".format(updates)})
 
+
+def empty_caches():
+    url = "{}/cache".format(HOST)
+    print("emptying caches : {}".format(url))
+    requests.delete(url)
+    print("emptied caches.")
+
+
+def repopulate_caches():
+    url = "{}/summary".format(HOST)
+    print("repopulating caches : {}".format(url))
+    requests.get(url)
+    print("repopulated caches.")
+    
 
 def post_todays_exchange_rate(source, target):
     url = "{}/exchange-rate/{}/{}".format(HOST, source, target)

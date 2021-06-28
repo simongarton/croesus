@@ -6,6 +6,16 @@ import TotalValueMobile from '../widgets/TotalValueMobile.js';
 
 function SharePage(props) {
   const account = props.account;
+  const mqlMobile = window.matchMedia('(max-width: 480px)');
+  const mqlDesktop = window.matchMedia('not all and (max-width: 480px)');
+  console.log(mqlMobile);
+  console.log(mqlDesktop);
+  let value;
+  if (mqlMobile.matches) {
+    value = <TotalValueMobile account={account}></TotalValueMobile>;
+  } else {
+    value = <TotalValue account={account}></TotalValue>;
+  }
   return (
     <div className="mt-1">
       <ShareSummary account={account}></ShareSummary>
@@ -14,12 +24,7 @@ function SharePage(props) {
       <div className="mb-2"></div>
       <GainLossLine account={account}></GainLossLine>
       <div className="mb-2"></div>
-      <div className="hide-on-mobile">
-        <TotalValue account={account}></TotalValue>
-      </div>
-      <div className="hide-on-desktop">
-        <TotalValueMobile account={account}></TotalValueMobile>
-      </div>
+      <div>{value}</div>
       <div className="mb-2"></div>
     </div>
   );
