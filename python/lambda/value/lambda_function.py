@@ -136,7 +136,6 @@ def get_share_data():
     for account in ['all', 'helen', 'simon', 'trust']:
         share_data[account] = json.loads(get_share_data_for_account(None if account == 'all' else account))
         share_data[account].pop('holdings')
-    print(share_data)
     return share_data
 
 def get_share_data_for_account(account):
@@ -182,7 +181,6 @@ def get_database_connection():
 
 
 def handle(filter_exchange, filter_symbol, filter_account):
-    # need to include filter account - and now I need to go straight to the database, not use the API.
     todays_date = datetime.datetime.now(TIMEZONE).date()
 
     database_holdings = get_holdings(
@@ -192,6 +190,8 @@ def handle(filter_exchange, filter_symbol, filter_account):
         return response(200, {})
     total_value = 0
     total_spend = 0
+    total_quantity = 0
+    total_cagr = 0
     holdings = []
     for holding in database_holdings:
         exchange = holding["exchange"]
@@ -225,7 +225,7 @@ def handle(filter_exchange, filter_symbol, filter_account):
         days = (datetime.date.today() - holding["date"]).days
         years = days/365
         cagr = round(pow((value/spend),(1/years)) - 1, 4)
-
+        total_cagr = total_cagr + (value * cagr)
         holding = {
             "date": date.strftime('%Y-%m-%d'),
             "exchange": exchange,
@@ -246,7 +246,7 @@ def handle(filter_exchange, filter_symbol, filter_account):
         "spend": round(total_spend, 2),
         "gain_loss": round(total_value - total_spend, 2),
         "percentage": round((total_value - total_spend) / total_spend, 4),
-        "cagr": None,
+        "cagr": round(total_cagr / total_value, 2),
         "holdings": holdings,
     }
     return response(200, response_data)

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Spinner } from 'react-bootstrap';
+import { Button, Spinner } from 'react-bootstrap';
 
 import SingleStat from '../components/SingleStat';
 
@@ -10,9 +10,14 @@ class Home extends React.Component {
       isLoaded: false,
       response: null,
     };
+    this.updateStuff.bind(this);
   }
 
   componentDidMount() {
+    this.getData();
+  }
+
+  getData() {
     const url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/summary';
     var t0 = performance.now();
     fetch(url)
@@ -57,6 +62,9 @@ class Home extends React.Component {
   }
 
   buildSharesForAccount(account) {
+    if (!this.state.response['share_data']) {
+      return <div>Oops</div>;
+    }
     const shareData = this.state.response['share_data'][account];
     return (
       <div>
@@ -88,6 +96,9 @@ class Home extends React.Component {
   buildOtherAssets() {
     const assetLines = [];
     const otherAssets = this.state.response['other_data'];
+    if (!otherAssets) {
+      return <div>Ooops2</div>;
+    }
     for (var i = 0; i < otherAssets.length; i++) {
       const otherAsset = otherAssets[i];
       assetLines.push(
@@ -111,8 +122,29 @@ class Home extends React.Component {
         {this.buildOtherAssets()}
         <hr></hr>
         <p className="code text-muted smaller-text">updated at {this.buildUpdatedAt()}</p>
+        <div className="mb-2"></div>
+        <Button variant="danger" onClick={this.updateStuff}>
+          Update all data
+        </Button>
+        <div className="mb-2"></div>
       </div>
     );
+  }
+
+  updateStuff() {
+    console.log(this);
+    const url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/cache';
+    fetch(url, { method: 'DELETE' })
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          console.log('deleted');
+          window.location.reload(false);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
   }
 
   render() {
