@@ -37,7 +37,7 @@ class Home extends React.Component {
   }
 
   buildSingleStat(label, value, currency, percentage, redGreen) {
-    return <SingleStat label={label} value={value} currency={currency} percentage={percentage} redGreen={redGreen} />;
+    return <SingleStat label={label} value={value} currency={currency} percentage={percentage} redGreen={redGreen} key={label} />;
   }
 
   getSingleStat(label, key, currency, percentage) {
@@ -68,6 +68,10 @@ class Home extends React.Component {
         {this.buildSingleStat('CAGR', shareData['cagr'], false, true, true)}
       </div>
     );
+  }
+
+  buildUpdatedAt() {
+    return this.state.response['updated_at'];
   }
 
   buildShares() {
@@ -106,6 +110,7 @@ class Home extends React.Component {
         <h2 className="code">Other assets</h2>
         {this.buildOtherAssets()}
         <hr></hr>
+        <p className="code text-muted smaller-text">updated at {this.buildUpdatedAt()}</p>
       </div>
     );
   }
