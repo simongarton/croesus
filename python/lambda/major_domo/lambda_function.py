@@ -53,9 +53,12 @@ def empty_caches():
 
 
 def repopulate_caches():
-    url = "{}/summary".format(HOST)
-    print("repopulating caches : {}".format(url))
-    requests.get(url)
+    print("repopulating caches ...")
+    requests.get("{}/summary".format(HOST))
+    requests.get("{}/all_value".format(HOST))
+    requests.get("{}/value/helen".format(HOST))
+    requests.get("{}/value/simon".format(HOST))
+    requests.get("{}/value/trust".format(HOST))
     print("repopulated caches.")
     
 

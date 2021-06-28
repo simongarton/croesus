@@ -9,7 +9,6 @@ import pytz
 TIMEZONE = pytz.timezone('Pacific/Auckland')
 
 def lambda_handler(event, context):
-    print(event)
 
     method = event["requestContext"]["http"]["method"]
 
@@ -17,8 +16,8 @@ def lambda_handler(event, context):
     if 'cache'in event['rawPath']:
         return handle_cache(method, parameters)
 
-
-    if event['rawPath'] == '/summary':
+    path = event['rawPath']
+    if path == '/summary':
         return summary()
 
     if method == 'POST':
@@ -28,7 +27,15 @@ def lambda_handler(event, context):
     filter_symbol = parameters["symbol"] if "symbol" in parameters else None
     filter_account = parameters["account"] if "account" in parameters else None
 
-    return handle(filter_exchange, filter_symbol, filter_account)
+    cached = get_cache({"id":path})
+    if cached["statusCode"] == 200:
+        result = json.loads(cached["body"])
+        return result
+
+    response = handle(filter_exchange, filter_symbol, filter_account)
+    result = json.loads(response['body'])
+    post_cache({"id":path,"value":json.dumps(result)})
+    return response
 
 
 def handle_cache(method, parameters):    
