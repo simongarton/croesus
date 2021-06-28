@@ -118,6 +118,7 @@ def summary():
         "total_value": share_data['all']['total'] + other_value,
         "share_data": share_data,
         "other_data": other_data,
+        "updated_at": datetime.datetime.now(TIMEZONE).strftime("%Y-%m-%d")
     }
 
     post_cache({"id":"summary","value":json.dumps(value)})
