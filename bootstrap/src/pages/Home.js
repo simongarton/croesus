@@ -8,6 +8,7 @@ class Home extends React.Component {
     super();
     this.state = {
       isLoaded: false,
+      isUpdating: false,
       response: null,
     };
     this.updateStuff.bind(this);
@@ -105,11 +106,20 @@ class Home extends React.Component {
         this.buildSingleStat(otherAsset['asset'] + ' (' + otherAsset['account'] + ')', otherAsset['value'], true, false, false)
       );
     }
-
     return <div>{assetLines}</div>;
   }
 
   buildHomePage() {
+    let bottomSection = <div />;
+    if (this.state.isUpdating) {
+      bottomSection = <Spinner animation="border" role="status"></Spinner>;
+    } else {
+      bottomSection = (
+        <Button variant="danger" onClick={this.recalculateValue.bind(this)}>
+          Recalculate value
+        </Button>
+      );
+    }
     return (
       <div>
         <h1 className="code">Summary</h1>
@@ -123,22 +133,40 @@ class Home extends React.Component {
         <hr></hr>
         <p className="code text-muted smaller-text">updated at {this.buildUpdatedAt()}</p>
         <div className="mb-2"></div>
-        <Button variant="danger" onClick={this.updateStuff}>
+        <Button variant="danger" onClick={this.updateStuff.bind(this)}>
           Update all data
         </Button>
+        <div className="mb-2"></div>
+        {bottomSection}
         <div className="mb-2"></div>
       </div>
     );
   }
 
   updateStuff() {
-    console.log(this);
     const url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/cache';
     fetch(url, { method: 'DELETE' })
       .then((res) => res.json())
       .then(
         (result) => {
           console.log('deleted');
+          window.location.reload(false);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+  }
+
+  recalculateValue() {
+    const url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value';
+    this.setState({ isUpdating: true });
+    fetch(url, { method: 'POST' })
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          console.log('updated');
+          this.setState({ isUpdating: false });
           window.location.reload(false);
         },
         (error) => {
