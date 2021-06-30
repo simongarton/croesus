@@ -58,9 +58,10 @@ class TotalValue extends React.Component {
         <td className="left-align pad-right">{element['date']}</td>
         <td className="left-align ">{element['account']}</td>
         <td className="right-align table-cell-pad">{this.formatNumber(element['quantity'])}</td>
+        <td className="right-align table-cell-pad">{this.formatDollars(element['purchase'])}</td>
+        <td className="right-align table-cell-pad">{this.formatDollars(element['spend'])}</td>
         <td className="right-align table-cell-pad">{this.formatDollars(element['price'])}</td>
         <td className="right-align table-cell-pad">{this.formatDollars(element['value'])}</td>
-        <td className="right-align table-cell-pad">{this.formatDollars(element['spend'])}</td>
         <td className={this.redGreen(element['gain_loss'], 'right-align table-cell-pad', 2)}>{this.formatDollars(element['gain_loss'])}</td>
         <td className={this.redGreen(element['percentage'], 'right-align table-cell-pad', 5)}>
           {this.formatPercentage(element['percentage'])}
@@ -130,7 +131,7 @@ class TotalValue extends React.Component {
     }
 
     return (
-      <div className="pad-table code small-text">
+      <div className="pad-table code small-text mt-3">
         <h3>
           Total value ({this.state.account}): {this.formatDollars(totalValue)}
         </h3>
@@ -139,16 +140,17 @@ class TotalValue extends React.Component {
           <span className={this.redGreen(gainLoss, '', 2)}>{this.formatDollars(gainLoss)} </span>&nbsp; {'% : '}
           <span className={this.redGreen(gainLoss, '', 5)}>{this.formatPercentage(percentage)}</span>
         </p>
-        <table>
+        <table class="margin-auto">
           <thead>
             <tr>
               <th className="left-align">holding</th>
               <th className="left-align">date</th>
               <th className="left-align">account</th>
               <th className="right-align">quantity</th>
+              <th className="right-align">purchase</th>
+              <th className="right-align">spend</th>
               <th className="right-align">price</th>
               <th className="right-align">value</th>
-              <th className="right-align">spend</th>
               <th className="right-align">gain/loss</th>
               <th className="right-align">%</th>
               <th className="right-align">cagr</th>

@@ -134,7 +134,7 @@ class Home extends React.Component {
         <p className="code text-muted smaller-text">updated at {this.buildUpdatedAt()}</p>
         <div className="mb-2"></div>
         <Button variant="danger" onClick={this.updateStuff.bind(this)}>
-          Update all data
+          Update cached data
         </Button>
         <div className="mb-2"></div>
         {bottomSection}

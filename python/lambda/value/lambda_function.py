@@ -190,7 +190,6 @@ def handle(filter_exchange, filter_symbol, filter_account):
         return response(200, {})
     total_value = 0
     total_spend = 0
-    total_quantity = 0
     total_cagr = 0
     holdings = []
     for holding in database_holdings:
@@ -199,10 +198,11 @@ def handle(filter_exchange, filter_symbol, filter_account):
         quantity = holding["quantity"]
         account = holding["account"]
         spend = holding["value"]
+        purchase_price = holding["price"]
         date = holding["date"]
         total_spend = total_spend + spend
-        price = get_price(exchange, symbol)  # from price table, so most recent
-        if not price:  # should not happen
+        current_price = get_price(exchange, symbol)  # from price table, so most recent
+        if not current_price:  # should not happen
             holding = {
                 "date": exchange,
                 "exchange": date,
@@ -215,7 +215,7 @@ def handle(filter_exchange, filter_symbol, filter_account):
             }
             holdings.append(holding)
             continue
-        value = quantity * price
+        value = quantity * current_price
         total_value = total_value + value
         gain_loss = value - spend
         if (spend > 0):
@@ -232,9 +232,11 @@ def handle(filter_exchange, filter_symbol, filter_account):
             "symbol": symbol,
             "account": account,
             "quantity": round(quantity, 2),
-            "price": price,
+            "purchase": purchase_price,
             "value": round(value, 2),
+            "price": current_price,
             "spend": spend,
+            "value": round(value, 2),
             "gain_loss": round(gain_loss, 2),
             "percentage": round(percentage, 4),
             "cagr": cagr,

@@ -12,9 +12,14 @@ function SharePage(props) {
   console.log(mqlDesktop);
   let value;
   if (mqlMobile.matches) {
-    value = <TotalValueMobile account={account}></TotalValueMobile>;
+    value = <TotalValueMobile account={account} small="true"></TotalValueMobile>;
   } else {
-    value = <TotalValue account={account}></TotalValue>;
+    value = (
+      <div>
+        <TotalValue account={account}></TotalValue>
+        <TotalValueMobile account={account} small="false"></TotalValueMobile>
+      </div>
+    );
   }
   return (
     <div className="mt-1">

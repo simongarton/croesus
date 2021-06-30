@@ -10,6 +10,7 @@ class TotalValueMobile extends React.Component {
       isLoaded: false,
       response: null,
       account: props.account,
+      small: props.small,
     };
     this.valueChartPoints = [];
     this.spendingChartPoints = [];
@@ -54,11 +55,21 @@ class TotalValueMobile extends React.Component {
   }
 
   buildRow(element, index) {
+    let percentageLine;
+    if (this.state.small && this.state.small === 'false') {
+      percentageLine = (
+        <td className={this.redGreen(element['percentage'], 'right-align table-cell-pad', 5)}>
+          {this.formatPercentage(element['percentage'])}
+        </td>
+      );
+    }
+
     return (
       <tr key={index}>
         <td className="left-align pad-right">{element['holding']}</td>
         <td className="right-align table-cell-pad">{this.formatDollars(element['value'])}</td>
         <td className={this.redGreen(element['gain_loss'], 'right-align table-cell-pad', 2)}>{this.formatDollars(element['gain_loss'])}</td>
+        {percentageLine}
         <td className={this.redGreen(element['weighted_cagr'], 'right-align table-cell-pad', 5)}>
           {this.formatPercentage(element['weighted_cagr'])}
         </td>
@@ -116,14 +127,14 @@ class TotalValueMobile extends React.Component {
           value: element['value'],
           spend: element['spend'],
           gain_loss: element['gain_loss'],
-          weighted_cagr: element['cagr'] * element['quantity'],
+          weighted_cagr: element['cagr'] * element['value'],
         };
       } else {
         map[holding]['quantity'] = map[holding]['quantity'] + element['quantity'];
         map[holding]['value'] = map[holding]['value'] + element['value'];
         map[holding]['spend'] = map[holding]['spend'] + element['spend'];
         map[holding]['gain_loss'] = map[holding]['gain_loss'] + element['gain_loss'];
-        map[holding]['weighted_cagr'] = map[holding]['weighted_cagr'] + element['cagr'] * element['quantity'];
+        map[holding]['weighted_cagr'] = map[holding]['weighted_cagr'] + element['cagr'] * element['value'];
       }
     });
     const result = [];
@@ -137,7 +148,7 @@ class TotalValueMobile extends React.Component {
         spend: value['spend'],
         gain_loss: value['gain_loss'],
         percentage: value['gain_loss'] / value['spend'],
-        weighted_cagr: value['weighted_cagr'] / value['quantity'],
+        weighted_cagr: value['weighted_cagr'] / value['value'],
       };
       result.push(this.buildRow(row, index));
       index++;
@@ -168,8 +179,17 @@ class TotalValueMobile extends React.Component {
       fields = this.buildSummarizedHoldings(this.state.response['holdings']);
     }
 
-    return (
-      <div className="pad-table code smaller-text">
+    let header;
+    let percentageLine;
+    if (this.state.small && this.state.small === 'false') {
+      header = (
+        <div className="mb-3 mt-3">
+          <h3>Summary by stock</h3>
+        </div>
+      );
+      percentageLine = <th className="right-align">%age</th>;
+    } else {
+      header = (
         <div>
           <h5>
             Total value ({this.state.account}): {this.formatDollars(totalValue)}
@@ -180,12 +200,18 @@ class TotalValueMobile extends React.Component {
           {this.buildSingleStat('Percentage', percentage, false, true, true)}
           {this.buildSingleStat('CAGR', cagr, false, true, true)}
         </div>
-        <table>
+      );
+    }
+    return (
+      <div className="pad-table code smaller-text">
+        {header}
+        <table className="margin-auto">
           <thead>
             <tr>
               <th className="left-align">holding</th>
               <th className="right-align">value</th>
               <th className="right-align">&nbsp;gain/loss</th>
+              {percentageLine}
               <th className="right-align">cagr</th>
             </tr>
           </thead>
