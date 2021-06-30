@@ -3,6 +3,10 @@ import TotalValueLine from '../widgets/TotalValueLine.js';
 import GainLossLine from '../widgets/GainLossLine.js';
 import TotalValue from '../widgets/TotalValue.js';
 import TotalValueMobile from '../widgets/TotalValueMobile.js';
+import TotalValueHorizontalBar from '../widgets/TotalValueHorizontalBar.js';
+import GainLossHorizontalBar from '../widgets/GainLossHorizontalBar.js';
+import GainLossPercentageHorizontalBar from '../widgets/GainLossPercentageHorizontalBar.js';
+import CAGRHorizontalBar from '../widgets/CAGRHorizontalBar.js';
 
 function SharePage(props) {
   const account = props.account;
@@ -31,6 +35,10 @@ function SharePage(props) {
       <div className="mb-2"></div>
       <div>{value}</div>
       <div className="mb-2"></div>
+      <TotalValueHorizontalBar account={account}></TotalValueHorizontalBar>
+      <GainLossHorizontalBar account={account}></GainLossHorizontalBar>
+      <GainLossPercentageHorizontalBar account={account}></GainLossPercentageHorizontalBar>
+      <CAGRHorizontalBar account={account}></CAGRHorizontalBar>
     </div>
   );
 }
