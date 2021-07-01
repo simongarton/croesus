@@ -223,7 +223,7 @@ def handle(filter_exchange, filter_symbol, filter_account):
         else:
             percentage = 0
         days = (datetime.date.today() - holding["date"]).days
-        years = days/365
+        years = (days if days > 0 else 1)/365
         cagr = round(pow((value/spend),(1/years)) - 1, 4)
         total_cagr = total_cagr + (value * cagr)
         holding = {

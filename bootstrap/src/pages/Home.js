@@ -52,12 +52,14 @@ class Home extends React.Component {
 
   buildSummary() {
     const valueFourPercent = this.state.response['total_value'] * 0.04; //'en-US', { style: 'currency', currency: 'USD' });
+    const value2halfMill = this.state.response['total_value'] / 2500000;
     return (
       <div>
         {this.getSingleStat('Total shares', 'share_value', true, false, false)}
         {this.getSingleStat('Other assets', 'other_value', true, false, false)}
         {this.getSingleStat('Total value', 'total_value', true, false, false)}
         {this.buildSingleStat('4% value', valueFourPercent, true, false, false)}
+        {this.buildSingleStat('2.5 million value', value2halfMill, false, true, false)}
       </div>
     );
   }
