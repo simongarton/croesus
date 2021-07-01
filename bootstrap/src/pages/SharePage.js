@@ -7,13 +7,13 @@ import TotalValueHorizontalBar from '../widgets/TotalValueHorizontalBar.js';
 import GainLossHorizontalBar from '../widgets/GainLossHorizontalBar.js';
 import GainLossPercentageHorizontalBar from '../widgets/GainLossPercentageHorizontalBar.js';
 import CAGRHorizontalBar from '../widgets/CAGRHorizontalBar.js';
+import HoldingPie from '../widgets/HoldingPie.js';
+import HostPie from '../widgets/HostPie.js';
+import AccountPie from '../widgets/AccountPie.js';
 
 function SharePage(props) {
   const account = props.account;
   const mqlMobile = window.matchMedia('(max-width: 480px)');
-  const mqlDesktop = window.matchMedia('not all and (max-width: 480px)');
-  console.log(mqlMobile);
-  console.log(mqlDesktop);
   let value;
   if (mqlMobile.matches) {
     value = <TotalValueMobile account={account} small="true"></TotalValueMobile>;
@@ -39,6 +39,10 @@ function SharePage(props) {
       <GainLossHorizontalBar account={account}></GainLossHorizontalBar>
       <GainLossPercentageHorizontalBar account={account}></GainLossPercentageHorizontalBar>
       <CAGRHorizontalBar account={account}></CAGRHorizontalBar>
+      <HoldingPie account={account}></HoldingPie>
+      <HostPie account={account}></HostPie>
+      <AccountPie account={account}></AccountPie>
+      <div className="mb-2"></div>
     </div>
   );
 }

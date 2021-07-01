@@ -151,7 +151,6 @@ class Home extends React.Component {
       .then((res) => res.json())
       .then(
         (result) => {
-          console.log('deleted');
           window.location.reload(false);
         },
         (error) => {
@@ -167,7 +166,6 @@ class Home extends React.Component {
       .then((res) => res.json())
       .then(
         (result) => {
-          console.log('updated');
           this.setState({ isUpdating: false });
           window.location.reload(false);
         },

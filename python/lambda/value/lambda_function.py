@@ -200,6 +200,7 @@ def handle(filter_exchange, filter_symbol, filter_account):
         spend = holding["value"]
         purchase_price = holding["price"]
         date = holding["date"]
+        host = holding["host"]
         total_spend = total_spend + spend
         current_price = get_price(exchange, symbol)  # from price table, so most recent
         if not current_price:  # should not happen
@@ -231,6 +232,7 @@ def handle(filter_exchange, filter_symbol, filter_account):
             "exchange": exchange,
             "symbol": symbol,
             "account": account,
+            "host": host,
             "quantity": round(quantity, 2),
             "purchase": purchase_price,
             "value": round(value, 2),
@@ -331,10 +333,10 @@ def get_holdings(filter_account, filter_exchange, filter_symbol, query_date):
     if not conn:
         return []
     cur = conn.cursor()
-    sql = "SELECT id, date, exchange, symbol, account, quantity, price::numeric::float8 FROM transaction ORDER BY date, exchange, symbol"
+    sql = "SELECT id, date, exchange, symbol, account, quantity, price::numeric::float8, host FROM transaction ORDER BY date, exchange, symbol"
     params = []
     if filter_account:
-        sql = "SELECT id, date, exchange, symbol, account, quantity, price::numeric::float8 FROM transaction WHERE account = %s ORDER BY date, exchange, symbol"
+        sql = "SELECT id, date, exchange, symbol, account, quantity, price::numeric::float8, host FROM transaction WHERE account = %s ORDER BY date, exchange, symbol"
         params = [filter_account]
     cur.execute(sql, params)
 
@@ -357,12 +359,14 @@ def get_holdings(filter_account, filter_exchange, filter_symbol, query_date):
         account = transaction[4]
         quantity = transaction[5]
         price = transaction[6]
+        host = transaction[7]
         holdings.append(
             {
                 "date": date,
                 "exchange": exchange,
                 "symbol": symbol,
                 "account": account,
+                "host": host,
                 "quantity": quantity,
                 "price": price,
                 "value": quantity * price,
