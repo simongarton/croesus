@@ -29,9 +29,6 @@ class HorizontalBarChart extends React.Component {
             items: this.processData(result),
           });
         },
-        // Note: it's important to handle errors here
-        // instead of a catch() block so that we don't swallow
-        // exceptions from actual bugs in components.
         (error) => {
           this.setState({
             isLoaded: true,
@@ -47,44 +44,27 @@ class HorizontalBarChart extends React.Component {
   }
 
   buildSummarizedHoldings(holdings) {
-    let map = {};
-    holdings.forEach((element) => {
-      let holding = element['exchange'] + ':' + element['symbol'];
-      if (!map[holding]) {
-        map[holding] = {
-          holding,
-          quantity: element['quantity'],
-          price: element['price'],
-          value: element['value'],
-          spend: element['spend'],
-          gain_loss: element['gain_loss'],
-          weighted_cagr: element['cagr'] * element['value'],
-        };
-      } else {
-        map[holding]['quantity'] = map[holding]['quantity'] + element['quantity'];
-        map[holding]['value'] = map[holding]['value'] + element['value'];
-        map[holding]['spend'] = map[holding]['spend'] + element['spend'];
-        map[holding]['gain_loss'] = map[holding]['gain_loss'] + element['gain_loss'];
-        map[holding]['weighted_cagr'] = map[holding]['weighted_cagr'] + element['cagr'] * element['value'];
-      }
-    });
-    const result = [];
-    let index = 0;
-    for (const [key, value] of Object.entries(map)) {
-      let row = {
-        index: index,
-        holding: key,
-        quantity: value['quantity'],
-        value: value['value'],
-        spend: value['spend'],
-        gain_loss: value['gain_loss'],
-        percentage: value['gain_loss'] / value['spend'],
-        cagr: value['weighted_cagr'] / value['value'],
-      };
-      result.push(row);
-      index++;
-    }
-    return result;
+    return [];
+  }
+
+  backgroundColor() {
+    return 'rgba(75,192,192,0.2)';
+  }
+
+  borderColor() {
+    return 'rgba(75,192,192,0.9)';
+  }
+
+  title() {
+    return 'Title';
+  }
+
+  labelFunction(t, d) {
+    return Math.round(t.value).toLocaleString() + '%';
+  }
+
+  labelFunctionValues(value, index, values) {
+    return Math.round(value).toLocaleString() + '%';
   }
 
   processData(data) {
@@ -92,15 +72,15 @@ class HorizontalBarChart extends React.Component {
     let chartPoints = [];
     let chartLabels = [];
     holdings.forEach((element) => {
-      chartLabels.push(element['holding']);
-      chartPoints.push(element['cagr'] * 100);
+      chartLabels.push(element['label']);
+      chartPoints.push(element['value']);
     });
     let chartData = {};
     chartData['labels'] = chartLabels;
     let chartDatasets = {
-      label: 'Value',
-      backgroundColor: 'rgba(75,192,192,0.2)',
-      borderColor: 'rgba(75,192,192,0.9)',
+      label: this.title(),
+      backgroundColor: this.backgroundColor(),
+      borderColor: this.borderColor(),
       borderWidth: 1,
       data: chartPoints,
     };
@@ -124,7 +104,7 @@ class HorizontalBarChart extends React.Component {
         options={{
           title: {
             display: true,
-            text: 'CAGR',
+            text: this.title(),
             fontSize: 20,
           },
           legend: {
@@ -135,19 +115,14 @@ class HorizontalBarChart extends React.Component {
             mode: 'index',
             intersect: false,
             callbacks: {
-              label: function (t, d) {
-                return Math.round(t.value).toLocaleString() + '%';
-              },
+              label: this.labelFunction,
             },
           },
           scales: {
             xAxes: [
               {
                 ticks: {
-                  callback: function (value, index, values) {
-                    //return value.toLocaleString("en-US",{style:"currency", currency:"USD"});
-                    return Math.round(value).toLocaleString() + '%';
-                  },
+                  callback: this.labelFunctionValues,
                 },
               },
             ],

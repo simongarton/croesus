@@ -1,6 +1,26 @@
-import HorizontalBarChart from './HorizontalBarChart.js';
+import HorizontalBarChart from '../widget_templates/HorizontalBarChart.js';
 
 class TotalValueHorizontalBar extends HorizontalBarChart {
+  backgroundColor() {
+    return 'rgba(192,75,75,0.2)';
+  }
+
+  borderColor() {
+    return 'rgba(192,75,75,0.9)';
+  }
+
+  title() {
+    return 'Total Value';
+  }
+
+  labelFunction(t, d) {
+    return '$' + Math.round(t.value).toLocaleString();
+  }
+
+  labelFunctionValues(value, index, values) {
+    return '$' + Math.round(value).toLocaleString();
+  }
+
   buildSummarizedHoldings(holdings) {
     let map = {};
     holdings.forEach((element) => {
@@ -28,40 +48,13 @@ class TotalValueHorizontalBar extends HorizontalBarChart {
     for (const [key, value] of Object.entries(map)) {
       let row = {
         index: index,
-        holding: key,
-        quantity: value['quantity'],
+        label: key,
         value: value['value'],
-        spend: value['spend'],
-        gain_loss: value['gain_loss'],
-        percentage: value['gain_loss'] / value['spend'],
-        weighted_cagr: value['weighted_cagr'] / value['value'],
       };
       result.push(row);
       index++;
     }
     return result;
-  }
-
-  processData(data) {
-    let holdings = data['holdings'] == null ? [] : this.buildSummarizedHoldings(data['holdings']);
-    let chartPoints = [];
-    let chartLabels = [];
-    holdings.forEach((element) => {
-      chartLabels.push(element['holding']);
-      chartPoints.push(element['value']);
-    });
-    let chartData = {};
-    chartData['labels'] = chartLabels;
-    let chartDatasets = {
-      label: 'Value',
-      backgroundColor: 'rgba(192,75,75,0.2)',
-      borderColor: 'rgba(192,75,75,0.9)',
-      borderWidth: 1,
-      data: chartPoints,
-    };
-    chartData['datasets'] = [];
-    chartData['datasets'].push(chartDatasets);
-    this.setState(chartData);
   }
 }
 
