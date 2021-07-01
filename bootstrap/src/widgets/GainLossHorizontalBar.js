@@ -1,51 +1,6 @@
-import React from 'react';
-import { HorizontalBar } from 'react-chartjs-2';
+import HorizontalBarChart from './HorizontalBarChart.js';
 
-class GainLossHorizontalBar extends React.Component {
-  constructor(props) {
-    super();
-    this.state = {
-      account: props.account,
-    };
-  }
-
-  componentDidMount() {
-    this.updateAmount(this.state.account);
-  }
-
-  updateAmount(account) {
-    var url;
-    if (account === 'all') {
-      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/all_value';
-    } else {
-      url = 'https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com/value/' + account;
-    }
-    fetch(url)
-      .then((res) => res.json())
-      .then(
-        (result) => {
-          this.setState({
-            isLoaded: true,
-            items: this.processData(result),
-          });
-        },
-        // Note: it's important to handle errors here
-        // instead of a catch() block so that we don't swallow
-        // exceptions from actual bugs in components.
-        (error) => {
-          this.setState({
-            isLoaded: true,
-            error,
-          });
-        }
-      );
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.setState({ account: nextProps.account });
-    this.updateAmount(nextProps.account);
-  }
-
+class GainLossHorizontalBar extends HorizontalBarChart {
   buildSummarizedHoldings(holdings) {
     let map = {};
     holdings.forEach((element) => {
@@ -108,54 +63,6 @@ class GainLossHorizontalBar extends React.Component {
     chartData['datasets'].push(chartDatasets);
     this.setState(chartData);
     console.log(chartData['labels'].length);
-  }
-
-  render() {
-    let heightTable = {
-      all: 448,
-      helen: 120,
-      simon: 400,
-      trust: 110,
-    };
-    let height = heightTable[this.state.account] ? heightTable[this.state.account] : 100;
-    return (
-      <HorizontalBar
-        data={this.state}
-        height={height}
-        options={{
-          title: {
-            display: true,
-            text: 'Gain/Loss',
-            fontSize: 20,
-          },
-          legend: {
-            display: false,
-            position: 'right',
-          },
-          tooltips: {
-            mode: 'index',
-            intersect: false,
-            callbacks: {
-              label: function (t, d) {
-                return '$' + Math.round(t.value).toLocaleString();
-              },
-            },
-          },
-          scales: {
-            xAxes: [
-              {
-                ticks: {
-                  callback: function (value, index, values) {
-                    //return value.toLocaleString("en-US",{style:"currency", currency:"USD"});
-                    return '$' + Math.round(value).toLocaleString();
-                  },
-                },
-              },
-            ],
-          },
-        }}
-      />
-    );
   }
 }
 
