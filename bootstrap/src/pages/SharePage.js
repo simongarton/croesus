@@ -10,6 +10,7 @@ import CAGRHorizontalBar from '../widgets/CAGRHorizontalBar.js';
 import HoldingPie from '../widgets/HoldingPie.js';
 import HostPie from '../widgets/HostPie.js';
 import AccountPie from '../widgets/AccountPie.js';
+import ExchangePie from '../widgets/ExchangePie.js';
 
 function SharePage(props) {
   const account = props.account;
@@ -40,6 +41,7 @@ function SharePage(props) {
       <GainLossPercentageHorizontalBar account={account}></GainLossPercentageHorizontalBar>
       <CAGRHorizontalBar account={account}></CAGRHorizontalBar>
       <HoldingPie account={account}></HoldingPie>
+      <ExchangePie account={account}></ExchangePie>
       <HostPie account={account}></HostPie>
       <AccountPie account={account}></AccountPie>
       <div className="mb-2"></div>
