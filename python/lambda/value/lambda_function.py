@@ -219,13 +219,14 @@ def handle(filter_exchange, filter_symbol, filter_account):
         value = quantity * current_price
         total_value = total_value + value
         gain_loss = value - spend
-        if (spend > 0):
-            percentage = gain_loss / spend
-        else:
-            percentage = 0
         days = (datetime.date.today() - holding["date"]).days
         years = (days if days > 0 else 1)/365
-        cagr = round(pow((value/spend),(1/years)) - 1, 4)
+        if (spend > 0):
+            percentage = gain_loss / spend
+            cagr = round(pow((value/spend),(1/years)) - 1, 4)
+        else:
+            percentage = 0
+            cagr = 0
         total_cagr = total_cagr + (value * cagr)
         holding = {
             "date": date.strftime('%Y-%m-%d'),
