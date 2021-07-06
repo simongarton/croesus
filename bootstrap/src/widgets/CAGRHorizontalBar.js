@@ -51,8 +51,10 @@ class CAGRHorizontalBar extends HorizontalBarChart {
         label: key,
         value: (100 * value['weighted_cagr']) / value['value'],
       };
-      result.push(row);
-      index++;
+      if (value['quantity'] > 0) {
+        result.push(row);
+        index++;
+      }
     }
     return result;
   }

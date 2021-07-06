@@ -61,8 +61,6 @@ class PieChart extends React.Component {
 
   getToolTipTitle(tooltipItem, data) {
     const value = data['labels'][tooltipItem[0]['index']];
-    console.log(data['labels']);
-    console.log(tooltipItem[0]['index']);
     return value;
   }
 

@@ -51,8 +51,10 @@ class GainLossPercentageHorizontalBar extends HorizontalBarChart {
         label: key,
         value: (100 * value['gain_loss']) / value['spend'],
       };
-      result.push(row);
-      index++;
+      if (value['quantity'] > 0) {
+        result.push(row);
+        index++;
+      }
     }
     return result;
   }

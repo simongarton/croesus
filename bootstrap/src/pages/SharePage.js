@@ -11,6 +11,8 @@ import HoldingPie from '../widgets/HoldingPie.js';
 import HostPie from '../widgets/HostPie.js';
 import AccountPie from '../widgets/AccountPie.js';
 import ExchangePie from '../widgets/ExchangePie.js';
+import RegionPie from '../widgets/RegionPie.js';
+import TypePie from '../widgets/TypePie.js';
 
 function SharePage(props) {
   const account = props.account;
@@ -25,6 +27,10 @@ function SharePage(props) {
         <TotalValueMobile account={account} small="false"></TotalValueMobile>
       </div>
     );
+  }
+  let accountPie = <div />;
+  if (account === 'all') {
+    accountPie = <AccountPie account={account}></AccountPie>;
   }
   return (
     <div className="mt-1">
@@ -41,9 +47,11 @@ function SharePage(props) {
       <GainLossPercentageHorizontalBar account={account}></GainLossPercentageHorizontalBar>
       <CAGRHorizontalBar account={account}></CAGRHorizontalBar>
       <HoldingPie account={account}></HoldingPie>
+      <RegionPie account={account}></RegionPie>
+      <TypePie account={account}></TypePie>
       <ExchangePie account={account}></ExchangePie>
       <HostPie account={account}></HostPie>
-      <AccountPie account={account}></AccountPie>
+      {accountPie}
       <div className="mb-2"></div>
     </div>
   );

@@ -20,7 +20,6 @@ def response(code, body):
     }
 
 def lambda_handler(event, context):
-    print(event)
     if not "pathParameters" in event:
         return {"statusCode": 400, "body": {"message": "no pathParameters"}}
     parameters = event["pathParameters"]

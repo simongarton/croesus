@@ -51,8 +51,10 @@ class GainLossHorizontalBar extends HorizontalBarChart {
         label: key,
         value: value['gain_loss'],
       };
-      result.push(row);
-      index++;
+      if (value['quantity'] > 0) {
+        result.push(row);
+        index++;
+      }
     }
     return result;
   }

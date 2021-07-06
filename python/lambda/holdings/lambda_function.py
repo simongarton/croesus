@@ -96,18 +96,14 @@ def get_holdings(account, exchange, symbol, query_date):
     holdings_map = {}
 
     for transaction in transactions:
-        print(transaction)
         transaction_date = transaction[1]
         if transaction_date > query_date:
-            print('date')
             continue
         if exchange is not None:
             if transaction[2] != exchange:
-                print('exchange')
                 continue
         if symbol is not None:
             if transaction[3] != symbol:
-                print('symbol')
                 continue
         key = transaction[2] + ":" + transaction[3]
         if not key in holdings_map:

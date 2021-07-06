@@ -51,8 +51,10 @@ class TotalValueHorizontalBar extends HorizontalBarChart {
         label: key,
         value: value['value'],
       };
-      result.push(row);
-      index++;
+      if (value['quantity'] > 0) {
+        result.push(row);
+        index++;
+      }
     }
     return result;
   }

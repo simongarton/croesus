@@ -64,6 +64,10 @@ class TotalValueMobile extends React.Component {
       );
     }
 
+    if (element['quantity'] === 0) {
+      return null;
+    }
+
     return (
       <tr key={index}>
         <td className="left-align pad-right">{element['holding']}</td>
@@ -150,7 +154,10 @@ class TotalValueMobile extends React.Component {
         percentage: value['gain_loss'] / value['spend'],
         weighted_cagr: value['weighted_cagr'] / value['value'],
       };
-      result.push(this.buildRow(row, index));
+      row = this.buildRow(row, index);
+      if (row) {
+        result.push(row);
+      }
       index++;
     }
     return result;

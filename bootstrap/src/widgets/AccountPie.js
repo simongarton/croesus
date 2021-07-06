@@ -49,8 +49,10 @@ class AccountPie extends PieChart {
         label: key,
         value: value['value'],
       };
-      result.push(row);
-      index++;
+      if (value['quantity'] > 0) {
+        result.push(row);
+        index++;
+      }
     }
     result.sort((a, b) => (a.value > b.value ? 1 : -1));
     return result;

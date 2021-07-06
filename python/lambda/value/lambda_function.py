@@ -201,6 +201,8 @@ def handle(filter_exchange, filter_symbol, filter_account):
         purchase_price = holding["price"]
         date = holding["date"]
         host = holding["host"]
+        region = holding["region"]
+        type = holding["type"]
         total_spend = total_spend + spend
         current_price = get_price(exchange, symbol)  # from price table, so most recent
         if not current_price:  # should not happen
@@ -208,6 +210,8 @@ def handle(filter_exchange, filter_symbol, filter_account):
                 "date": exchange,
                 "exchange": date,
                 "symbol": symbol,
+                "region": region,
+                "type": type,
                 "account": account,
                 "quantity": round(quantity, 2),
                 "price": None,
@@ -233,6 +237,8 @@ def handle(filter_exchange, filter_symbol, filter_account):
             "exchange": exchange,
             "symbol": symbol,
             "account": account,
+            "region": region,
+            "type": type,
             "host": host,
             "quantity": round(quantity, 2),
             "purchase": purchase_price,
@@ -327,12 +333,26 @@ def response(code, body):
         "body": json.dumps(body),
     }
 
+def get_regions(conn):
+    sql = 'SELECT exchange, symbol, region, type FROM region'
+    cur = conn.cursor()
+    cur.execute(sql)
+    rows = cur.fetchall()
+    regions = {}
+    for row in rows:
+        key = row[0] + '-'+ row[1]
+        regions[key]= {
+            'region':row[2],
+            'type':row[3]
+        }
+    return regions
 
 # same code : value and holdings
 def get_holdings(filter_account, filter_exchange, filter_symbol, query_date):
     conn = get_database_connection()
     if not conn:
         return []
+    regions = get_regions(conn)
     cur = conn.cursor()
     sql = "SELECT id, date, exchange, symbol, account, quantity, price::numeric::float8, host FROM transaction ORDER BY date, exchange, symbol"
     params = []
@@ -361,11 +381,16 @@ def get_holdings(filter_account, filter_exchange, filter_symbol, query_date):
         quantity = transaction[5]
         price = transaction[6]
         host = transaction[7]
+        key = exchange + '-' + symbol
+        region = regions[key]['region'] if key in regions else '?'
+        type = regions[key]['type'] if key in regions else '?'
         holdings.append(
             {
                 "date": date,
                 "exchange": exchange,
                 "symbol": symbol,
+                "region": region, 
+                "type": type, 
                 "account": account,
                 "host": host,
                 "quantity": quantity,

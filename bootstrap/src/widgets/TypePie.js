@@ -1,28 +1,28 @@
 import PieChart from '../widget_templates/PieChart.js';
 
-class ExchangePie extends PieChart {
+class TypePie extends PieChart {
   calculateBackgroundColor(value, maxValue) {
     if (value < 0) {
       value = 0;
     }
-    let r = Math.round((0 * (value * 1.0)) / maxValue);
-    let g = Math.round((255 * (value * 1.0)) / maxValue);
+    let r = Math.round((255 * (value * 1.0)) / maxValue);
+    let g = Math.round((0 * (value * 1.0)) / maxValue);
     let b = Math.round((255 * (value * 1.0)) / maxValue);
     return 'rgba(' + r + ',' + g + ',' + b + ',0.5)';
   }
 
   borderColor() {
-    return 'rgba(0,127,127,0.9)';
+    return 'rgba(127,0,127,0.9)';
   }
 
   title() {
-    return 'Exchange';
+    return 'Type';
   }
 
   buildSummarizedHoldings(holdings) {
     let map = {};
     holdings.forEach((element) => {
-      let holding = element['exchange'];
+      let holding = element['type'];
       if (!map[holding]) {
         map[holding] = {
           holding,
@@ -59,4 +59,4 @@ class ExchangePie extends PieChart {
   }
 }
 
-export default ExchangePie;
+export default TypePie;
