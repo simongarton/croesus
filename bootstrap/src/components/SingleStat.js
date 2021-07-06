@@ -18,6 +18,9 @@ function SingleStat(props) {
   } else {
     valueSpan = <span className="single-span-value right-align code">{value}</span>;
   }
+  if (props['cell'] && props['cell'] === true) {
+    return valueSpan;
+  }
   return (
     <div>
       <span className="single-span-label left-align code">{label}</span>

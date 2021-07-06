@@ -7,9 +7,26 @@
 }
 
 .small-logo {
-  width: 100%;
-  padding: 10%;
+  width: 80%;
+  padding-top: 50%;
   margin-bottom: 10px;
+}
+
+.big-logo {
+  width: 30%;
+  padding-top: 30%;
+  margin-bottom: 10px;
+}
+
+.table-spacer {
+  width: 100px;
+}
+
+.password {
+  max-width: 200px;
+  text-align: center;
+  margin: auto;
+  margin-bottom: 15px;
 }
 
 .font-bold {

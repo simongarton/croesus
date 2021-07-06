@@ -52,8 +52,8 @@ class App extends React.Component {
           if (result['code'] === 200) {
             window.sessionStorage.setItem('loggedIn', 'true');
           }
-          var t1 = performance.now()
-          console.log("Call to " + url + " took " + (t1 - t0) + " milliseconds.")
+          var t1 = performance.now();
+          console.log('Call to ' + url + ' took ' + (t1 - t0) + ' milliseconds.');
         },
         (error) => {
           window.sessionStorage.removeItem('loggedIn');
@@ -81,7 +81,8 @@ class App extends React.Component {
     const controlIdTag = 'password';
     return (
       <div>
-        <img alt="croesus" src={imageName} className="small-logo" />
+        <img alt="croesus" src={imageName} className="hide-on-mobile big-logo" />
+        <img alt="croesus" src={imageName} className="hide-on-desktop small-logo" />
 
         <Form className="mb-1" onSubmit={this.doLogin}>
           <Form.Group controlId={controlIdTag}>
@@ -90,6 +91,7 @@ class App extends React.Component {
               placeholder="Enter password"
               onChange={this.setPassword}
               autoComplete={autoCompleteTag}
+              className="password"
             ></Form.Control>
           </Form.Group>
         </Form>
