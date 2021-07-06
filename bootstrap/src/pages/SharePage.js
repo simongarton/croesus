@@ -18,19 +18,56 @@ function SharePage(props) {
   const account = props.account;
   const mqlMobile = window.matchMedia('(max-width: 480px)');
   let value;
+  let pies;
+  let accountPie = <div />;
+  if (account === 'all') {
+    accountPie = <AccountPie account={account}></AccountPie>;
+  }
   if (mqlMobile.matches) {
     value = <TotalValueMobile account={account} small="true"></TotalValueMobile>;
+    pies = (
+      <div>
+        <HoldingPie account={account}></HoldingPie>
+        <RegionPie account={account}></RegionPie>
+        <TypePie account={account}></TypePie>
+        <ExchangePie account={account}></ExchangePie>
+        <HostPie account={account}></HostPie>
+        {accountPie}
+      </div>
+    );
   } else {
     value = (
       <div>
         <TotalValue account={account}></TotalValue>
         <TotalValueMobile account={account} small="false"></TotalValueMobile>
+        <TotalValueHorizontalBar account={account}></TotalValueHorizontalBar>
+        <GainLossHorizontalBar account={account}></GainLossHorizontalBar>
+        <GainLossPercentageHorizontalBar account={account}></GainLossPercentageHorizontalBar>
+        <CAGRHorizontalBar account={account}></CAGRHorizontalBar>
+        <table>
+          <tr>
+            <td>
+              <HoldingPie account={account}></HoldingPie>
+            </td>
+            <td>
+              <RegionPie account={account}></RegionPie>
+            </td>
+            <td>
+              <TypePie account={account}></TypePie>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <ExchangePie account={account}></ExchangePie>
+            </td>
+            <td>
+              <HostPie account={account}></HostPie>
+            </td>
+            <td>{accountPie}</td>
+          </tr>
+        </table>
       </div>
     );
-  }
-  let accountPie = <div />;
-  if (account === 'all') {
-    accountPie = <AccountPie account={account}></AccountPie>;
   }
   return (
     <div className="mt-1">
@@ -42,16 +79,7 @@ function SharePage(props) {
       <div className="mb-2"></div>
       <div>{value}</div>
       <div className="mb-2"></div>
-      <TotalValueHorizontalBar account={account}></TotalValueHorizontalBar>
-      <GainLossHorizontalBar account={account}></GainLossHorizontalBar>
-      <GainLossPercentageHorizontalBar account={account}></GainLossPercentageHorizontalBar>
-      <CAGRHorizontalBar account={account}></CAGRHorizontalBar>
-      <HoldingPie account={account}></HoldingPie>
-      <RegionPie account={account}></RegionPie>
-      <TypePie account={account}></TypePie>
-      <ExchangePie account={account}></ExchangePie>
-      <HostPie account={account}></HostPie>
-      {accountPie}
+      {pies}
       <div className="mb-2"></div>
     </div>
   );
