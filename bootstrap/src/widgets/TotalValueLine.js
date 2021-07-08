@@ -85,11 +85,6 @@ class TotalValueLine extends React.Component {
     return null;
   }
 
-  // componentWillReceiveProps(nextProps) {
-  //   this.setState({ account: nextProps.account });
-  //   this.updateAmount(nextProps.account);
-  // }
-
   processValue(data) {
     this.valueChartPoints = [];
     data.forEach((element) => {
@@ -232,7 +227,7 @@ class TotalValueLine extends React.Component {
                   },
                   ticks: {
                     min: '2021-01-01',
-                    max: '2021-07-01',
+                    max: new Date(),
                   },
                 },
               ],
