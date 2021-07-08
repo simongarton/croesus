@@ -4,7 +4,9 @@ import { redGreen } from '../utils';
 
 function SingleStat(props) {
   const label = props['label'] ? props['label'] : '';
-  let value = props['value'] ? parseFloat(props['value']).toLocaleString(undefined, { minimumFractionDigits: 2 }) : '';
+  let value = props['value']
+    ? parseFloat(props['value']).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : '';
   const originalValue = props['value'] ? parseFloat(props['value']) : undefined;
   if (props['currency']) {
     value = '$' + value;

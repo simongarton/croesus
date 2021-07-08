@@ -223,7 +223,7 @@ class GainLossLine extends React.Component {
                   },
                   ticks: {
                     min: '2021-01-01',
-                    max: '2021-07-01',
+                    max: new Date(),
                   },
                 },
               ],
