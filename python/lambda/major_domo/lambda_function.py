@@ -4,7 +4,6 @@ import datetime
 import random
 import time
 import os
-import psycopg2
 import sys
 import pytz
 import boto3
@@ -57,6 +56,10 @@ def lambda_handler(event, context):
     print("repopulating caches")
     repopulate_caches()
 
+    # and repopulate the caches
+    print("calculating net worth")
+    calculate_net_worth()
+
     print("major_domo done")
     return response(200, {"message": "{} prices updated".format(updates)})
 
@@ -67,6 +70,24 @@ def empty_caches():
     requests.delete(url)
     print("emptied caches.")
     log('major_domo','empty_caches()', 200)
+
+
+def calculate_net_worth():
+    print("calculating net worth ...")
+    data = requests.get("{}/summary".format(HOST))
+    payload = {
+        'lambda':'major_domo',
+        'method':'net_worth',
+        'data': data.json()
+    }
+    print(payload)
+    api_response = lambda_client.invoke(
+        FunctionName = 'arn:aws:lambda:ap-southeast-2:396194066872:function:database',
+        InvocationType = 'RequestResponse',
+        Payload = json.dumps(payload)
+        )
+ 
+    responseFromChild = json.load(api_response['Payload'])
 
 
 def repopulate_caches():

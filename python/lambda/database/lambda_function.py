@@ -37,6 +37,8 @@ def lambda_handler(event, context):
             return handle_stocks(event)
         if lambda_name == 'croesus':
             return handle_croesus(event)
+        if lambda_name == 'major_domo':
+            return handle_major_domo(event)
         if lambda_name == 'log':
             return handle_log(event)
         return response(400, 'unable to handle database event for lambda \'{}\''.format(lambda_name))
@@ -59,6 +61,16 @@ def handle_exchange_rate(event):
         return exchange_rate_save_rate_to_database(event)
     if method == 'get_rate':
         return exchange_rate_get_rate(event)
+    return response(400, 'unable to handle database method {} for lambda \'{}\''.format(method, lambda_name))
+
+
+def handle_major_domo(event):
+    print('major_domo')
+    print(event)
+    lambda_name = event['lambda']
+    method = event['method']
+    if method == 'net_worth':
+        return major_domo_save_net_worth_to_database(event)
     return response(400, 'unable to handle database method {} for lambda \'{}\''.format(method, lambda_name))
 
 
@@ -192,6 +204,32 @@ def save_price_history_to_database(exchange, symbol, date, price):
         200, {"exchange": exchange, "symbol": symbol, "date": date, "price": price}
     )
 
+
+def major_domo_save_net_worth_to_database(event):
+    conn = get_database_connection()
+    if not conn:
+        return
+    cur = conn.cursor()
+    data = event['data']
+    cur.execute('DELETE FROM net_worth WHERE date  = %s',[date.today()])
+    cur.execute(
+        'INSERT INTO net_worth (date, share_spend, share_value, share_gain_loss, share_percentage, share_cagr, other_value, total_value, four_percent, two_point_five_million) ' + \
+            'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+        [
+            date.today(),
+            data['share_spend'],
+            data['share_value'],
+            data['share_gain_loss'],
+            data['share_percentage'],
+            data['share_cagr'],
+            data['other_value'],
+            data['total_value'],
+            round(data['total_value'] * 0.04,2),
+            round(2500000 / data['total_value'],2)
+        ],
+    )
+    conn.commit()
+    return response(200, data)
 
 
 def exchange_rate_save_rate_to_database(event):
