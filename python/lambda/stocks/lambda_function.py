@@ -60,8 +60,11 @@ def generic_stock(exchange, suffix, currency, symbol, date, save):
     date = actual_date.strftime("%Y-%m-%d")
     print("exchange {} symbol {} with suffix {} currency {} for date {} actual_date ".format(exchange, symbol, suffix, currency, date, actual_date))
     ticker = yf.Ticker(symbol + suffix) if suffix else yf.Ticker(symbol)
+    print(ticker)
     data = ticker.info
+    print(data)
     exchange_rate = get_exchange_rate(currency, date)
+    print(exchange_rate)
     if exchange_rate == None:
         return response(500, {"message": "no exchange rate for {} on {}".format(currency, date)})
     if not 'regularMarketPrice' in data :
@@ -90,12 +93,17 @@ def generic_stock(exchange, suffix, currency, symbol, date, save):
 def get_exchange_rate(currency, date):
     if not currency:
         return 1.0
-    url = "{}/exchange-rate/{}/NZD".format(HOST, currency)
-    api_response = requests.post(url)
-    url = "{}/exchange-rate/{}/NZD/{}".format(HOST, currency, date)
+    # I don't know why I always do this, and I'm getting rate warnings on exchange rate
+    # url = "{}/exchange-rate/{}/NZD".format(HOST, currency)
+    # api_response = requests.post(url)
+    url = "{}/exchange-rate/{}/NZD?date={}".format(HOST, currency, date)
+    print(url)
     api_response = requests.get(url)
+    print(api_response)
     if api_response.status_code != 200:
+        print("response code {} so returning None".format(api_response.status_code))
         return None
+    print(api_response.json())
     return api_response.json()["rate"]
 
 

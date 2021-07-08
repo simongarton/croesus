@@ -17,31 +17,46 @@ HOST = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com"
 # logs
 
 def lambda_handler(event, context):
+
+    # do exchange rate once a day
+    right_now = datetime.datetime.now(TIMEZONE).strftime("%H")
+    if right_now == "01" or right_now == "12":
+        print("updating exchange rates {}".format(right_now))
+        post_todays_exchange_rate("USD", "NZD")
+        post_todays_exchange_rate("AUD", "NZD")
+    else:
+        print("not updating exchange rates {}".format(right_now))
+
+    # get holdings
     todays_date = datetime.datetime.now(TIMEZONE).strftime("%Y-%m-%d")
     holdings_response = requests.get("{}/all_holdings?date={}".format(HOST, todays_date))
+    print("holdings")
     print(holdings_response)
     if holdings_response.status_code != 200:
         return response(holdings_response.status_code, holdings_response.text)
+
+    print("updating holdings")
     updates = 0
     for holding in holdings_response.json():
         exchange = holding["exchange"].upper()
         symbol = holding["symbol"].upper()
+        print("updating holding {}:{}".format(exchange, symbol))
         update_price(exchange, symbol, todays_date)
         updates = updates + 1
 
-    # also do exchange rate
-    post_todays_exchange_rate("USD", "NZD")
-    post_todays_exchange_rate("AUD", "NZD")
-
     # and rebuild value table
+    print("updating value table")
     rebuild_value_table()
 
     # and empty the caches
+    print("emptying caches")
     empty_caches()
 
     # and repopulate the caches
+    print("repopulating caches")
     repopulate_caches()
 
+    print("major_domo done")
     return response(200, {"message": "{} prices updated".format(updates)})
 
 
@@ -80,6 +95,7 @@ def update_price(exchange, symbol, date):
     url = "{}/stocks/{}/{}/{}".format(HOST, exchange, symbol, date)
     print(url)
     price_response = requests.post(url)
+    print(price_response)
     if price_response.status_code != 200:
         print(
             "could not get price for {}.{} : status {}".format(

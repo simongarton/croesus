@@ -63,8 +63,9 @@ def get_rate(source, target, date):
         )
  
     responseFromChild = json.load(api_response['Payload'])
+    print("get_rate()")
     print(responseFromChild)
-    return response(200, json.loads(responseFromChild['body']))
+    return response(responseFromChild['statusCode'], json.loads(responseFromChild['body']))
 
 
 def post_rate(source, target):
@@ -79,6 +80,7 @@ def post_rate(source, target):
 
 def get_current_rate(source, target):
     url = "https://v6.exchangerate-api.com/v6/{}/pair/{}/{}".format(API_KEY, source, target)
+    print("getting current rate from {}".format(url))
     api_response = requests.get(url)
     api_response.raise_for_status()
     rate = api_response.json()["conversion_rate"]
