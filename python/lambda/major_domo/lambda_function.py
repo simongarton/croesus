@@ -7,7 +7,10 @@ import os
 import psycopg2
 import sys
 import pytz
+import boto3
 
+
+lambda_client = boto3.client('lambda')
 
 TIMEZONE = pytz.timezone('Pacific/Auckland')
 HOST = "https://g4spmx84mk.execute-api.ap-southeast-2.amazonaws.com"
@@ -35,12 +38,10 @@ def lambda_handler(event, context):
     if holdings_response.status_code != 200:
         return response(holdings_response.status_code, holdings_response.text)
 
-    print("updating holdings")
     updates = 0
     for holding in holdings_response.json():
         exchange = holding["exchange"].upper()
         symbol = holding["symbol"].upper()
-        print("updating holding {}:{}".format(exchange, symbol))
         update_price(exchange, symbol, todays_date)
         updates = updates + 1
 
@@ -65,6 +66,7 @@ def empty_caches():
     print("emptying caches : {}".format(url))
     requests.delete(url)
     print("emptied caches.")
+    log('major_domo','empty_caches()', 200)
 
 
 def repopulate_caches():
@@ -75,6 +77,7 @@ def repopulate_caches():
     requests.get("{}/value/simon".format(HOST))
     requests.get("{}/value/trust".format(HOST))
     print("repopulated caches.")
+    log('major_domo','repopulate_caches()', 200)
     
 
 def post_todays_exchange_rate(source, target):
@@ -82,6 +85,7 @@ def post_todays_exchange_rate(source, target):
     print("updating exchange rate : {}".format(url))
     requests.post(url)
     print("updated exchange rate.")
+    log('major_domo','post_todays_exchange_rate()', 200)
 
 
 def rebuild_value_table():
@@ -89,22 +93,26 @@ def rebuild_value_table():
     print("rebuilding value table : {}".format(url))
     requests.post(url)
     print("rebuilt value table.")
+    log('major_domo','rebuild_value_table()', 200)
 
 
 def update_price(exchange, symbol, date):
     url = "{}/stocks/{}/{}/{}".format(HOST, exchange, symbol, date)
-    print(url)
     price_response = requests.post(url)
-    print(price_response)
     if price_response.status_code != 200:
         print(
-            "could not get price for {}.{} : status {}".format(
-                exchange, symbol, price_response.status_code
+            "major-domo : could not get price for {}.{} : status {} from {}".format(
+                exchange, symbol, price_response.status_code, url
             )
         )
         return None
-    print(price_response.json())
-    return price_response.json()["price"]
+    price = price_response.json()["price"] 
+    print(
+        "major-domo : got price for {}.{} : status {} from {}".format(
+            exchange, symbol, price_response.status_code, url
+        )
+    )
+    return price
 
 
 def response(code, body):
@@ -113,3 +121,22 @@ def response(code, body):
         "headers": {"Content-Type": "application/json"},
         "body": json.dumps(body),
     }
+
+# this is a common method
+def log(source, details, status_code):
+    payload = {
+        'lambda':'log',
+        'data': {
+            'source':source,
+            'details':details,
+            'status_code':status_code
+        }
+    }
+    api_response = lambda_client.invoke(
+        FunctionName = 'arn:aws:lambda:ap-southeast-2:396194066872:function:database',
+        InvocationType = 'RequestResponse',
+        Payload = json.dumps(payload)
+        )
+ 
+    responseFromChild = json.load(api_response['Payload'])
+    return response(responseFromChild['statusCode'], json.loads(responseFromChild['body']))

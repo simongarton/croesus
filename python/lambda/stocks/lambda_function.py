@@ -6,6 +6,7 @@ import sys
 import pytz
 import yfinance as yf
 import boto3
+import numpy as np
 
 
 TIMEZONE = pytz.timezone('Pacific/Auckland')
@@ -56,21 +57,32 @@ def post_generic_stock(exchange, suffix, currency, symbol, date):
 
 
 def generic_stock(exchange, suffix, currency, symbol, date, save):
+
     actual_date = datetime.strptime(date, "%Y-%m-%d")
     date = actual_date.strftime("%Y-%m-%d")
-    print("exchange {} symbol {} with suffix {} currency {} for date {} actual_date ".format(exchange, symbol, suffix, currency, date, actual_date))
-    ticker = yf.Ticker(symbol + suffix) if suffix else yf.Ticker(symbol)
-    print(ticker)
-    data = ticker.info
-    print(data)
     exchange_rate = get_exchange_rate(currency, date)
     print(exchange_rate)
     if exchange_rate == None:
         return response(500, {"message": "no exchange rate for {} on {}".format(currency, date)})
-    if not 'regularMarketPrice' in data :
-        return response(404, {"exchange": exchange, "symbol": symbol})
-    raw = data['regularMarketPrice']
-    price = round(raw * exchange_rate, 3)
+
+    print("exchange {} symbol {} with suffix {} currency {} for date {} actual_date ".format(exchange, symbol, suffix, currency, date, actual_date))
+    ticker = yf.Ticker(symbol + suffix) if suffix else yf.Ticker(symbol)
+    print("{}:{}".format(symbol + suffix,ticker))
+    data = ticker.info
+    # most weird. The original code works fine locally from the laptop, but fails for e.g. ASX as info just has {'logo_url':''}
+    # if run as a lambda; but a different call works
+    price = 0
+    if 'regularMarketPrice' in data:
+        raw = data['regularMarketPrice']
+        price = round(raw * exchange_rate, 3)
+    else:
+        data = yf.download(symbol + suffix, period="2d",
+            group_by='ticker', actions=False)
+        afi=data 
+        key = np.datetime64(date)
+        raw = afi.loc[key]['Close']
+        price = round(raw * exchange_rate, 3)
+
     print("{}.{} with suffix {} currency {} for date {} raw {} rate {} exchanged ".format(exchange, symbol, suffix, currency, date, raw, exchange_rate, price))
     
     if save:
@@ -200,12 +212,11 @@ def update_prices_for_date(event):
 
 def update_price(exchange, symbol, date):
     url = "{}/stocks/{}/{}/{}".format(HOST, exchange, symbol, date)
-    print(url)
     price_response = requests.post(url)
     if price_response.status_code != 200:
         print(
-            "could not get price for {}.{} : status {}".format(
-                exchange, symbol, price_response.status_code
+            "stocks : could not get price for {}.{} : status {} from url".format(
+                exchange, symbol, price_response.status_code, url
             )
         )
         return None

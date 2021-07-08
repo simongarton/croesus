@@ -41,12 +41,35 @@ def get(parameters):
 
 def password(parameters, body):
     if not 'password' in body:
+        log('croesus', 'password', 400)
         return response(400,{"message":"no password"})
     payload = {
         'lambda':'croesus',
         'method':'password',
         'data': {
             'password':body['password']
+        }
+    }
+    # this should become a common methof
+    api_response = lambda_client.invoke(
+        FunctionName = 'arn:aws:lambda:ap-southeast-2:396194066872:function:database',
+        InvocationType = 'RequestResponse',
+        Payload = json.dumps(payload)
+        )
+ 
+    responseFromChild = json.load(api_response['Payload'])
+    log('croesus', 'password', responseFromChild['statusCode'])
+    return response(responseFromChild['statusCode'], json.loads(responseFromChild['body']))
+
+
+# this is a common method
+def log(source, details, status_code):
+    payload = {
+        'lambda':'log',
+        'data': {
+            'source':source,
+            'details':details,
+            'status_code':status_code
         }
     }
     api_response = lambda_client.invoke(
@@ -56,5 +79,4 @@ def password(parameters, body):
         )
  
     responseFromChild = json.load(api_response['Payload'])
-    print(responseFromChild)
-    return response(200, json.loads(responseFromChild['body']))
+    return response(responseFromChild['statusCode'], json.loads(responseFromChild['body']))

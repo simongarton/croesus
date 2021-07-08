@@ -37,9 +37,19 @@ def lambda_handler(event, context):
             return handle_stocks(event)
         if lambda_name == 'croesus':
             return handle_croesus(event)
+        if lambda_name == 'log':
+            return handle_log(event)
         return response(400, 'unable to handle database event for lambda \'{}\''.format(lambda_name))
     except Exception as e:
         return response(500, "failure in handler : {}".format(str(e)))
+
+def handle_log(event):
+    data = event['data']
+    source = data['source']
+    details = data['details']
+    status_code = data['status_code']
+    log(source, details, status_code)
+    return response(200, 'log {} {} {}'.format(source, details, status_code))
 
 
 def handle_exchange_rate(event):
@@ -223,6 +233,16 @@ def exchange_rate_get_rate(event):
     target = data['target']
     date = data['date']
     return get_rate(source, target, date)
+
+
+def log(source, details, status_code):
+    conn = get_database_connection()
+    if not conn:
+        return
+    cur = conn.cursor()
+    cur.execute('INSERT INTO log (source, log_time, details, status_code) VALUES (%s, %s, %s, %s);',
+        [source, datetime.now(), details, status_code])
+    conn.commit()
 
 
 def get_rate(source, target, date):

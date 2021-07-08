@@ -4,7 +4,9 @@ import os
 import datetime
 from datetime import timedelta
 import pytz
+import boto3
 
+lambda_client = boto3.client('lambda')
 
 TIMEZONE = pytz.timezone('Pacific/Auckland')
 
@@ -99,7 +101,6 @@ def empty_cache(parameters):
     )
 
     conn.commit()
-
     return response(200, {})
 
 
@@ -422,6 +423,7 @@ def find_accounts():
     rows = cur.fetchall()
     return [row[0] for row in rows]
 
+
 def find_holdings(account):
     conn = get_database_connection()
     if not conn:
@@ -470,12 +472,8 @@ def find_prices(exchange, symbol):
     return prices
 
 
-def build_value(holding):
-    conn = get_database_connection()
-    if not conn:
-        return []
-    cur = conn.cursor()
-
+def build_value(holding, cur):
+    
     exchange = holding['exchange']
     symbol = holding['symbol']
     earliest = holding['earliest']
@@ -499,7 +497,6 @@ def build_value(holding):
         #print('on {} for {}:{} ({}) I have q {} p {} v {}'.format(day,exchange, symbol, account, quantity, price, value))
         sql = 'insert into value (date, exchange, symbol, account, price, quantity, value) values (%s,%s,%s,%s,%s,%s,%s)'
         cur.execute(sql, [day, exchange, symbol, account, price, quantity, value])
-    conn.commit()
 
 
 def daterange(start_date, end_date):
@@ -509,9 +506,27 @@ def daterange(start_date, end_date):
 
 def rebuild_value_table():
     empty_value_table()
+    conn = get_database_connection()
+    if not conn:
+        return []
+    cur = conn.cursor()
     accounts = find_accounts()
     for account in accounts:
         holdings = find_holdings(account)
         for holding in holdings:
-            build_value(holding)
+            build_value(holding, cur)
+    print("committing")
+    conn.commit()
+    print("committed")
+    log('value','rebuild_value_table()', 200)
     return response(200, {"message":"value table rebuilt"})
+
+
+def log(source, details, status_code):
+    conn = get_database_connection()
+    if not conn:
+        return
+    cur = conn.cursor()
+    cur.execute('INSERT INTO log (source, log_time, details, status_code) VALUES (%s, %s, %s, %s);',
+        [source, datetime.datetime.now(), details, status_code])
+    conn.commit()
