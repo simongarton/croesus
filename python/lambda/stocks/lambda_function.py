@@ -59,7 +59,9 @@ def post_generic_stock(exchange, suffix, currency, symbol, date):
 def generic_stock(exchange, suffix, currency, symbol, date, save):
 
     actual_date = datetime.strptime(date, "%Y-%m-%d")
+    previous_day = actual_date - timedelta(days=1)
     date = actual_date.strftime("%Y-%m-%d")
+    previous_date = previous_day.strftime("%Y-%m-%d")
     exchange_rate = get_exchange_rate(currency, date)
     print(exchange_rate)
     if exchange_rate == None:
@@ -67,7 +69,7 @@ def generic_stock(exchange, suffix, currency, symbol, date, save):
 
     print("exchange {} symbol {} with suffix {} currency {} for date {} actual_date ".format(exchange, symbol, suffix, currency, date, actual_date))
     ticker = yf.Ticker(symbol + suffix) if suffix else yf.Ticker(symbol)
-    print("{}:{}".format(symbol + suffix,ticker))
+    print("{}:{} {}".format(symbol, suffix, ticker))
     data = ticker.info
     # most weird. The original code works fine locally from the laptop, but fails for e.g. ASX as info just has {'logo_url':''}
     # if run as a lambda; but a different call works
@@ -79,9 +81,14 @@ def generic_stock(exchange, suffix, currency, symbol, date, save):
         data = yf.download(symbol + suffix, period="2d",
             group_by='ticker', actions=False)
         afi=data 
-        key = np.datetime64(date)
-        raw = afi.loc[key]['Close']
-        price = round(raw * exchange_rate, 3)
+        try:
+            key = np.datetime64(date)
+            raw = afi.loc[key]['Close']
+            price = round(raw * exchange_rate, 3)
+        except KeyError:
+            key = np.datetime64(previous_date)
+            raw = afi.loc[key]['Close']
+            price = round(raw * exchange_rate, 3)
 
     print("{}.{} with suffix {} currency {} for date {} raw {} rate {} exchanged ".format(exchange, symbol, suffix, currency, date, raw, exchange_rate, price))
     
