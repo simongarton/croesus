@@ -2,6 +2,8 @@ import React from 'react';
 import { Button, Spinner } from 'react-bootstrap';
 
 import SingleStat from '../components/SingleStat';
+import SummaryLine from '../widget_templates/SummaryLine';
+import SummaryLinePercentage from '../widget_templates/SummaryLinePercentage';
 
 class Home extends React.Component {
   constructor(props) {
@@ -232,6 +234,13 @@ class Home extends React.Component {
         <h2 className="code">Other assets</h2>
         {this.buildOtherAssets()}
         <hr></hr>
+        <h2 className="code">Trends</h2>
+        <SummaryLine title="Total Value" field="total_value" mobile="true"></SummaryLine>
+        <SummaryLine title="Share Value" field="share_value" mobile="true"></SummaryLine>
+        <SummaryLine title="Other Value" field="other_value" mobile="true"></SummaryLine>
+        <SummaryLine title="4%" field="four_percent" mobile="true"></SummaryLine>
+        <SummaryLinePercentage title="2.5 million" field="two_point_five_million" mobile="true"></SummaryLinePercentage>
+        <hr></hr>
         <p className="code text-muted smaller-text">updated at {this.buildUpdatedAt()}</p>
         <div className="mb-2"></div>
         <Button variant="danger" onClick={this.updateStuff.bind(this)}>
@@ -262,6 +271,13 @@ class Home extends React.Component {
         <hr></hr>
         <h2 className="code">Shares</h2>
         {this.buildSharesTable()}
+        <hr></hr>
+        <h2 className="code">Trends</h2>
+        <SummaryLine title="Total Value" field="total_value"></SummaryLine>
+        <SummaryLine title="Share Value" field="share_value"></SummaryLine>
+        <SummaryLine title="Other Value" field="other_value"></SummaryLine>
+        <SummaryLine title="4%" field="four_percent"></SummaryLine>
+        <SummaryLinePercentage title="2.5 million" field="two_point_five_million"></SummaryLinePercentage>
         <hr></hr>
         <p className="code text-muted smaller-text">updated at {this.buildUpdatedAt()}</p>
         <div className="mb-2"></div>

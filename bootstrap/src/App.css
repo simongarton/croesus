@@ -94,3 +94,11 @@
     display: none;
   }
 }
+
+.summary-chart {
+  height: 300px;
+}
+
+.summary-chart-mobile {
+  height: 200px;
+}

@@ -21,6 +21,8 @@ def lambda_handler(event, context):
     path = event['rawPath']
     if path == '/summary':
         return summary()
+    if path == '/summary/history':
+        return summary_history()
 
     if method == 'POST':
         return rebuild_value_table()
@@ -102,6 +104,46 @@ def empty_cache(parameters):
 
     conn.commit()
     return response(200, {})
+
+
+def summary_history():
+    conn = get_database_connection()
+    if not conn:
+        return None
+
+    cur = conn.cursor()
+    cur.execute('''
+    SELECT date, 
+        share_spend::numeric::float8, 
+        share_value::numeric::float8, 
+        share_gain_loss::numeric::float8, 
+        share_percentage::numeric::float8, 
+        share_cagr::numeric::float8, 
+        other_value::numeric::float8, 
+        total_value::numeric::float8, 
+        four_percent::numeric::float8, 
+        two_point_five_million 
+    FROM net_worth ORDER BY date;
+        ''')
+    rows = cur.fetchall()
+    result = []
+    for row in rows:
+        result.append(build_net_worth(row))
+    return response(200, result)    
+
+def build_net_worth(row):
+    return {
+        'date':row[0].strftime('%Y-%m-%d'),
+        'share_spend':row[1],
+        'share_value':row[2],
+        'share_gain_loss':row[3],
+        'share_percentage':row[4],
+        'share_cagr':row[5],
+        'other_value':row[6],
+        'total_value':row[7],
+        'four_percent':row[8],
+        'two_point_five_million':row[9]
+}
 
 
 def summary():

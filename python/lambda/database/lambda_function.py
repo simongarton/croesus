@@ -3,7 +3,9 @@ import json
 from datetime import date, datetime, timedelta
 import psycopg2
 import sys
+import pytz
 
+TIMEZONE = pytz.timezone('Pacific/Auckland')
 
 def response(code, body):
     return {
@@ -211,12 +213,13 @@ def major_domo_save_net_worth_to_database(event):
         return
     cur = conn.cursor()
     data = event['data']
-    cur.execute('DELETE FROM net_worth WHERE date  = %s',[date.today()])
+    today = datetime.now(TIMEZONE).date()
+    cur.execute('DELETE FROM net_worth WHERE date  = %s',[today])
     cur.execute(
         'INSERT INTO net_worth (date, share_spend, share_value, share_gain_loss, share_percentage, share_cagr, other_value, total_value, four_percent, two_point_five_million) ' + \
             'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
         [
-            date.today(),
+            today,
             data['share_spend'],
             data['share_value'],
             data['share_gain_loss'],
@@ -224,8 +227,8 @@ def major_domo_save_net_worth_to_database(event):
             data['share_cagr'],
             data['other_value'],
             data['total_value'],
-            round(data['total_value'] * 0.04,2),
-            round(2500000 / data['total_value'],2)
+            round(data['total_value'] * 0.04,4),
+            round(data['total_value'] / 2500000,4)
         ],
     )
     conn.commit()
