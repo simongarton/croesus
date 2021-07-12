@@ -140,7 +140,7 @@ class TotalValue extends React.Component {
           <span className={this.redGreen(gainLoss, '', 2)}>{this.formatDollars(gainLoss)} </span>&nbsp; {'% : '}
           <span className={this.redGreen(gainLoss, '', 5)}>{this.formatPercentage(percentage)}</span>
         </p>
-        <table class="margin-auto">
+        <table className="margin-auto">
           <thead>
             <tr>
               <th className="left-align">holding</th>

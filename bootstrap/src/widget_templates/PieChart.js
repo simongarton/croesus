@@ -1,4 +1,5 @@
 import React from 'react';
+import { Card } from 'react-bootstrap';
 import { Pie } from 'react-chartjs-2';
 
 class PieChart extends React.Component {
@@ -106,28 +107,36 @@ class PieChart extends React.Component {
     };
     let height = heightTable[this.state.account] ? heightTable[this.state.account] : 100;
     return (
-      <Pie
-        data={this.state}
-        height={height}
-        options={{
-          title: {
-            display: true,
-            text: this.title(),
-            fontSize: 20,
-          },
-          legend: {
-            display: false,
-            position: 'right',
-          },
-          tooltips: {
-            callbacks: {
-              title: this.getToolTipTitle,
-              label: this.getToolTipValue,
+      <Card className="mb-1">
+        <Pie
+          data={this.state}
+          height={height}
+          options={{
+            title: {
+              display: true,
+              text: this.title(),
+              fontSize: 20,
             },
-          },
-          scales: {},
-        }}
-      />
+            cutoutPercentage: 30,
+            layout: {
+              padding: {
+                bottom: 20,
+              },
+            },
+            legend: {
+              display: false,
+              position: 'right',
+            },
+            tooltips: {
+              callbacks: {
+                title: this.getToolTipTitle,
+                label: this.getToolTipValue,
+              },
+            },
+            scales: {},
+          }}
+        />
+      </Card>
     );
   }
 }

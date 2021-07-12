@@ -1,5 +1,6 @@
 import React from 'react';
 import { Scatter } from 'react-chartjs-2';
+import { Card } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import moment from 'moment';
 
@@ -16,6 +17,7 @@ class SummaryLinePercentage extends React.Component {
       title: props.title,
       field: props.field,
       mobile: props.mobile,
+      color: props.color,
     };
     this.valueChartPoints = [];
     console.log(props);
@@ -69,7 +71,7 @@ class SummaryLinePercentage extends React.Component {
   rebuildChart() {
     let chartData = {
       labels: ['Scatter'],
-      datasets: [this.buildSeries(this.state.field, this.valueChartPoints, 'rgba(0,192,0,0.4)', false, null)],
+      datasets: [this.buildSeries(this.state.field, this.valueChartPoints, this.state.color, true, null)],
     };
     this.setState(chartData);
   }
@@ -79,7 +81,8 @@ class SummaryLinePercentage extends React.Component {
       label: label,
       fill: false,
       borderColor: mainColor,
-      backgroundColor: mainColor,
+      backgroundColor: 'white',
+      borderWidth: 5,
       pointBorderColor: 'rgba(0,0,0,1)',
       pointBorderWidth: 1,
       pointHoverRadius: 8,
@@ -101,55 +104,57 @@ class SummaryLinePercentage extends React.Component {
       styleHeight = 'summary-chart-mobile';
     }
     return (
-      <div className={styleHeight}>
-        <Scatter
-          data={this.state}
-          options={{
-            maintainAspectRatio: false,
-            title: {
-              display: true,
-              text: this.state.title,
-              fontSize: 20,
-            },
-            legend: {
-              display: false,
-              position: 'right',
-            },
-            tooltips: {
-              mode: 'index',
-              intersect: false,
-              callbacks: {
-                label: function (t, d) {
-                  return formatDate(t.xLabel) + ' : ' + Math.round(t.value * 100).toLocaleString() + '%';
+      <Card className="mb-1">
+        <div className={styleHeight}>
+          <Scatter
+            data={this.state}
+            options={{
+              maintainAspectRatio: false,
+              title: {
+                display: true,
+                text: this.state.title,
+                fontSize: 20,
+              },
+              legend: {
+                display: false,
+                position: 'right',
+              },
+              tooltips: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                  label: function (t, d) {
+                    return formatDate(t.xLabel) + ' : ' + (Math.round(t.value * 10000) / 100).toLocaleString() + '%';
+                  },
                 },
               },
-            },
-            scales: {
-              xAxes: [
-                {
-                  type: 'time',
-                  time: {
-                    unit: 'day',
-                  },
-                  ticks: {
-                    min: this.state.minDate,
-                    max: new Date(),
-                  },
-                },
-              ],
-              yAxes: [
-                {
-                  ticks: {
-                    callback: function (value, index, values) {
-                      return Math.round(value * 100).toLocaleString() + '%';
+              scales: {
+                xAxes: [
+                  {
+                    type: 'time',
+                    time: {
+                      unit: 'day',
+                    },
+                    ticks: {
+                      min: this.state.minDate,
+                      max: new Date(),
                     },
                   },
-                },
-              ],
-            },
-          }}
-        />
-      </div>
+                ],
+                yAxes: [
+                  {
+                    ticks: {
+                      callback: function (value, index, values) {
+                        return Math.round(value * 100).toLocaleString() + '%';
+                      },
+                    },
+                  },
+                ],
+              },
+            }}
+          />
+        </div>
+      </Card>
     );
   }
 }

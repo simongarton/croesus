@@ -2,11 +2,13 @@ import HorizontalBarChart from '../widget_templates/HorizontalBarChart.js';
 
 class GainLossPercentageHorizontalBar extends HorizontalBarChart {
   backgroundColor() {
-    return 'rgba(192,192,75,0.2)';
+    //return 'rgba(192,192,75,0.2)';
+    return '#f9d87f55';
   }
 
   borderColor() {
-    return 'rgba(192,192,75,0.9)';
+    //return 'rgba(192,192,75,0.9)';
+    return '#f9d87fff';
   }
 
   title() {

@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  background-color: whitesmoke;
+  background-color: #ece9e8;
   margin: auto;
   padding: 10px;
   max-width: 1000px;
@@ -101,4 +101,8 @@
 
 .summary-chart-mobile {
   height: 200px;
+}
+
+.background {
+  background-color: #ece9e8;
 }

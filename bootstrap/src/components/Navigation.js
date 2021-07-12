@@ -3,10 +3,16 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 const Navigation = () => {
   return (
     <>
-      <Navbar collapseOnSelect fixed="top" expand="sm" bg="light" variant="light">
+      <Navbar collapseOnSelect fixed="top" expand="sm" className="background">
         <Container>
           <Navbar.Brand>
-            <img src="/favicon.ico" width="30" height="30" className="d-inline-block align-top" alt="React Bootstrap logo" />
+            <img
+              src="/croesus-one.png"
+              width="30"
+              height="30"
+              className="d-inline-block align-top navigation-bar"
+              alt="React Bootstrap logo"
+            />
             &nbsp;croesus
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="responsive-navbar-nav"></Navbar.Toggle>

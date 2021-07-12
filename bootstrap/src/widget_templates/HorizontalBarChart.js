@@ -1,4 +1,5 @@
 import React from 'react';
+import { Card } from 'react-bootstrap';
 import { HorizontalBar } from 'react-chartjs-2';
 
 class HorizontalBarChart extends React.Component {
@@ -98,37 +99,39 @@ class HorizontalBarChart extends React.Component {
     };
     let height = heightTable[this.state.account] ? heightTable[this.state.account] : 100;
     return (
-      <HorizontalBar
-        data={this.state}
-        height={height}
-        options={{
-          title: {
-            display: true,
-            text: this.title(),
-            fontSize: 20,
-          },
-          legend: {
-            display: false,
-            position: 'right',
-          },
-          tooltips: {
-            mode: 'index',
-            intersect: false,
-            callbacks: {
-              label: this.labelFunction,
+      <Card className="mb-1">
+        <HorizontalBar
+          data={this.state}
+          height={height}
+          options={{
+            title: {
+              display: true,
+              text: this.title(),
+              fontSize: 20,
             },
-          },
-          scales: {
-            xAxes: [
-              {
-                ticks: {
-                  callback: this.labelFunctionValues,
-                },
+            legend: {
+              display: false,
+              position: 'right',
+            },
+            tooltips: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label: this.labelFunction,
               },
-            ],
-          },
-        }}
-      />
+            },
+            scales: {
+              xAxes: [
+                {
+                  ticks: {
+                    callback: this.labelFunctionValues,
+                  },
+                },
+              ],
+            },
+          }}
+        />
+      </Card>
     );
   }
 }

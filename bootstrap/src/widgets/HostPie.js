@@ -8,11 +8,12 @@ class HostPie extends PieChart {
     let r = Math.round((255 * (value * 1.0)) / maxValue);
     let g = Math.round((0 * (value * 1.0)) / maxValue);
     let b = Math.round((0 * (value * 1.0)) / maxValue);
-    return 'rgba(' + r + ',' + g + ',' + b + ',0.5)';
+    //return 'rgba(' + r + ',' + g + ',' + b + ',0.5)';
+    return '#d9b77655';
   }
 
   borderColor() {
-    return 'rgba(127,0,0,0.9)';
+    return '#d9b776ff';
   }
 
   title() {

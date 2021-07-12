@@ -2,11 +2,13 @@ import HorizontalBarChart from '../widget_templates/HorizontalBarChart.js';
 
 class TotalValueHorizontalBar extends HorizontalBarChart {
   backgroundColor() {
-    return 'rgba(192,75,75,0.2)';
+    //return 'rgba(192,75,75,0.2)';
+    return '#a66d2e55';
   }
 
   borderColor() {
-    return 'rgba(192,75,75,0.9)';
+    //return 'rgba(192,75,75,0.9)';
+    return '#a66d2eff';
   }
 
   title() {

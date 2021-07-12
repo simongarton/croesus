@@ -12,7 +12,7 @@ function SingleStat(props) {
     value = '$' + value;
   }
   if (props['percentage']) {
-    value = (value * 100).toLocaleString(undefined, { minimumFractionDigits: 2 }) + '%';
+    value = (originalValue * 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
   }
   let valueSpan;
   if (props['redGreen']) {

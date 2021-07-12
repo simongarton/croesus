@@ -8,11 +8,12 @@ class TypePie extends PieChart {
     let r = Math.round((255 * (value * 1.0)) / maxValue);
     let g = Math.round((0 * (value * 1.0)) / maxValue);
     let b = Math.round((255 * (value * 1.0)) / maxValue);
-    return 'rgba(' + r + ',' + g + ',' + b + ',0.5)';
+    //return 'rgba(' + r + ',' + g + ',' + b + ',0.5)';
+    return '#f9d87f55';
   }
 
   borderColor() {
-    return 'rgba(127,0,127,0.9)';
+    return '#f9d87fff';
   }
 
   title() {

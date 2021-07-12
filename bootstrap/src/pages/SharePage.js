@@ -7,7 +7,7 @@ import TotalValueHorizontalBar from '../widgets/TotalValueHorizontalBar.js';
 import GainLossHorizontalBar from '../widgets/GainLossHorizontalBar.js';
 import GainLossPercentageHorizontalBar from '../widgets/GainLossPercentageHorizontalBar.js';
 import CAGRHorizontalBar from '../widgets/CAGRHorizontalBar.js';
-import HoldingPie from '../widgets/HoldingPie.js';
+import TotalValuePie from '../widgets/TotalValuePie.js';
 import HostPie from '../widgets/HostPie.js';
 import AccountPie from '../widgets/AccountPie.js';
 import ExchangePie from '../widgets/ExchangePie.js';
@@ -23,11 +23,15 @@ function SharePage(props) {
   if (account === 'all') {
     accountPie = <AccountPie account={account}></AccountPie>;
   }
+  let totalValueAll = <div />;
+  if (account !== 'all') {
+    totalValueAll = <TotalValue account={account}></TotalValue>;
+  }
   if (mqlMobile.matches) {
     value = <TotalValueMobile account={account} small="true"></TotalValueMobile>;
     pies = (
       <div>
-        <HoldingPie account={account}></HoldingPie>
+        <TotalValuePie account={account}></TotalValuePie>
         <RegionPie account={account}></RegionPie>
         <TypePie account={account}></TypePie>
         <ExchangePie account={account}></ExchangePie>
@@ -38,33 +42,36 @@ function SharePage(props) {
   } else {
     value = (
       <div>
-        <TotalValue account={account}></TotalValue>
+        {totalValueAll}
         <TotalValueMobile account={account} small="false"></TotalValueMobile>
+        <div className="mb-2"></div>
         <TotalValueHorizontalBar account={account}></TotalValueHorizontalBar>
         <GainLossHorizontalBar account={account}></GainLossHorizontalBar>
         <GainLossPercentageHorizontalBar account={account}></GainLossPercentageHorizontalBar>
         <CAGRHorizontalBar account={account}></CAGRHorizontalBar>
         <table>
-          <tr>
-            <td>
-              <HoldingPie account={account}></HoldingPie>
-            </td>
-            <td>
-              <RegionPie account={account}></RegionPie>
-            </td>
-            <td>
-              <TypePie account={account}></TypePie>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <ExchangePie account={account}></ExchangePie>
-            </td>
-            <td>
-              <HostPie account={account}></HostPie>
-            </td>
-            <td>{accountPie}</td>
-          </tr>
+          <tbody>
+            <tr>
+              <td>
+                <TotalValuePie account={account}></TotalValuePie>
+              </td>
+              <td>
+                <RegionPie account={account}></RegionPie>
+              </td>
+              <td>
+                <TypePie account={account}></TypePie>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <ExchangePie account={account}></ExchangePie>
+              </td>
+              <td>
+                <HostPie account={account}></HostPie>
+              </td>
+              <td>{accountPie}</td>
+            </tr>
+          </tbody>
         </table>
       </div>
     );

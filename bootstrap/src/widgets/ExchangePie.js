@@ -8,11 +8,12 @@ class ExchangePie extends PieChart {
     let r = Math.round((0 * (value * 1.0)) / maxValue);
     let g = Math.round((255 * (value * 1.0)) / maxValue);
     let b = Math.round((255 * (value * 1.0)) / maxValue);
-    return 'rgba(' + r + ',' + g + ',' + b + ',0.5)';
+    //return 'rgba(' + r + ',' + g + ',' + b + ',0.5)';
+    return '#a66d2e55';
   }
 
   borderColor() {
-    return 'rgba(0,127,127,0.9)';
+    return '#a66d2e5ff';
   }
 
   title() {

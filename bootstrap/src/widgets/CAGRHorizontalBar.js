@@ -2,11 +2,13 @@ import HorizontalBarChart from '../widget_templates/HorizontalBarChart.js';
 
 class CAGRHorizontalBar extends HorizontalBarChart {
   backgroundColor() {
-    return 'rgba(75,192,192,0.2)';
+    //return 'rgba(75,192,192,0.2)';
+    return '#eddec955';
   }
 
   borderColor() {
-    return 'rgba(75,192,192,0.9)';
+    //return 'rgba(75,192,192,0.9)';
+    return '#eddec9ff';
   }
 
   title() {
