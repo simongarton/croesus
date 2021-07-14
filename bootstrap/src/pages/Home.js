@@ -237,9 +237,10 @@ class Home extends React.Component {
         <h2 className="code">Trends</h2>
         <SummaryLine title="Total Value" field="total_value" mobile="true" color="#a66d2e"></SummaryLine>
         <SummaryLine title="Share Value" field="share_value" mobile="true" color="#d9b776"></SummaryLine>
-        <SummaryLine title="Other Value" field="other_value" mobile="true" color="#f9d87f"></SummaryLine>
+        <SummaryLine title="Share Gain/Loss" field="share_gain_loss" mobile="true" color="#f9d87f"></SummaryLine>
+        <SummaryLine title="Other Value" field="other_value" mobile="true" color="#eddec9"></SummaryLine>
         <SummaryLine title="4% withdrawal" field="four_percent" mobile="true" color="#eddec9"></SummaryLine>
-        <SummaryLinePercentage title="2.5 million" field="two_point_five_million" mobile="true" color="#a66d2e"></SummaryLinePercentage>
+        <SummaryLinePercentage title="2.5 million" field="two_point_five_million" mobile="true" color="#d9b776"></SummaryLinePercentage>
         <hr></hr>
         <p className="code text-muted smaller-text">updated at {this.buildUpdatedAt()}</p>
         <div className="mb-2"></div>
@@ -275,9 +276,10 @@ class Home extends React.Component {
         <h2 className="code">Trends</h2>
         <SummaryLine title="Total Value" field="total_value" color="#a66d2e"></SummaryLine>
         <SummaryLine title="Share Value" field="share_value" color="#d9b776"></SummaryLine>
-        <SummaryLine title="Other Value" field="other_value" color="#f9d87f"></SummaryLine>
+        <SummaryLine title="Share Gain/Loss" field="share_gain_loss" color="#f9d87f"></SummaryLine>
+        <SummaryLine title="Other Value" field="other_value" color="#eddec9"></SummaryLine>
         <SummaryLine title="4% withdrawal" field="four_percent" color="#eddec9"></SummaryLine>
-        <SummaryLinePercentage title="2.5 million target" field="two_point_five_million" color="#eddec9"></SummaryLinePercentage>
+        <SummaryLinePercentage title="2.5 million target" field="two_point_five_million" color="#d9b776"></SummaryLinePercentage>
         <hr></hr>
         <p className="code text-muted smaller-text">updated at {this.buildUpdatedAt()}</p>
         <div className="mb-2"></div>
